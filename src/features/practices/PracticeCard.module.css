@@ -1,0 +1,88 @@
+.card {
+  background-color: var(--ui-background-secondary);
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.practiceName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.editButton {
+  color: var(--ui-text-tertiary);
+}
+.editButton:hover {
+  background-color: var(--brand-secondary);
+  color: var(--brand-primary);
+}
+
+.deleteButton {
+  color: var(--ui-text-tertiary);
+}
+.deleteButton:hover {
+  background-color: var(--state-danger-bg);
+  color: var(--state-danger);
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--ui-text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail svg {
+    color: var(--ui-text-tertiary);
+}
+
+.notes {
+    font-size: 0.85rem;
+    color: var(--ui-text-secondary);
+    background-color: var(--ui-background-tertiary);
+    border-radius: 4px;
+    padding: 0.75rem;
+    border-left: 3px solid var(--ui-border-primary);
+}
