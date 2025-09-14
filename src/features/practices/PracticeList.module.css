@@ -1,48 +1,53 @@
+/* The main container for the list and grid */
 .practiceListContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  width: 100%;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--ui-text-primary);
-}
-
-.addButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  background-color: var(--brand-primary);
-  color: var(--brand-text-on-primary);
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.addButton:hover {
-  background-color: #2563eb; /* A slightly darker shade of the brand color */
-}
-
+/* The responsive grid for displaying practice cards */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* Updated minmax for slightly larger cards on bigger screens */
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.5rem;
 }
 
-.loading,
-.emptyState {
+/* --- Loading and Empty States --- */
+
+.loading {
   text-align: center;
   padding: 4rem;
   color: var(--ui-text-secondary);
+  font-weight: 500;
 }
+
+/* Upgraded styles for a more professional empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  margin-top: 2rem;
+  border: 2px dashed var(--ui-border-secondary);
+  border-radius: 12px;
+  background-color: var(--ui-background-secondary);
+}
+
+.emptyStateIcon {
+  color: var(--ui-text-tertiary);
+  margin-bottom: 1rem;
+}
+
+.emptyStateTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.emptyStateText {
+  color: var(--ui-text-secondary);
+  max-width: 300px;
+}
+

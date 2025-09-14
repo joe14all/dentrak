@@ -1,0 +1,33 @@
+.filterContainer {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--ui-background-secondary);
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border-secondary);
+  width: fit-content;
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ui-text-secondary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.filterButton:hover {
+  color: var(--ui-text-primary);
+}
+
+.filterButton.active {
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  box-shadow: var(--shadow-sm);
+}
