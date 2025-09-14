@@ -1,0 +1,111 @@
+/* src/assets/styles/theme.css */
+
+/* ============================================
+  DENTRAK THEME SYSTEM
+  ============================================
+  This file defines the color palette for the entire application.
+  It uses a semantic variable naming convention on top of a base color palette.
+*/
+
+:root {
+  /* -- BRAND / ACCENT COLORS --
+    The primary color that defines the application's identity.
+  */
+  --brand-primary: #3B82F6; /* A modern, professional blue */
+  --brand-secondary: #Dbeafe;
+  --brand-text-on-primary: #ffffff; /* Text color for on-brand backgrounds */
+
+  /* -- NEUTRAL / GRAYSCALE PALETTE --
+    Used for text, backgrounds, borders, and UI elements.
+  */
+  --neutral-0: #ffffff;
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+
+  /* -- STATE COLORS --
+    For user feedback: success, warnings, and errors.
+  */
+  --state-success: #22c55e;
+  --state-success-bg: #f0fdf4;
+  --state-warning: #f59e0b;
+  --state-warning-bg: #fffbeb;
+  --state-danger: #ef4444;
+  --state-danger-bg: #fef2f2;
+  --state-danger-text: #991b1b;
+
+  /* -- SEMANTIC UI VARIABLES (Light Theme) --
+    Mapping the palette to actual UI roles.
+  */
+  
+  /* Backgrounds */
+  --ui-background-primary: var(--neutral-50); /* Main app background */
+  --ui-background-secondary: var(--neutral-0); /* Cards, modals */
+  --ui-background-tertiary: var(--neutral-100); /* Hover states, selected items */
+
+  /* Text */
+  --ui-text-primary: var(--neutral-800); /* Headings, primary content */
+  --ui-text-secondary: var(--neutral-600); /* Subheadings, secondary content */
+  --ui-text-tertiary: var(--neutral-400); /* Metadata, disabled text */
+  --ui-text-accent: var(--brand-primary);
+
+  /* Borders */
+  --ui-border-primary: var(--neutral-300); /* Stronger borders */
+  --ui-border-secondary: var(--neutral-200); /* Subtle dividers */
+  
+  /* Interactive Elements (Buttons, Inputs) */
+  --ui-interactive-primary-bg: var(--brand-primary);
+  --ui-interactive-primary-text: var(--brand-text-on-primary);
+  --ui-interactive-secondary-bg: var(--neutral-200);
+  --ui-interactive-secondary-text: var(--neutral-700);
+
+  /* Shadows */
+  --ui-shadow-color: 220 3% 15%;
+  --shadow-sm: 0.3px 0.5px 0.7px hsl(var(--ui-shadow-color) / 0.1),
+    0.4px 0.8px 1px -1.2px hsl(var(--ui-shadow-color) / 0.1),
+    1px 2px 2.5px -2.5px hsl(var(--ui-shadow-color) / 0.1);
+  --shadow-md: 0.3px 0.5px 0.7px hsl(var(--ui-shadow-color) / 0.12),
+    0.8px 1.6px 2px -0.8px hsl(var(--ui-shadow-color) / 0.12),
+    2.1px 4.1px 5.2px -1.7px hsl(var(--ui-shadow-color) / 0.12),
+    5px 10px 12.6px -2.5px hsl(var(--ui-shadow-color) / 0.12);
+}
+
+.dark {
+  /* -- SEMANTIC UI VARIABLES (Dark Theme) --
+  */
+
+  /* Backgrounds */
+  --ui-background-primary: var(--neutral-900);
+  --ui-background-secondary: var(--neutral-800);
+  --ui-background-tertiary: var(--neutral-700);
+  
+  /* Text */
+  --ui-text-primary: var(--neutral-100);
+  --ui-text-secondary: var(--neutral-400);
+  --ui-text-tertiary: var(--neutral-500);
+
+  /* Borders */
+  --ui-border-primary: var(--neutral-600);
+  --ui-border-secondary: var(--neutral-700);
+  
+  /* State Colors (Dark Mode Overrides) */
+  --state-success-bg: #1a2e24;
+  --state-warning-bg: #2d2315;
+  --state-danger-bg: #2e1c21;
+  --state-danger-text: #fca5a5;
+  
+  /* Interactive Elements (Buttons, Inputs) */
+  --ui-interactive-secondary-bg: var(--neutral-700);
+  --ui-interactive-secondary-text: var(--neutral-200);
+
+  /* Shadows */
+  --ui-shadow-color: 220 40% 2%;
+}
+

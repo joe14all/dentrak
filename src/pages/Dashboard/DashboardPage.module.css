@@ -1,0 +1,41 @@
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.statCard {
+  background-color: var(--ui-background-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.statCard h3 {
+  color: var(--ui-text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.statCard p {
+  color: var(--ui-text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.mainChart {
+  grid-column: 1 / -1; /* Span full width */
+  min-height: 300px;
+  background-color: var(--ui-background-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--ui-border-secondary);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ui-text-tertiary);
+}
+

@@ -1,0 +1,126 @@
+.settingsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 800px; /* Constrain width for readability */
+}
+
+.settingsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+}
+
+.sectionDescription {
+    font-size: 0.9rem;
+    color: var(--ui-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    background-color: var(--ui-background-secondary);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--ui-border-secondary);
+}
+
+.card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+    margin-bottom: 1rem;
+}
+
+.themeOptions {
+    display: flex;
+    gap: 0.75rem;
+    background-color: var(--ui-background-primary);
+    padding: 0.5rem;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.themeButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    background-color: transparent;
+    border-radius: 4px;
+    color: var(--ui-text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.themeButton:hover {
+    color: var(--ui-text-primary);
+}
+
+.themeButton.active {
+    background-color: var(--ui-background-tertiary);
+    color: var(--ui-text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.dataActions {
+    display: flex;
+    gap: 1rem;
+}
+
+.dataButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: 1px solid var(--ui-border-primary);
+    background-color: var(--ui-interactive-secondary-bg);
+    color: var(--ui-interactive-secondary-text);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dataButton:hover {
+    background-color: var(--ui-background-tertiary);
+}
+
+/* Danger Zone Styles */
+.dangerTitle {
+    color: var(--state-danger);
+}
+
+.dangerCard {
+    border-color: var(--state-danger-secondary);
+}
+
+.dangerCard p {
+    color: var(--ui-text-secondary);
+    margin-bottom: 1rem;
+}
+
+.dangerButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--state-danger);
+    color: var(--brand-text-on-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.dangerButton:hover {
+    opacity: 0.9;
+}

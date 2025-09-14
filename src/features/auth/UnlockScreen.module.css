@@ -1,0 +1,56 @@
+.unlockContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  background-color: var(--ui-background-primary);
+}
+
+.unlockBox {
+  padding: 3rem;
+  background-color: var(--ui-background-secondary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  border: 1px solid var(--ui-border-secondary);
+}
+
+.logo h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--ui-text-primary);
+  margin-bottom: 1rem;
+}
+
+.prompt {
+  color: var(--ui-text-secondary);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.unlockButton {
+  background-color: var(--ui-interactive-primary-bg);
+  color: var(--ui-interactive-primary-text);
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.unlockButton:hover {
+  opacity: 0.9;
+}
+
+.error {
+  margin-top: 1rem;
+  color: var(--state-danger);
+}
+
+.status {
+    margin-top: 1rem;
+    color: var(--ui-text-tertiary);
+}
