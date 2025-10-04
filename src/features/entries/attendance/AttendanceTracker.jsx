@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo} from 'react';
 import AttendanceToolbar from './AttendanceToolbar';
 import AttendanceCalendar from './AttendanceCalendar';
 import AttendanceLegend from './AttendanceLegend';
@@ -28,7 +28,6 @@ const AttendanceTracker = ({ entries, practices }) => {
     return entries.filter(e => e.entryType === 'attendanceRecord');
   }, [entries]);
 
-  // The hook is now the single source of truth for managing changes
   const { pendingChanges, stageChange, applyBulkUpdate, saveChanges, revertChanges } = useAttendanceEditor(
     attendanceEntries, 
     addNewEntry, 
@@ -56,21 +55,26 @@ const AttendanceTracker = ({ entries, practices }) => {
         <AttendanceCalendar
           currentDate={currentDate}
           attendanceEntries={attendanceEntries}
-          practices={practices}
+          practices={practices || []}
           colorMap={colorMap}
           pendingChanges={pendingChanges}
-          // Correctly pass the stageChange function as onDayClick
           onDayClick={stageChange}
         />
       </div>
       
       {practices && practices.length > 0 && (
-        <AttendanceLegend practices={practices} colorMap={colorMap} />
+        <AttendanceLegend 
+          practices={practices} 
+          colorMap={colorMap}
+          attendanceEntries={attendanceEntries}
+          currentDate={currentDate}
+          pendingChanges={pendingChanges}
+        />
       )}
 
       <Modal isOpen={isBulkEditOpen} onClose={() => setBulkEditOpen(false)} title="">
         <BulkEditPanel 
-          practices={practices}
+          practices={practices || []}
           currentDate={currentDate}
           onApply={handleBulkUpdate}
           onCancel={() => setBulkEditOpen(false)}

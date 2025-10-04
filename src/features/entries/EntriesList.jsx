@@ -1,5 +1,5 @@
 import React from 'react';
-import EntryCard from './EntryCard';
+import EntryRow from './EntryRow'; // Import the new row component
 import styles from './EntriesList.module.css';
 import { FolderSearch, LoaderCircle } from 'lucide-react';
 
@@ -14,23 +14,36 @@ const EntriesList = ({ entries, practices, isLoading, viewType, onEditEntry, onD
     );
   }
 
-  const emptyStateTitle = viewType === 'performance' ? 'No Performance Entries Found' : 'No Attendance Records Found';
-  const emptyStateText = `There are no ${viewType} entries that match the current filter.`;
+  const emptyStateTitle = 'No Performance Entries Found';
+  const emptyStateText = `There are no performance entries that match the current filter.`;
 
   return (
     <div className={styles.listContainer}>
       {entries.length > 0 ? (
-        <div className={styles.grid}>
-          {entries.map((entry) => (
-            <EntryCard 
-              key={entry.id} 
-              entry={entry}
-              practice={practices.find(p => p.id === entry.practiceId)}
-              onEdit={() => onEditEntry(entry)}
-              onDelete={() => onDeleteEntry(entry.id)}
-            />
-          ))}
-        </div>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Practice</th>
+              <th>Type</th>
+              <th className={styles.thRight}>Production</th>
+              <th className={styles.thRight}>Collection</th>
+              <th className={styles.thRight}>Adjustments</th>
+              <th className={styles.thRight}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.map((entry) => (
+              <EntryRow 
+                key={entry.id} 
+                entry={entry}
+                practice={practices.find(p => p.id === entry.practiceId)}
+                onEdit={() => onEditEntry(entry)}
+                onDelete={() => onDeleteEntry(entry.id)}
+              />
+            ))}
+          </tbody>
+        </table>
       ) : (
         <div className={styles.infoState}>
           <FolderSearch size={48} />

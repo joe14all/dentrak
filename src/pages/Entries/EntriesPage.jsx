@@ -4,7 +4,6 @@ import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import PageHeader from '../../features/entries/PageHeader';
 import PerformanceToolbar from '../../features/entries/PerformanceToolbar';
 import EntriesList from '../../features/entries/EntriesList';
-import ViewSwitcher from '../../features/entries/ViewSwitcher';
 import AttendanceTracker from '../../features/entries/attendance/AttendanceTracker'; 
 import Modal from '../../components/common/Modal/Modal';
 import EntryForm from '../../features/entries/form-components/EntryForm';
@@ -16,7 +15,12 @@ const EntriesPage = () => {
   const { practices } = usePractices();
   
   const [activeView, setActiveView] = useState('performance');
-  const [practiceFilter, setPracticeFilter] = useState('all');
+  const [filters, setFilters] = useState({
+    practiceId: 'all',
+    entryTypes: [],
+    startDate: '',
+    endDate: ''
+  });
 
   const [isFormModalOpen, setFormModalOpen] = useState(false);
   const [entryToEdit, setEntryToEdit] = useState(null);
@@ -24,35 +28,45 @@ const EntriesPage = () => {
   const [entryToDelete, setEntryToDelete] = useState(null);
 
   const filteredPerformanceEntries = useMemo(() => {
-    const byPractice = practiceFilter === 'all'
-      ? entries
-      : entries.filter(entry => entry.practiceId === parseInt(practiceFilter));
+    if (!entries) return [];
+    
+    let performanceEntries = entries.filter(entry => entry.entryType !== 'attendanceRecord');
 
-    return byPractice.filter(entry => entry.entryType !== 'attendanceRecord');
-  }, [entries, practiceFilter]);
+    // Apply advanced filters
+    if (filters.practiceId !== 'all') {
+      performanceEntries = performanceEntries.filter(e => e.practiceId === parseInt(filters.practiceId));
+    }
+    if (filters.entryTypes.length > 0) {
+      performanceEntries = performanceEntries.filter(e => filters.entryTypes.includes(e.entryType));
+    }
+    if (filters.startDate) {
+      performanceEntries = performanceEntries.filter(e => new Date(e.date || e.periodStartDate) >= new Date(filters.startDate));
+    }
+    if (filters.endDate) {
+      performanceEntries = performanceEntries.filter(e => new Date(e.date || e.periodEndDate) <= new Date(filters.endDate));
+    }
+
+    return performanceEntries;
+  }, [entries, filters]);
 
   const handleOpenAddModal = () => {
     setEntryToEdit(null);
     setFormModalOpen(true);
   };
-
   const handleOpenEditModal = (entry) => {
     setEntryToEdit(entry);
     setFormModalOpen(true);
   };
-
   const handleOpenDeleteModal = (entryId) => {
     setEntryToDelete(entryId);
     setDeleteModalOpen(true);
   };
-
   const handleCloseModals = () => {
     setFormModalOpen(false);
     setDeleteModalOpen(false);
     setEntryToEdit(null);
     setEntryToDelete(null);
   };
-
   const handleSaveEntry = (formData) => {
     if (entryToEdit) {
       editEntry(entryToEdit.id, formData);
@@ -61,7 +75,6 @@ const EntriesPage = () => {
     }
     handleCloseModals();
   };
-
   const handleConfirmDelete = () => {
     if (entryToDelete) {
       removeEntry(entryToDelete);
@@ -69,18 +82,22 @@ const EntriesPage = () => {
     handleCloseModals();
   };
 
+
   return (
     <div className={styles.entriesPage}>
-      <PageHeader title="Entries">
-        <ViewSwitcher activeView={activeView} setActiveView={setActiveView} />
-      </PageHeader>
+      <PageHeader 
+        title="Entries"
+        activeView={activeView}
+        setActiveView={setActiveView}
+      />
       
       {activeView === 'performance' && (
         <PerformanceToolbar
           practices={practices}
-          activeFilter={practiceFilter}
-          setActiveFilter={setPracticeFilter}
-          onAddEntry={handleOpenAddModal}
+          activeFilters={filters}
+          onFilterChange={setFilters}
+                  onAddEntry={handleOpenAddModal}
+
         />
       )}
       

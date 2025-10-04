@@ -5,10 +5,15 @@
   flex-direction: column;
 }
 
-.viewContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem; /* Space between switcher and list */
+.viewContent {
   flex-grow: 1;
+  overflow: auto; /* Allows the content (list or calendar) to scroll */
+  scrollbar-width: none;
+  display: flex; /* Ensures the child takes up the full height */
+}
+
+/* Make sure the direct child of viewContent fills the space */
+.viewContent > * {
+    flex-grow: 1;
 }
 

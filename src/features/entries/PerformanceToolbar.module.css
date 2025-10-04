@@ -1,50 +1,96 @@
 .toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
+  gap: 2rem;
   margin-bottom: 1.5rem;
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: var(--ui-background-secondary);
   border-radius: 12px;
   border: 1px solid var(--ui-border-secondary);
 }
 
-.filterWrapper {
+.filters {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    align-items: flex-end;
+    gap: 2rem;
+    flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
 }
 
-.filterWrapper label {
-    font-size: 0.9rem;
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filterGroup > label {
+    font-size: 0.8rem;
     font-weight: 500;
     color: var(--ui-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.selectWrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.selectWrapper select {
-    -webkit-appearance: none;
-    appearance: none;
-    padding: 0.6rem 2.5rem 0.6rem 1rem;
+.filterGroup select, .filterGroup input {
+    padding: 0.6rem 1rem;
     border: 1px solid var(--ui-border-primary);
     border-radius: 8px;
     background-color: var(--ui-background-primary);
     color: var(--ui-text-primary);
     font-size: 0.9rem;
-    min-width: 220px;
-    cursor: pointer;
 }
 
-.selectIcon {
-    position: absolute;
-    right: 0.75rem;
-    pointer-events: none;
+.checkboxGroup {
+    display: flex;
+    gap: 0.5rem;
+}
+.checkboxGroup label {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--ui-border-primary);
+    border-radius: 8px;
+    background-color: var(--ui-background-primary);
+    color: var(--ui-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.checkboxGroup label:hover {
+    border-color: var(--ui-border-secondary);
+}
+.checkboxGroup label.active {
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+.checkboxGroup input[type="checkbox"] {
+    display: none;
+}
+
+.dateInputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dateInputs span {
     color: var(--ui-text-tertiary);
+}
+
+.clearButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--brand-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+}
+.clearButton:hover {
+    background-color: var(--brand-secondary);
 }
 
 .addButton {
@@ -59,8 +105,10 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .addButton:hover {
   background-color: #2563eb;
 }
+

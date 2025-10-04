@@ -4,9 +4,8 @@ import { LineChart, CalendarCheck } from 'lucide-react';
 
 const ViewSwitcher = ({ activeView, setActiveView }) => {
   const views = [
-    { id: 'attendance', label: 'Attendance', icon: CalendarCheck },
     { id: 'performance', label: 'Performance', icon: LineChart },
-    
+    { id: 'attendance', label: 'Attendance', icon: CalendarCheck },
   ];
 
   return (
@@ -17,7 +16,7 @@ const ViewSwitcher = ({ activeView, setActiveView }) => {
           className={`${styles.switchButton} ${activeView === view.id ? styles.active : ''}`}
           onClick={() => setActiveView(view.id)}
         >
-          <view.icon size={16} />
+          <view.icon size={18} />
           <span>{view.label}</span>
         </button>
       ))}
@@ -26,3 +25,4 @@ const ViewSwitcher = ({ activeView, setActiveView }) => {
 };
 
 export default ViewSwitcher;
+

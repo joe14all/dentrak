@@ -12,6 +12,7 @@
   flex-direction: column;
   gap: 2.5rem; /* Increased gap for more breathing room */
   overflow-y: auto;
+  scrollbar-width: none;
 }
 
 .section {

@@ -1,13 +1,30 @@
 .listContainer {
   width: 100%;
+  overflow-x: auto; /* Allow horizontal scroll on smaller screens */
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+.table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
+.table th {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--ui-border-secondary);
+  background-color: var(--ui-background-secondary);
+}
+
+.thRight {
+  text-align: right;
+}
+
+/* --- Info States (Loading, Empty) --- */
 .infoState {
   display: flex;
   flex-direction: column;
@@ -19,6 +36,7 @@
   background-color: var(--ui-background-secondary);
   color: var(--ui-text-secondary);
   border: 1px dashed var(--ui-border-secondary);
+  margin: 1rem; /* Add margin so it doesn't touch the edges */
 }
 
 .infoStateTitle {
@@ -39,11 +57,7 @@
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 

@@ -1,15 +1,17 @@
 import React from 'react';
 import styles from './PageHeader.module.css';
+import ViewSwitcher from './ViewSwitcher';
 
-const PageHeader = ({ title, children }) => {
+const PageHeader = ({  activeView, setActiveView }) => {
   return (
     <div className={styles.pageHeader}>
-      <h2 className={styles.title}>{title}</h2>
+
       <div className={styles.controls}>
-        {children}
+        <ViewSwitcher activeView={activeView} setActiveView={setActiveView} />
       </div>
     </div>
   );
 };
 
 export default PageHeader;
+

@@ -34,12 +34,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .entryTitle {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--ui-text-primary);
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
 }
 
 .actions { display: flex; gap: 0.5rem; }
@@ -64,6 +74,7 @@
 
 .tags {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.5rem 1.5rem;
     border-bottom: 1px solid var(--ui-border-secondary);
@@ -84,6 +95,11 @@
     background-color: var(--state-success-bg);
     color: var(--state-success);
 }
+.procedureTag {
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+    text-transform: uppercase;
+}
 
 .cardBody {
     padding: 1.5rem;
@@ -93,9 +109,8 @@
     text-align: center;
 }
 
-/* Specific styles for the new attendance view */
 .attendanceBody .detailValue {
-    font-size: 1.1rem; /* Slightly smaller for time text */
+    font-size: 1.1rem;
     font-weight: 500;
 }
 
@@ -103,6 +118,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+}
+.detailItem[title] {
+    cursor: help; /* Indicates more information is available on hover */
 }
 
 .detailLabel {

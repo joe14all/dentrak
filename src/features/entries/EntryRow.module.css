@@ -1,0 +1,81 @@
+.tableRow {
+  transition: background-color 0.2s ease;
+}
+
+.tableRow:hover {
+  background-color: var(--ui-background-tertiary);
+}
+
+.tableRow td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ui-border-secondary);
+  font-size: 0.9rem;
+  color: var(--ui-text-secondary);
+}
+
+.cellDate {
+  font-weight: 500;
+  color: var(--ui-text-primary);
+}
+
+.cellPractice {
+    font-weight: 500;
+}
+
+.cellCurrency {
+  text-align: right;
+  font-family: 'SF Mono', 'Menlo', 'monospace'; /* Monospaced font for numbers */
+  font-weight: 500;
+}
+
+.adjustmentsValue {
+    color: var(--state-danger);
+    cursor: help;
+}
+
+.tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    text-transform: capitalize;
+    background-color: var(--ui-background-tertiary);
+    color: var(--ui-text-secondary);
+}
+
+/* You can add specific colors for different entry types if you wish */
+.tag.dailySummary {
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+}
+
+
+.cellActions {
+  text-align: right;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.tableRow:hover .actions {
+  opacity: 1;
+}
+
+.actionButton {
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  color: var(--ui-text-tertiary);
+  transition: all 0.2s ease;
+}
+.actionButton:hover {
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+}
