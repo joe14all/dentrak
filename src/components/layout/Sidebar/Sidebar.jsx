@@ -6,7 +6,7 @@ import { LayoutDashboard, Building2, PenSquare, Receipt, FileText, Settings, Loc
 const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: 'Dashboard' },
     { name: 'Practices', icon: Building2, path: 'Practices' },
-    { name: 'Daily Entry', icon: PenSquare, path: 'Daily Entry' },
+    { name: 'Entries', icon: PenSquare, path: 'Entries' },
     { name: 'Cheques', icon: Receipt, path: 'Cheques' },
     { name: 'Reports', icon: FileText, path: 'Reports' },
     { name: 'Settings', icon: Settings, path: 'Settings' },

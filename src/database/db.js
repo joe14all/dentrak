@@ -1,11 +1,18 @@
 import Dexie from "dexie";
 
-// Create a new Dexie database instance
 export const db = new Dexie("DentrakDatabase");
 
-// Define the database schema
+// Version 1: The original schema
 db.version(1).stores({
-  practices: "++id, name", // '++id' is an auto-incrementing primary key, 'name' is an indexed property
-  entries: "++id, practiceId, date", // Indexing by practiceId and date for efficient lookups
-  cheques: "++id, practiceId, dateReceived, status", // Indexing for filtering
+  practices: "++id, name, status, taxStatus",
+  entries: "++id, practiceId, date",
+  cheques: "++id, practiceId, dateReceived, status",
 });
+
+// Version 2: Upgraded schema to add the necessary index
+// This tells Dexie that we want to be able to efficiently query the 'entryType' field.
+db.version(2).stores({
+  entries: "++id, practiceId, date, entryType", // Added 'entryType' index
+});
+
+// You can add future schema upgrades here, e.g., db.version(3)...

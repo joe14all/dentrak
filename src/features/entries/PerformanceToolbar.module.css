@@ -1,0 +1,66 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--ui-background-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--ui-border-secondary);
+}
+
+.filterWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.filterWrapper label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+}
+
+.selectWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.selectWrapper select {
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0.6rem 2.5rem 0.6rem 1rem;
+    border: 1px solid var(--ui-border-primary);
+    border-radius: 8px;
+    background-color: var(--ui-background-primary);
+    color: var(--ui-text-primary);
+    font-size: 0.9rem;
+    min-width: 220px;
+    cursor: pointer;
+}
+
+.selectIcon {
+    position: absolute;
+    right: 0.75rem;
+    pointer-events: none;
+    color: var(--ui-text-tertiary);
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  background-color: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addButton:hover {
+  background-color: #2563eb;
+}

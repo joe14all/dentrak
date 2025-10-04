@@ -1,0 +1,101 @@
+/* Note: The 'targetSelector' styles have been removed from here. */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--ui-border-secondary);
+  flex-shrink: 0;
+}
+.leftSection, .rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.monthNavigator {
+    display: flex;
+    align-items: center;
+    background-color: var(--ui-background-primary);
+    border: 1px solid var(--ui-border-primary);
+    border-radius: 8px;
+}
+.monthDisplay {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  width: 170px;
+  text-align: center;
+  border-left: 1px solid var(--ui-border-primary);
+  border-right: 1px solid var(--ui-border-primary);
+  padding: 0.5rem 0;
+}
+.navButton {
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  color: var(--ui-text-secondary);
+  cursor: pointer;
+  display: flex;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+.navButton:hover { background-color: var(--ui-background-tertiary); }
+.todayButton {
+  padding: 0.6rem 1.25rem;
+  font-weight: 500;
+  border: 1px solid var(--ui-border-primary);
+  border-radius: 8px;
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-secondary);
+  cursor: pointer;
+}
+.todayButton:hover {
+  background-color: var(--ui-background-tertiary);
+  color: var(--ui-text-primary);
+}
+.automateButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  font-weight: 500;
+  border: 1px solid var(--ui-border-primary);
+  border-radius: 8px;
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary); /* Make it stand out more */
+  cursor: pointer;
+}
+.automateButton:hover {
+  background-color: var(--ui-background-tertiary);
+}
+.changeIndicator {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+}
+.saveButton, .revertButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.revertButton {
+    background-color: var(--ui-interactive-secondary-bg);
+    color: var(--ui-interactive-secondary-text);
+}
+.revertButton:hover { background-color: var(--ui-background-tertiary); }
+.revertButton:disabled { opacity: 0.5; cursor: not-allowed; }
+.saveButton {
+  background-color: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+.saveButton:hover { background-color: #2563eb; }
+.saveButton:disabled {
+  background-color: var(--ui-background-tertiary);
+  color: var(--ui-text-tertiary);
+  cursor: not-allowed;
+}
+

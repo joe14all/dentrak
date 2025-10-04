@@ -1,0 +1,70 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 1rem;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--ui-border-primary);
+  border-radius: 6px;
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  font-size: 1rem;
+  width: 100%;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ui-border-secondary);
+}
+
+.cancelButton, .saveButton {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton {
+  background-color: var(--ui-interactive-secondary-bg);
+  color: var(--ui-interactive-secondary-text);
+}
+.cancelButton:hover {
+  background-color: var(--ui-border-primary);
+}
+
+.saveButton {
+  background-color: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+.saveButton:hover {
+  background-color: #2563eb;
+}

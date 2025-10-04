@@ -1,0 +1,138 @@
+.card {
+  background-color: var(--ui-background-secondary);
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconWrapper {
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.entryTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+}
+
+.actions { display: flex; gap: 0.5rem; }
+.actionButton { padding: 0.5rem; background: none; border: none; border-radius: 6px; cursor: pointer; display: flex; transition: all 0.2s ease; }
+.editButton { color: var(--ui-text-tertiary); }
+.editButton:hover { background-color: var(--brand-secondary); color: var(--brand-primary); }
+.deleteButton { color: var(--ui-text-tertiary); }
+.deleteButton:hover { background-color: var(--state-danger-bg); color: var(--state-danger); }
+
+.practiceInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    color: var(--ui-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.practiceInfo svg {
+    color: var(--ui-text-tertiary);
+}
+
+.tags {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    border-bottom: 1px solid var(--ui-border-secondary);
+    border-top: 1px solid var(--ui-border-secondary);
+}
+
+.tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    text-transform: capitalize;
+    background-color: var(--ui-background-tertiary);
+    color: var(--ui-text-secondary);
+}
+
+.patientTag {
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+}
+
+.cardBody {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    text-align: center;
+}
+
+/* Specific styles for the new attendance view */
+.attendanceBody .detailValue {
+    font-size: 1.1rem; /* Slightly smaller for time text */
+    font-weight: 500;
+}
+
+.detailItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detailLabel {
+    font-size: 0.8rem;
+    color: var(--ui-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detailValue {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+}
+.production { color: var(--state-success); }
+.collection { color: var(--brand-primary); }
+.adjustments { color: var(--state-danger); }
+
+.cardFooter {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    margin-top: -0.5rem;
+}
+
+.notes {
+  font-size: 0.85rem;
+  color: var(--ui-text-secondary);
+  line-height: 1.5;
+  background-color: var(--ui-background-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--ui-border-secondary);
+}
+

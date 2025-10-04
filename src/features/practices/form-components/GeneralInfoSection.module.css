@@ -1,0 +1,103 @@
+/* GeneralInfoSection Styles - Apple UI/UX Design */
+
+.fieldset {
+  border: none;
+  background-color: var(--ui-background-secondary);
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; /* Generous spacing between form groups */
+  border: 1px solid var(--ui-border-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.legend {
+  padding: 0;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem; /* Wide gap for a relaxed feel */
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.formGroup label {
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  font-size: 0.9rem;
+}
+
+.formGroup input[type="text"] {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  font-size: 1rem;
+  width: 90%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formGroup input[type="text"]:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-secondary);
+}
+
+
+/* --- Apple-style Segmented Control --- */
+.segmentedControl {
+  display: flex;
+  background-color: var(--ui-background-tertiary);
+  border-radius: 8px;
+  padding: 0.25rem;
+  border: 1px solid var(--ui-border-secondary);
+}
+
+.segmentButton {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  background-color: transparent;
+  color: var(--ui-text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.segmentButton.active {
+  background-color: var(--ui-background-secondary);
+  color: var(--ui-text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+
+/* --- Address Grid Layout --- */
+.addressGrid {
+    display: grid;
+    /* Create a flexible grid that adapts */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+/* For larger screens, you can enforce a specific column layout if desired */
+@media (min-width: 768px) {
+    .addressGrid {
+        grid-template-columns: 2fr 1fr 1fr; /* Address takes more space */
+    }
+}
+

@@ -2,7 +2,6 @@ import React from 'react';
 import styles from './PracticeCard.module.css';
 import { Edit, Trash2, Building2, User, Percent, DollarSign, Archive } from 'lucide-react';
 
-// Now accepts onEdit and onDelete props
 const PracticeCard = ({ practice, onEdit, onDelete }) => {
   const isArchived = practice.status === 'archived';
 
@@ -39,7 +38,7 @@ const PracticeCard = ({ practice, onEdit, onDelete }) => {
             <span className={styles.detailLabel}>Base / Guarantee</span>
             <span className={styles.detailValue}>
               <DollarSign size={14} />
-              {practice.paymentType === 'percentage' ? `${practice.dailyGuarantee || 'N/A'}` : `${practice.basePay}`}
+              {practice.basePay}
             </span>
           </div>
           <div className={styles.detailItem}>

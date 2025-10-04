@@ -27,7 +27,7 @@
 .formRow {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6rem; /* Increased gap */
+    gap: 2.5rem; /* Increased gap */
 }
 
 .formGroup {
@@ -53,7 +53,6 @@
   color: var(--ui-text-primary);
   font-size: 1rem;
   width: 100%;
-  max-width: 800px;
 }
 
 .formGroup textarea {

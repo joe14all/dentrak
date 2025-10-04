@@ -1,0 +1,141 @@
+.calendarContainer {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 1rem 1rem 1rem;
+}
+
+.daysOfWeek {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  padding: 1rem 0;
+}
+
+.calendarGrid {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(100px, 1fr);
+  gap: 1px;
+  background-color: var(--ui-border-secondary);
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dayCell, .emptyCell {
+  background-color: var(--ui-background-primary);
+  padding: 0.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 26px; /* Reserve space */
+}
+
+.dayNumber {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ui-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.today {
+  background-color: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+
+/* --- Holiday Styles --- */
+.holiday {
+  background-color: var(--brand-secondary);
+}
+
+.holidayIcon {
+  color: var(--state-warning);
+  flex-shrink: 0;
+}
+
+.holidayInfo {
+  margin-top: 4px;
+  text-align: left;
+}
+
+.holidayName {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ui-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* --- Practice Dots --- */
+.practiceDots {
+  flex-grow: 1;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.dot {
+  --practice-color: var(--ui-border-primary);
+  height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: var(--ui-background-secondary);
+  border: 1px solid var(--ui-border-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.dot:hover {
+  background-color: var(--ui-background-tertiary);
+  border-color: var(--ui-border-primary);
+}
+
+.filledDot {
+    width: 100%;
+    height: 100%;
+    background-color: var(--practice-color);
+    border-radius: 3px;
+    opacity: 0.5;
+}
+
+.dot.stagedAdd {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border-color: #16a34a;
+}
+
+.dot.stagedRemove {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.dot.stagedRemove .filledDot {
+    background-color: var(--practice-color);
+    opacity: 0.3;
+    text-decoration: line-through;
+}
+

@@ -1,0 +1,49 @@
+.listContainer {
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.infoState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  border-radius: 12px;
+  background-color: var(--ui-background-secondary);
+  color: var(--ui-text-secondary);
+  border: 1px dashed var(--ui-border-secondary);
+}
+
+.infoStateTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.infoStateText {
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.spinnerIcon {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+

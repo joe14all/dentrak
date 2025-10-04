@@ -45,27 +45,21 @@
 export const mockPractices = [
   {
     id: 1,
-    name: "Smile Bright Dental",
+    name: "All Care dental by the sea ",
     status: "active",
-    address: "123 Main St",
-    city: "Metropolis",
+    address: "607 W Channel Islands Blvd",
+    city: "Port Hueneme",
     provinceState: "CA",
     paymentType: "percentage",
     taxStatus: "contractor",
-    calculationBase: "collection",
-    percentage: 40,
-    dailyGuarantee: 600,
-    deductions: [
-      { name: "Lab Fees", type: "percentage", value: 50, timing: "pre-split" },
-      { name: "Supply Fee", type: "flat", value: 25, timing: "post-split" },
-    ],
-    holdback: {
-      percentage: 5,
-      notes: "Released quarterly after 90 days for lab remakes.",
-    },
-    payCycle: "monthly",
-    paymentDetail: "Paid on the 15th of the following month.",
-    notes: "A high-volume clinic with a focus on cosmetic work.",
+    calculationBase: "Production",
+    percentage: 29,
+    dailyGuarantee: 950,
+    deductions: [],
+    holdback: {},
+    payCycle: "bi-weekly",
+    paymentDetail: "",
+    notes: "A high-volume clinic.",
   },
   {
     id: 2,
@@ -126,40 +120,137 @@ export const mockPractices = [
   },
 ];
 
+/**
+ * @typedef {Object} Adjustment
+ * @property {string} name - The description of the adjustment (e.g., "Lab Fees").
+ * @property {'cost' | 'write-off' | 'other'} type - The category of the adjustment.
+ * @property {number} amount - The monetary value of the adjustment.
+ */
+
+/**
+ * Represents a single financial or attendance entry.
+ * The `entryType` field determines which other fields are relevant.
+ *
+ * @typedef {Object} Entry
+ * @property {number} id - Unique identifier for the entry.
+ * @property {number} practiceId - Links the entry to a specific practice.
+ * @property {'dailySummary' | 'periodSummary' | 'individualProcedure' | 'attendanceRecord'} entryType - The core of the versatile structure.
+ *
+ * -- Date Fields --
+ * @property {string} [date] - For dailySummary, individualProcedure, and attendanceRecord.
+ * @property {string} [periodStartDate] - For periodSummary.
+ * @property {string} [periodEndDate] - For periodSummary.
+ *
+ * -- Financials (not used by attendanceRecord) --
+ * @property {number} [production]
+ * @property {number} [collection]
+ * @property {Adjustment[]} [adjustments]
+ *
+ * -- Attendance Fields (only for attendanceRecord) --
+ * @property {string} [checkInTime] - Optional time stamp (e.g., "08:30").
+ * @property {string} [checkOutTime] - Optional time stamp (e.g., "17:00").
+ *
+ * -- Optional Details --
+ * @property {string} [patientId]
+ * @property {string} [procedureCode]
+ * @property {string} [notes]
+ */
+
+/** @type {Entry[]} */
 export const mockEntries = [
-  // Entries for Smile Bright Dental
+  // --- Example: Attendance Records (New Type) ---
   {
-    practiceId: 1,
-    date: "2024-08-01",
-    production: 2500,
-    labFees: 300,
-    notes: "One crown prep.",
+    id: 101,
+    practiceId: 2, // City Center Dentistry
+    entryType: "attendanceRecord",
+    date: "2025-10-06",
+    checkInTime: "08:55",
+    checkOutTime: "17:05",
+    notes: "Regular work day.",
   },
   {
-    practiceId: 1,
-    date: "2024-08-02",
-    production: 1800,
-    labFees: 0,
-    notes: "",
+    id: 102,
+    practiceId: 3, // Rural Community Clinic
+    entryType: "attendanceRecord",
+    date: "2025-10-07",
+    notes: "Present for morning huddle and admin tasks. Left after lunch.",
   },
 
-  // Entries for City Center Dentistry
   {
-    practiceId: 2,
-    date: "2024-08-05",
-    production: 2800,
-    basePay: 700,
-    notes: "Busy day, hit bonus.",
+    id: 1,
+    practiceId: 1, // Smile Bright Dental
+    entryType: "dailySummary",
+    date: "2025-10-01",
+    production: 3200,
+    collection: 2850,
+    adjustments: [
+      { name: "Lab Fee (Crown)", amount: 250, type: "cost" },
+      { name: "Supplies", amount: 50, type: "cost" },
+    ],
+    notes: "Productive day, 2 crowns and fillings.",
   },
   {
-    practiceId: 2,
-    date: "2024-08-06",
-    production: 1900,
-    basePay: 700,
-    notes: "Just under the bonus threshold.",
+    id: 2,
+    practiceId: 1,
+    entryType: "dailySummary",
+    date: "2025-10-02",
+    production: 1800,
+    collection: 1500,
+    adjustments: [],
+    notes: "Hygiene checks and a few fillings.",
+  },
+
+  // --- Example: Period Summary (for simple, high-level tracking) ---
+  {
+    id: 3,
+    practiceId: 2, // City Center Dentistry
+    entryType: "periodSummary",
+    periodStartDate: "2025-09-16",
+    periodEndDate: "2025-09-30",
+    production: 28500,
+    collection: 26000,
+    adjustments: [
+      { name: "Total Lab Fees for Period", amount: 2800, type: "cost" },
+    ],
+    notes: "Pay stub summary for the last half of September.",
+  },
+
+  // --- Example: Individual Procedures (for detailed, patient-level tracking) ---
+  {
+    id: 4,
+    practiceId: 3, // Rural Community Clinic
+    entryType: "individualProcedure",
+    date: "2025-10-03",
+    patientId: "P-48151",
+    procedureCode: "D2740", // Porcelain/Ceramic Crown
+    production: 1450,
+    collection: 0, // Collection will be logged later
+    adjustments: [{ name: "Lab Fee", amount: 210, type: "cost" }],
+    notes: "Crown prep on #14.",
+  },
+  {
+    id: 5,
+    practiceId: 3,
+    entryType: "individualProcedure",
+    date: "2025-10-03",
+    patientId: "P-48151",
+    procedureCode: "D2330", // Resin composite
+    production: 250,
+    collection: 250,
+    adjustments: [],
+    notes: "Anterior filling on #8.",
+  },
+  {
+    id: 6,
+    practiceId: 1,
+    entryType: "dailySummary",
+    date: "2025-10-03",
+    production: 4500,
+    collection: 4000,
+    adjustments: [{ name: "Implant Parts", amount: 800, type: "cost" }],
+    notes: "Implant placement day.",
   },
 ];
-
 export const mockCheques = [
   {
     practiceId: 1,
