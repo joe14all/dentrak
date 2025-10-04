@@ -9,10 +9,12 @@ db.version(1).stores({
   cheques: "++id, practiceId, dateReceived, status",
 });
 
-// Version 2: Upgraded schema to add the necessary index
-// This tells Dexie that we want to be able to efficiently query the 'entryType' field.
+// Version 2: Added index for entryType
 db.version(2).stores({
-  entries: "++id, practiceId, date, entryType", // Added 'entryType' index
+  entries: "++id, practiceId, date, entryType",
 });
 
-// You can add future schema upgrades here, e.g., db.version(3)...
+// Version 3: Added the new 'payments' table
+db.version(3).stores({
+  payments: "++id, practiceId, paymentDate", // Indexed for efficient queries
+});

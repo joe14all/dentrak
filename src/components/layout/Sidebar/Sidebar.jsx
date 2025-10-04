@@ -1,24 +1,31 @@
 import React from 'react';
 import styles from './Sidebar.module.css';
 import { useAuth } from '../../../contexts/AuthContext/AuthContext';
-import { LayoutDashboard, Building2, PenSquare, Receipt, FileText, Settings, Lock, Stethoscope } from 'lucide-react';
+import { useNavigation } from '../../../contexts/NavigationContext/NavigationContext';
+import { LayoutDashboard, Building2, PenSquare, Banknote, Receipt, FileText, Settings, Lock, Stethoscope } from 'lucide-react';
 
 const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: 'Dashboard' },
-    { name: 'Practices', icon: Building2, path: 'Practices' },
-    { name: 'Entries', icon: PenSquare, path: 'Entries' },
-    { name: 'Cheques', icon: Receipt, path: 'Cheques' },
-    { name: 'Reports', icon: FileText, path: 'Reports' },
-    { name: 'Settings', icon: Settings, path: 'Settings' },
+    { name: 'Dashboard', icon: LayoutDashboard },
+    { name: 'Practices', icon: Building2 },
+    { name: 'Entries', icon: PenSquare },
+    { name: 'Payments', icon: Banknote },
+    { name: 'Cheques', icon: Receipt },
+    { name: 'Reports', icon: FileText },
+    { name: 'Settings', icon: Settings },
 ];
 
-// isCollapsed prop is no longer needed
-const Sidebar = ({ activePage, setActivePage }) => {
+// The component no longer needs to accept activePage or setActivePage as props
+const Sidebar = ({ isCollapsed, onMouseEnter, onMouseLeave }) => {
     const { lockApp } = useAuth();
+    // It gets everything it needs directly from the context
+    const { activePage, setActivePage } = useNavigation();
 
     return (
-        // The component now manages its collapsed/expanded state based on hover
-        <aside className={styles.sidebar}>
+        <aside 
+          className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+        >
             <div className={styles.logoContainer}>
                 <Stethoscope className={styles.logoIcon} size={32} />
                 <span className={styles.logoText}>Dentrak</span>

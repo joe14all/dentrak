@@ -269,3 +269,63 @@ export const mockCheques = [
     image: null,
   },
 ];
+
+/**
+ * Represents a single payment received from a practice.
+ *
+ * @typedef {Object} Payment
+ * @property {number} id - Unique identifier.
+ * @property {number} practiceId - Links the payment to a specific practice.
+ * @property {string} paymentDate - The date the payment was received.
+ * @property {number} amount - The total monetary value of the payment.
+ * @property {'cheque' | 'e-transfer' | 'directDeposit' | 'cash'} paymentMethod - The method of payment.
+ *
+ * @property {string} [payPeriodStartDate] - The start date of the pay period this payment covers.
+ * @property {string} [payPeriodEndDate] - The end date of the pay period.
+ *
+ * @property {string} [referenceNumber] - Optional reference like a cheque number or e-transfer ID.
+ * @property {number[]} [linkedEntryIds] - An array of 'entry' IDs that this payment covers for reconciliation.
+ * @property {number} [linkedChequeId] - An optional ID linking to a record in the 'cheques' table for detailed tracking.
+ *
+ * @property {string} [image] - Placeholder for a URI or path to an attached image (e.g., for transfers).
+ * @property {string} [notes] - Any miscellaneous notes.
+ */
+
+/** @type {Payment[]} */
+export const mockPayments = [
+  {
+    id: 1,
+    practiceId: 1,
+    paymentDate: "2025-10-15",
+    amount: 8530.5,
+    paymentMethod: "cheque",
+    payPeriodStartDate: "2025-09-16",
+    payPeriodEndDate: "2025-09-30",
+    referenceNumber: "2045",
+    linkedChequeId: 1, // Corresponds to an entry in the 'cheques' table
+    notes: "Payment for the last half of September.",
+  },
+  {
+    id: 2,
+    practiceId: 2,
+    paymentDate: "2025-10-05",
+    amount: 7200.0,
+    paymentMethod: "directDeposit",
+    payPeriodStartDate: "2025-09-16",
+    payPeriodEndDate: "2025-09-30",
+    referenceNumber: "DD-987654",
+    notes: "Standard bi-weekly payroll deposit.",
+  },
+  {
+    id: 3,
+    practiceId: 3,
+    paymentDate: "2025-10-03",
+    amount: 4750.0,
+    paymentMethod: "e-transfer",
+    payPeriodStartDate: "2025-09-22",
+    payPeriodEndDate: "2025-09-26",
+    referenceNumber: "ETR-ABC123XYZ",
+    image: null, // Placeholder for a screenshot
+    notes: "E-transfer for the last week of September.",
+  },
+];

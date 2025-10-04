@@ -1,5 +1,5 @@
 .legendContainer {
-  padding: 1.5rem;
+  padding: 0 1.5rem ;
   border-left: 1px solid var(--ui-border-secondary);
   width: 320px; /* Increased width for more info */
   flex-shrink: 0;
@@ -12,7 +12,7 @@
   font-weight: 600;
   color: var(--ui-text-primary);
   margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--ui-border-secondary);
 }
 

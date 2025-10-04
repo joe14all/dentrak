@@ -5,20 +5,27 @@ import { AuthProvider } from './AuthContext/AuthContext';
 import { PracticeProvider } from './PracticeContext/PracticeContext';
 import { EntryProvider } from './EntryContext/EntryContext';
 import { ChequeProvider } from './ChequeContext/ChequeContext';
-import { ThemeProvider } from './ThemeContext/ThemeContext'; // <-- IMPORT THEME PROVIDER
+import { ThemeProvider } from './ThemeContext/ThemeContext';
+import { PaymentProvider } from './PaymentContext/PaymentContext';
+import { NavigationProvider } from './NavigationContext/NavigationContext'; // Import the provider
 
 export const AppProvider = ({ children }) => {
   return (
     <AuthProvider>
-      <PracticeProvider>
-        <EntryProvider>
-          <ChequeProvider>
-            <ThemeProvider> 
-              {children}
-            </ThemeProvider>
-          </ChequeProvider>
-        </EntryProvider>
-      </PracticeProvider>
+      <NavigationProvider> {/* 1. Wrap all other providers */}
+        <PracticeProvider>
+          <EntryProvider>
+            <PaymentProvider>
+              <ChequeProvider>
+                <ThemeProvider> 
+                  {children}
+                </ThemeProvider>
+              </ChequeProvider>
+            </PaymentProvider>
+          </EntryProvider>
+        </PracticeProvider>
+      </NavigationProvider>
     </AuthProvider>
   );
 };
+
