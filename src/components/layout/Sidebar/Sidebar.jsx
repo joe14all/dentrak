@@ -9,15 +9,13 @@ const navItems = [
     { name: 'Practices', icon: Building2 },
     { name: 'Entries', icon: PenSquare },
     { name: 'Payments', icon: Banknote },
-    { name: 'Cheques', icon: Receipt },
+    { name: 'Transactions', icon: Receipt }, // Renamed from 'Cheques'
     { name: 'Reports', icon: FileText },
     { name: 'Settings', icon: Settings },
 ];
 
-// The component no longer needs to accept activePage or setActivePage as props
 const Sidebar = ({ isCollapsed, onMouseEnter, onMouseLeave }) => {
     const { lockApp } = useAuth();
-    // It gets everything it needs directly from the context
     const { activePage, setActivePage } = useNavigation();
 
     return (

@@ -1,0 +1,16 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content {
+  flex-grow: 1;
+  overflow: auto;
+  display: flex;
+}
+
+.content > * {
+    flex-grow: 1;
+}
+

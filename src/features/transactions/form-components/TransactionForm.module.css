@@ -1,0 +1,11 @@
+.form { display: flex; flex-direction: column; gap: 1.5rem; padding-top: 1rem; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.formGroup { display: flex; flex-direction: column; gap: 0.5rem; }
+.formGroup label { font-weight: 500; color: var(--ui-text-secondary); }
+.formGroup input, .formGroup select, .formGroup textarea {
+  padding: 0.75rem; border: 1px solid var(--ui-border-primary); border-radius: 6px; background-color: var(--ui-background-primary); color: var(--ui-text-primary); font-size: 1rem;
+}
+.formActions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--ui-border-secondary); }
+.formActions button { padding: 0.6rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; }
+.formActions button:first-child { background-color: var(--ui-interactive-secondary-bg); color: var(--ui-interactive-secondary-text); border: none; }
+.formActions button:last-child { background-color: var(--brand-primary); color: var(--brand-text-on-primary); border: none; }

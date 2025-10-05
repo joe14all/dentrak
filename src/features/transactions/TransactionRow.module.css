@@ -1,0 +1,18 @@
+.tableRow {
+  cursor: pointer; /* Make the whole row look clickable */
+  transition: background-color 0.2s ease;
+}
+.tableRow:hover { background-color: var(--ui-background-tertiary); }
+.tableRow td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--ui-border-secondary); font-size: 0.9rem; color: var(--ui-text-secondary); }
+.cellAmount { font-weight: 500; color: var(--ui-text-primary); font-family: 'SF Mono', 'Menlo', 'monospace'; }
+.tag { font-size: 0.8rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 999px; text-transform: capitalize; }
+.tag.Cleared { background-color: var(--state-success-bg); color: var(--state-success); }
+.tag.Deposited { background-color: var(--brand-secondary); color: var(--brand-primary); }
+.tag.Pending { background-color: var(--state-warning-bg); color: var(--state-warning); }
+.tag.Bounced { background-color: var(--state-danger-bg); color: var(--state-danger); }
+.cellActions { text-align: right; }
+.actions { display: inline-flex; gap: 0.25rem; opacity: 0; }
+.tableRow:hover .actions { opacity: 1; }
+.actions button { padding: 0.5rem; background: none; border: none; border-radius: 6px; cursor: pointer; color: var(--ui-text-tertiary); }
+.actions button:hover { background-color: var(--ui-background-primary); color: var(--ui-text-primary); }
+

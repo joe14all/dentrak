@@ -251,22 +251,117 @@ export const mockEntries = [
     notes: "Implant placement day.",
   },
 ];
+/**
+ * Represents a physical cheque received as payment.
+ *
+ * @typedef {Object} Cheque
+ * @property {number} id - Unique identifier for the cheque record.
+ * @property {number} practiceId - Links to the practice that issued the cheque.
+ * @property {number} [linkedPaymentId] - Links to the corresponding entry in the 'payments' table.
+ * @property {string} dateReceived - The date the cheque was physically received.
+ * @property {number} amount - The monetary value of the cheque.
+ * @property {string} chequeNumber - The number printed on the cheque.
+ * @property {'Pending' | 'Deposited' | 'Cleared' | 'Bounced'} status - The current status in the deposit lifecycle.
+ * @property {string} [dateDeposited] - The date the cheque was deposited into the bank.
+ * @property {string} [dateCleared] - The date the cheque cleared the bank.
+ * @property {string} [image] - A path or URI to a scanned image of the cheque.
+ * @property {string} [notes] - Any relevant notes (e.g., "For second half of Sept pay period").
+ */
+
+/** @type {Cheque[]} */
 export const mockCheques = [
   {
+    id: 1,
     practiceId: 1,
-    dateReceived: "2024-09-15",
-    amount: 5240.0,
-    chequeNumber: "1054",
-    status: "Deposited", // 'Pending', 'Deposited', 'Cleared', 'Bounced'
-    image: null, // Placeholder for image data/path
+    linkedPaymentId: 1,
+    dateReceived: "2025-10-15",
+    amount: 8530.5,
+    chequeNumber: "2045",
+    status: "Deposited",
+    dateDeposited: "2025-10-16",
+    dateCleared: null,
+    image: null,
+    notes: "Payment for the last half of September.",
   },
   {
-    practiceId: 2,
-    dateReceived: "2024-08-20",
-    amount: 3450.0,
-    chequeNumber: "EFT-84321",
+    id: 2,
+    practiceId: 4,
+    dateReceived: "2025-09-30",
+    amount: 12500.0,
+    chequeNumber: "8801",
     status: "Cleared",
+    dateDeposited: "2025-10-01",
+    dateCleared: "2025-10-03",
     image: null,
+    notes: "Final payment from archived contract.",
+  },
+];
+
+// --- 2. New Direct Deposit Schema ---
+
+/**
+ * Represents a direct deposit (EFT) payment.
+ *
+ * @typedef {Object} DirectDeposit
+ * @property {number} id - Unique identifier for the deposit record.
+ * @property {number} practiceId - Links to the paying practice.
+ * @property {number} [linkedPaymentId] - Links to the 'payments' table.
+ * @property {string} paymentDate - The date the deposit was received in the account.
+ * @property {number} amount - The net amount received.
+ * @property {string} payPeriodStartDate - The start of the pay period this deposit covers.
+ * @property {string} payPeriodEndDate - The end of the pay period.
+ * @property {string} transactionId - The unique transaction ID from the bank statement.
+ * @property {string} [paystubImage] - A path or URI to an image of the associated paystub.
+ * @property {string} [notes] - Notes on the deposit (e.g., "Includes holiday pay").
+ */
+
+/** @type {DirectDeposit[]} */
+export const mockDirectDeposits = [
+  {
+    id: 1,
+    practiceId: 2,
+    linkedPaymentId: 2,
+    paymentDate: "2025-10-05",
+    amount: 7200.0,
+    payPeriodStartDate: "2025-09-16",
+    payPeriodEndDate: "2025-09-30",
+    transactionId: "DD-987654",
+    paystubImage: null,
+    notes: "Standard bi-weekly payroll deposit.",
+  },
+];
+
+// --- 3. New E-Transfer Schema ---
+
+/**
+ * Represents a payment received via e-transfer.
+ *
+ * @typedef {Object} ETransfer
+ * @property {number} id - Unique identifier.
+ * @property {number} practiceId - Links to the paying practice.
+ * @property {number} [linkedPaymentId] - Links to the 'payments' table.
+ * @property {string} paymentDate - The date the transfer was accepted.
+ * @property {number} amount - The amount of the transfer.
+ * @property {string} confirmationNumber - The confirmation or reference number from the e-transfer.
+ * @property {string} [senderEmail] - The email address of the sender, for tracking.
+ * @property {'Pending' | 'Accepted' | 'Expired' | 'Cancelled'} status - The status of the e-transfer.
+ * @property {string} [screenshotImage] - A path or URI to a screenshot of the confirmation.
+ * @property {string} [notes] - Any notes, such as the security answer.
+ */
+
+/** @type {ETransfer[]} */
+export const mockETransfers = [
+  {
+    id: 1,
+    practiceId: 3,
+    linkedPaymentId: 3,
+    paymentDate: "2025-10-03",
+    amount: 4750.0,
+    confirmationNumber: "ETR-ABC123XYZ",
+    senderEmail: "accounting@ruralclinic.com",
+    status: "Accepted",
+    screenshotImage: null,
+    notes: "Security answer: 'dentist'",
   },
 ];
 

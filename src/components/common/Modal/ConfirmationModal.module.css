@@ -1,0 +1,59 @@
+.container {
+  padding: 1.5rem 2rem;
+  text-align: center;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.iconWrapper {
+    margin-bottom: 1rem;
+}
+
+.alertIcon {
+    color: var(--state-danger);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.message {
+  color: var(--ui-text-secondary);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.cancelButton, .confirmButton {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.cancelButton {
+  background-color: var(--ui-interactive-secondary-bg);
+  color: var(--ui-interactive-secondary-text);
+  border: 1px solid var(--ui-border-primary);
+}
+.cancelButton:hover {
+  background-color: var(--ui-background-tertiary);
+}
+
+.confirmButton {
+  background-color: var(--state-danger);
+  color: var(--brand-text-on-primary);
+}
+.confirmButton:hover {
+  background-color: #b91c1c; /* Darker red */
+}

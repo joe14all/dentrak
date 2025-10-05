@@ -4,7 +4,7 @@ import React from 'react';
 import { AuthProvider } from './AuthContext/AuthContext';
 import { PracticeProvider } from './PracticeContext/PracticeContext';
 import { EntryProvider } from './EntryContext/EntryContext';
-import { ChequeProvider } from './ChequeContext/ChequeContext';
+import { TransactionProvider } from './TransactionContext/TransactionContext';
 import { ThemeProvider } from './ThemeContext/ThemeContext';
 import { PaymentProvider } from './PaymentContext/PaymentContext';
 import { NavigationProvider } from './NavigationContext/NavigationContext'; // Import the provider
@@ -12,15 +12,15 @@ import { NavigationProvider } from './NavigationContext/NavigationContext'; // I
 export const AppProvider = ({ children }) => {
   return (
     <AuthProvider>
-      <NavigationProvider> {/* 1. Wrap all other providers */}
+      <NavigationProvider> 
         <PracticeProvider>
           <EntryProvider>
             <PaymentProvider>
-              <ChequeProvider>
+              <TransactionProvider>
                 <ThemeProvider> 
                   {children}
                 </ThemeProvider>
-              </ChequeProvider>
+              </TransactionProvider>
             </PaymentProvider>
           </EntryProvider>
         </PracticeProvider>

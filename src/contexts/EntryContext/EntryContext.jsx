@@ -9,76 +9,58 @@ import {
 
 const EntryContext = createContext();
 
+// This flag exists OUTSIDE the component. It will only be false once
+// when the application first loads.
+let hasInitialized = false;
+
 export const EntryProvider = ({ children }) => {
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // This is a safe function to only refresh the state from the DB
   const refreshEntries = useCallback(async () => {
     setIsLoading(true);
     try {
       const allEntriesFromDB = await getAllEntries();
+      console.log(`[EntryContext] Fetched ${allEntriesFromDB.length} entries.`);
       setEntries(allEntriesFromDB);
     } catch (error) {
-      console.error(`Failed to fetch all entries:`, error);
-      setEntries([]);
+      console.error(`[EntryContext] Failed to fetch all entries:`, error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // This effect now handles all initialization logic robustly.
   useEffect(() => {
     const initializeDB = async () => {
-      // Step 1: Run the smarter populator. It will add missing data if needed.
-      await populateEntries();
-      // Step 2: Now that we know the DB is correct, refresh the state.
-      await refreshEntries();
+      // We check the module-level flag.
+      if (!hasInitialized) {
+        // If it's the first run, set the flag to true immediately.
+        hasInitialized = true;
+        console.log("[EntryContext] First run detected. Initializing database...");
+        await populateEntries();
+        await refreshEntries();
+      } else {
+        // On subsequent runs (like from Strict Mode), this will be skipped.
+        console.log("[EntryContext] Database already initialized. Skipping population, just refreshing.");
+        // We can still refresh to ensure data is up to date if needed.
+        if (entries.length === 0) { // Only refresh if state is empty
+            await refreshEntries();
+        }
+      }
     };
+
     initializeDB();
-  }, [refreshEntries]); // Depends on refreshEntries to run after it's defined
+    
+    // We no longer need the cleanup function for this pattern.
+  }, [refreshEntries, entries.length]); // Add entries.length to dependencies
 
-  const addNewEntry = async (entryData) => {
-    try {
-      await dbAddEntry(entryData);
-      await refreshEntries(); // Refresh state after any change
-    } catch (error) {
-      console.error("Failed to add new entry:", error);
-    }
-  };
+  const addNewEntry = async (data) => { await dbAddEntry(data); await refreshEntries(); };
+  const editEntry = async (id, data) => { await dbUpdateEntry(id, data); await refreshEntries(); };
+  const removeEntry = async (id) => { await dbDeleteEntry(id); await refreshEntries(); };
 
-  const editEntry = async (id, updatedData) => {
-    try {
-      await dbUpdateEntry(id, updatedData);
-      await refreshEntries();
-    } catch (error) {
-      console.error(`Failed to edit entry ${id}:`, error);
-    }
-  };
+  const value = { entries, isLoading, addNewEntry, editEntry, removeEntry };
 
-  const removeEntry = async (id) => {
-    try {
-      await dbDeleteEntry(id);
-      await refreshEntries();
-    } catch (error) {
-      console.error(`Failed to remove entry ${id}:`, error);
-    }
-  };
-
-  const value = {
-    entries,
-    isLoading,
-    refreshEntries,
-    addNewEntry,
-    editEntry,
-    removeEntry,
-  };
-
-  return (
-    <EntryContext.Provider value={value}>
-      {children}
-    </EntryContext.Provider>
-  );
+  return <EntryContext.Provider value={value}>{children}</EntryContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components

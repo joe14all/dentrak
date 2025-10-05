@@ -1,0 +1,17 @@
+.listContainer { width: 100%; }
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ui-border-secondary);
+  background-color: var(--ui-background-secondary);
+}
+.thRight { text-align: right; }
+.infoState { text-align: center; padding: 4rem 2rem; }
+.infoStateTitle { font-size: 1.25rem; font-weight: 600; color: var(--ui-text-primary); margin-top: 1.5rem; }
+.spinnerIcon { animation: spin 1.5s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

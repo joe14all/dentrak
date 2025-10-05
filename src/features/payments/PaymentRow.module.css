@@ -1,52 +1,63 @@
 .tableRow {
-  /* Remove individual bottom borders from cells */
-  border-bottom: 1px solid var(--ui-border-secondary);
   transition: background-color 0.2s ease;
 }
-.tableRow:last-child {
-  border-bottom: none; /* Remove border from the very last row in the table */
-}
-
 .tableRow:hover {
   background-color: var(--ui-background-tertiary);
 }
-
 .tableRow td {
-  padding: 1.25rem 1.5rem;
-  font-size: 0.9rem;
-  color: var(--ui-text-secondary);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ui-border-secondary);
   vertical-align: middle;
-  /* Remove individual cell borders */
-  border-bottom: none; 
+}
+.tableRow:last-child td {
+  border-bottom: none;
 }
 
 /* --- Cell Specific Styles --- */
-.cellDate {
-  font-weight: 500;
-  color: var(--ui-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  white-space: nowrap;
-}
-.recentIndicator {
-  width: 8px;
-  height: 8px;
-  background-color: var(--brand-primary);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
+.cellMain {
+  width: 50%; /* Give the main info column more space */
+}
+.mainInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
 .practiceLink {
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--ui-text-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 .practiceLink:hover {
   color: var(--brand-primary);
-  text-decoration: underline;
 }
+.subInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ui-text-secondary);
+}
+.separator {
+  color: var(--ui-border-primary);
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+.tag.cheque { background-color: var(--state-success-bg); color: var(--state-success); }
+.tag.e-transfer { background-color: var(--state-warning-bg); color: var(--state-warning); }
+.tag.directDeposit { background-color: var(--brand-secondary); color: var(--brand-primary); }
+.tag.cash { background-color: var(--ui-background-tertiary); color: var(--ui-text-secondary); }
+
 
 .cellAmount {
   font-size: 1rem;
@@ -54,27 +65,30 @@
   color: var(--ui-text-primary);
   font-family: 'SF Mono', 'Menlo', 'monospace';
   letter-spacing: 0.5px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .cellRef {
-    color: var(--ui-text-tertiary);
+  color: var(--ui-text-tertiary);
+  font-family: 'SF Mono', 'Menlo', 'monospace';
+  font-size: 0.85rem;
 }
-
-.tag {
+.refLink {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 0.35rem;
+  color: var(--brand-primary);
+  text-decoration: none;
   font-weight: 500;
-  padding: 0.3rem 0.75rem;
-  border-radius: 999px;
-  text-transform: capitalize;
 }
-/* Use semantic theme variables for consistency */
-.tag.cheque { background-color: var(--state-success-bg); color: var(--state-success); }
-.tag.e-transfer { background-color: var(--state-warning-bg); color: var(--state-warning); }
-.tag.directDeposit { background-color: var(--brand-secondary); color: var(--brand-primary); }
-.tag.cash { background-color: var(--ui-background-tertiary); color: var(--ui-text-secondary); }
+.refLink:hover {
+  text-decoration: underline;
+}
+.refLink svg {
+  opacity: 0.6;
+}
+
 
 /* --- Actions --- */
 .cellActions { text-align: right; }
@@ -84,11 +98,6 @@
   gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.2s ease;
-  background-color: var(--ui-background-primary);
-  border: 1px solid var(--ui-border-secondary);
-  border-radius: 8px;
-  padding: 4px; /* Slightly more space */
-  box-shadow: var(--shadow-sm);
 }
 .tableRow:hover .actions { opacity: 1; }
 
@@ -103,9 +112,8 @@
   transition: all 0.2s ease;
 }
 .actionButton:hover {
-  background-color: var(--ui-background-tertiary);
+  background-color: var(--ui-background-primary);
   color: var(--ui-text-primary);
+  box-shadow: var(--shadow-sm);
 }
-.linkButton { color: var(--brand-primary); }
-.linkButton:hover { background-color: var(--brand-secondary); }
 

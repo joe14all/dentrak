@@ -19,11 +19,9 @@ const PaymentsList = ({ payments, practices, isLoading, onEditPayment, onDeleteP
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Practice</th>
-              <th>Amount</th>
-              <th>Method</th>
-              <th>Reference #</th>
+              <th className={styles.thMain}>Payment Details</th>
+              <th className={styles.thRight}>Amount</th>
+              <th>Reference</th>
               <th className={styles.thRight}>Actions</th>
             </tr>
           </thead>
@@ -51,3 +49,4 @@ const PaymentsList = ({ payments, practices, isLoading, onEditPayment, onDeleteP
 };
 
 export default PaymentsList;
+

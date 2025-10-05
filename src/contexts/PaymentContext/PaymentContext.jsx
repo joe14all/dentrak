@@ -7,15 +7,15 @@ import {
   populatePayments
 } from '../../database/payments';
 
-// 1. Create the context
 const PaymentContext = createContext();
 
-// 2. Create the provider component
+// This flag ensures the initialization runs only once per application session.
+let hasInitialized = false;
+
 export const PaymentProvider = ({ children }) => {
   const [payments, setPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Function to refresh the payments state from the database
   const refreshPayments = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -23,58 +23,29 @@ export const PaymentProvider = ({ children }) => {
       setPayments(allPaymentsFromDB);
     } catch (error) {
       console.error(`Failed to fetch all payments:`, error);
-      setPayments([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Effect to initialize the database on first load
   useEffect(() => {
     const initializeDB = async () => {
-      await populatePayments();
-      await refreshPayments(); // Perform the initial data load
+      if (!hasInitialized) {
+        hasInitialized = true;
+        await populatePayments();
+        await refreshPayments();
+      } else if (payments.length === 0) { // Refresh if state is empty on re-render
+        await refreshPayments();
+      }
     };
     initializeDB();
-  }, [refreshPayments]);
+  }, [refreshPayments, payments.length]);
 
-  // --- CRUD Functions ---
+  const addNewPayment = async (data) => { await dbAddPayment(data); await refreshPayments(); };
+  const editPayment = async (id, data) => { await dbUpdatePayment(id, data); await refreshPayments(); };
+  const removePayment = async (id) => { await dbDeletePayment(id); await refreshPayments(); };
 
-  const addNewPayment = async (paymentData) => {
-    try {
-      await dbAddPayment(paymentData);
-      await refreshPayments(); // Refresh state after any change
-    } catch (error) {
-      console.error("Failed to add new payment:", error);
-    }
-  };
-
-  const editPayment = async (id, updatedData) => {
-    try {
-      await dbUpdatePayment(id, updatedData);
-      await refreshPayments();
-    } catch (error) {
-      console.error(`Failed to edit payment ${id}:`, error);
-    }
-  };
-
-  const removePayment = async (id) => {
-    try {
-      await dbDeletePayment(id);
-      await refreshPayments();
-    } catch (error) {
-      console.error(`Failed to remove payment ${id}:`, error);
-    }
-  };
-
-  const value = {
-    payments,
-    isLoading,
-    refreshPayments,
-    addNewPayment,
-    editPayment,
-    removePayment,
-  };
+  const value = { payments, isLoading, addNewPayment, editPayment, removePayment, refreshPayments };
 
   return (
     <PaymentContext.Provider value={value}>
@@ -83,7 +54,6 @@ export const PaymentProvider = ({ children }) => {
   );
 };
 
-// 3. Create a custom hook for easy consumption
 // eslint-disable-next-line react-refresh/only-export-components
 export const usePayments = () => {
   const context = useContext(PaymentContext);
@@ -92,3 +62,4 @@ export const usePayments = () => {
   }
   return context;
 };
+

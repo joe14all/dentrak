@@ -1,55 +1,43 @@
-/* eslint-disable no-unused-vars */
 import { db } from "./db";
 import { mockEntries } from "./mockData";
 
-// This function is now smarter and can handle adding missing mock data.
+/**
+ * Populates the entries table with mock data if it's empty.
+ */
 export const populateEntries = async () => {
+  // Add log to see when this function is called
+  console.log("Attempting to populate entries...");
+
   const count = await db.entries.count();
+
+  // Add log to show the current count
+  console.log(`Found ${count} existing entries in the database.`);
+
   if (count === 0) {
-    console.log("Populating entries for the first time...");
-    const entriesWithoutIds = mockEntries.map(({ id, ...rest }) => rest);
-    await db.entries.bulkAdd(entriesWithoutIds);
-  } else {
-    // If the DB isn't empty, check specifically for attendance records.
-    const attendanceCount = await db.entries
-      .where("entryType")
-      .equals("attendanceRecord")
-      .count();
-    if (attendanceCount === 0) {
-      console.log(
-        "Database exists, but adding missing attendance mock entries..."
-      );
-      const attendanceEntries = mockEntries
-        .filter((e) => e.entryType === "attendanceRecord")
-        .map(({ id, ...rest }) => rest); // Still remove hardcoded IDs
-      if (attendanceEntries.length > 0) {
-        await db.entries.bulkAdd(attendanceEntries);
-      }
+    console.log("Entries table is empty. Populating with mock data...");
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const entriesWithoutIds = mockEntries.map(({ id, ...rest }) => rest);
+      await db.entries.bulkAdd(entriesWithoutIds);
+      console.log("Successfully added mock entries.");
+    } catch (error) {
+      console.error("Error during bulkAdd for entries:", error);
     }
+  } else {
+    console.log("Entries table already contains data. Skipping population.");
   }
 };
 
-// Get all entries from the database
+// --- Other functions remain the same ---
 export const getAllEntries = async () => {
   return await db.entries.toArray();
 };
-
-// Get entries for a specific practice, sorted by date
-export const getEntriesForPractice = async (practiceId) => {
-  return await db.entries.where("practiceId").equals(practiceId).sortBy("date");
-};
-
-// Add a new entry
 export const addEntry = async (entry) => {
   return await db.entries.add(entry);
 };
-
-// Update an existing entry
-export const updateEntry = async (id, updatedData) => {
-  return await db.entries.update(id, updatedData);
+export const updateEntry = async (id, data) => {
+  return await db.entries.update(id, data);
 };
-
-// Delete an entry by its ID
 export const deleteEntry = async (id) => {
   return await db.entries.delete(id);
 };

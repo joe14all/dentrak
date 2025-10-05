@@ -1,0 +1,8 @@
+.container { padding: 1rem; text-align: center; }
+.iconWrapper { color: var(--state-danger); margin-bottom: 1rem; }
+.container h3 { font-size: 1.25rem; font-weight: 600; color: var(--ui-text-primary); margin-bottom: 0.5rem; }
+.container p { color: var(--ui-text-secondary); margin-bottom: 2rem; }
+.actions { display: flex; justify-content: center; gap: 1rem; }
+.actions button { padding: 0.6rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; border: none; }
+.actions button:first-child { background-color: var(--ui-interactive-secondary-bg); color: var(--ui-interactive-secondary-text); }
+.actions button:last-child { background-color: var(--state-danger); color: var(--brand-text-on-primary); }

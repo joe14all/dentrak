@@ -2,19 +2,17 @@ import Dexie from "dexie";
 
 export const db = new Dexie("DentrakDatabase");
 
-// Version 1: The original schema
-db.version(1).stores({
+// This is the correct, consolidated schema for your application.
+// Version 5 corrects the index names for transaction tables.
+db.version(5).stores({
+  // Tables from previous versions, carried forward:
   practices: "++id, name, status, taxStatus",
-  entries: "++id, practiceId, date",
-  cheques: "++id, practiceId, dateReceived, status",
-});
-
-// Version 2: Added index for entryType
-db.version(2).stores({
   entries: "++id, practiceId, date, entryType",
-});
+  payments: "++id, practiceId, paymentDate",
 
-// Version 3: Added the new 'payments' table
-db.version(3).stores({
-  payments: "++id, practiceId, paymentDate", // Indexed for efficient queries
+  // Updated and new tables for this version:
+  cheques: "++id, practiceId, status, dateReceived",
+  // CORRECTED: The field is 'paymentDate' in the mock data, not 'transactionDate'
+  directDeposits: "++id, practiceId, paymentDate",
+  eTransfers: "++id, practiceId, status, paymentDate", // CORRECTED here as well
 });
