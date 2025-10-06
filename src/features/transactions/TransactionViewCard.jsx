@@ -23,18 +23,22 @@ const TransactionViewCard = ({ transaction, practice, onStatusChange, onEdit }) 
   const formatDate = (date) => new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
   const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
 
-  const getMethodIcon = (method) => {
+  const getMethodIcon = (type) => {
     const props = { size: 20, className: styles.icon };
-    switch (method) {
-      case 'cheque': return <CreditCard {...props} />;
-      case 'e-transfer': return <MousePointerClick {...props} />;
-      case 'directDeposit': return <Landmark {...props} />;
+    switch (type) {
+      case 'cheques': return <CreditCard {...props} />;
+      case 'eTransfers': return <MousePointerClick {...props} />;
+      case 'directDeposits': return <Landmark {...props} />;
       case 'cash': return <Wallet {...props} />;
       default: return null;
     }
   };
   
   const chequeStatusOptions = ['Pending', 'Deposited', 'Cleared', 'Bounced'];
+  
+  // Correct, robust date extraction logic.
+  const date = transaction.type === 'cheques' ? transaction.dateReceived : (transaction.paymentDate || transaction.transactionDate);
+  const reference = transaction.chequeNumber || transaction.referenceNumber || transaction.transactionId || transaction.confirmationNumber || '—';
 
   return (
     <div className={styles.viewCard}>
@@ -68,13 +72,13 @@ const TransactionViewCard = ({ transaction, practice, onStatusChange, onEdit }) 
         </div>
         <div className={styles.detailItem}>
           <span className={styles.label}>Date</span>
-          <span className={styles.value}>{formatDate(transaction.dateReceived || transaction.transactionDate)}</span>
+          <span className={styles.value}>{formatDate(date)}</span>
         </div>
         <div className={styles.detailItem}>
           <span className={styles.label}>Reference #</span>
-          <span className={styles.value}>{transaction.chequeNumber || transaction.referenceNumber || '—'}</span>
+          <span className={styles.value}>{reference}</span>
         </div>
-        {transaction.senderName && <div className={styles.detailItem}><span className={styles.label}>Sender</span><span className={styles.value}>{transaction.senderName}</span></div>}
+        {transaction.senderEmail && <div className={styles.detailItem}><span className={styles.label}>Sender</span><span className={styles.value}>{transaction.senderEmail}</span></div>}
         {transaction.sourceBank && <div className={styles.detailItem}><span className={styles.label}>Source Bank</span><span className={styles.value}>{transaction.sourceBank}</span></div>}
       </div>
       
@@ -82,7 +86,6 @@ const TransactionViewCard = ({ transaction, practice, onStatusChange, onEdit }) 
           <div className={styles.attachmentSection}>
               <h4 className={styles.sectionTitle}><File size={16}/> Attached Image</h4>
               <div className={styles.imagePreview}>
-                  {/* In a real app, you might use a library like react-pdf, but an iframe is simple and effective for many image types and PDFs */}
                   <iframe src={transaction.image} title="Transaction Attachment" />
               </div>
           </div>

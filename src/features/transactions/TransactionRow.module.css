@@ -1,18 +1,46 @@
-.tableRow {
-  cursor: pointer; /* Make the whole row look clickable */
-  transition: background-color 0.2s ease;
+/* ... existing styles ... */
+/* Add new style for status tag */
+.statusTag {
+    font-weight: 500;
+    font-size: 0.85rem;
 }
-.tableRow:hover { background-color: var(--ui-background-tertiary); }
-.tableRow td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--ui-border-secondary); font-size: 0.9rem; color: var(--ui-text-secondary); }
-.cellAmount { font-weight: 500; color: var(--ui-text-primary); font-family: 'SF Mono', 'Menlo', 'monospace'; }
-.tag { font-size: 0.8rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 999px; text-transform: capitalize; }
-.tag.Cleared { background-color: var(--state-success-bg); color: var(--state-success); }
-.tag.Deposited { background-color: var(--brand-secondary); color: var(--brand-primary); }
-.tag.Pending { background-color: var(--state-warning-bg); color: var(--state-warning); }
-.tag.Bounced { background-color: var(--state-danger-bg); color: var(--state-danger); }
+
+/* Most other styles from your previous version remain correct. */
+/* This is a summary of the key styles */
+.tableRow {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+.tableRow:hover {
+  background-color: var(--ui-background-tertiary);
+}
+.tableRow td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--ui-border-secondary);
+  vertical-align: middle;
+}
+.tableRow:last-child td {
+  border-bottom: none;
+}
+.cellMain { width: 60%; }
+.mainInfo { display: flex; flex-direction: column; gap: 0.35rem; }
+.practiceLink { font-size: 1rem; font-weight: 600; color: var(--ui-text-primary); text-decoration: none; }
+.practiceLink:hover { color: var(--brand-primary); }
+.subInfo { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--ui-text-secondary); }
+.separator { color: var(--ui-border-primary); }
+.tag { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 500; padding: 0.25rem 0.6rem; border-radius: 999px; text-transform: capitalize; }
+.tag.cheque { background-color: var(--state-success-bg); color: var(--state-success); }
+.tag.e-transfer { background-color: var(--state-warning-bg); color: var(--state-warning); }
+.tag.directDeposit { background-color: var(--brand-secondary); color: var(--brand-primary); }
+.tag.cash { background-color: var(--ui-background-tertiary); color: var(--ui-text-secondary); }
+.cellAmount { font-size: 1rem; font-weight: 600; color: var(--ui-text-primary); font-family: 'SF Mono', 'Menlo', 'monospace'; text-align: right; }
+.cellRef { color: var(--ui-text-tertiary); font-family: 'SF Mono', 'Menlo', 'monospace'; font-size: 0.85rem; }
+.refLink { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--brand-primary); text-decoration: none; font-weight: 500; }
+.refLink:hover { text-decoration: underline; }
+.refLink svg { opacity: 0.6; }
 .cellActions { text-align: right; }
-.actions { display: inline-flex; gap: 0.25rem; opacity: 0; }
+.actions { display: inline-flex; align-items: center; gap: 0.25rem; opacity: 0; }
 .tableRow:hover .actions { opacity: 1; }
-.actions button { padding: 0.5rem; background: none; border: none; border-radius: 6px; cursor: pointer; color: var(--ui-text-tertiary); }
-.actions button:hover { background-color: var(--ui-background-primary); color: var(--ui-text-primary); }
+.actionButton { padding: 0.5rem; background: none; border: none; border-radius: 6px; cursor: pointer; display: flex; color: var(--ui-text-tertiary); }
+.actionButton:hover { background-color: var(--ui-background-primary); color: var(--ui-text-primary); box-shadow: var(--shadow-sm); }
 

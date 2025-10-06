@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './TransactionsToolbar.module.css';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Sparkles } from 'lucide-react';
 
-const TransactionsToolbar = ({ views, activeView, setActiveView, onAddTransaction }) => {
+const TransactionsToolbar = ({ views, activeView, setActiveView, onAddTransaction, onOpenImporter }) => {
   return (
     <div className={styles.header}>
       <div className={styles.leftSection}>
@@ -20,12 +20,19 @@ const TransactionsToolbar = ({ views, activeView, setActiveView, onAddTransactio
           ))}
         </div>
       </div>
-      <button className={styles.addButton} onClick={onAddTransaction}>
-        <PlusCircle size={16} />
-        <span>Log Transaction</span>
-      </button>
+      <div className={styles.actions}>
+        <button className={styles.importButton} onClick={onOpenImporter}>
+          <Sparkles size={16} />
+          <span>Import with AI</span>
+        </button>
+        <button className={styles.addButton} onClick={onAddTransaction}>
+          <PlusCircle size={16} />
+          <span>Log Manually</span>
+        </button>
+      </div>
     </div>
   );
 };
 
 export default TransactionsToolbar;
+

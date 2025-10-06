@@ -1,41 +1,116 @@
 .dashboardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    "stats stats stats stats"
+    "actions actions alerts alerts"
+    "activity activity summary summary";
 }
 
+.statsHeader { grid-area: stats; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+.quickActions { grid-area: actions; }
+.alerts { grid-area: alerts; }
+.recentActivity { grid-area: activity; }
+.practiceSummary { grid-area: summary; }
+
+/* --- Section Styling --- */
+.quickActions, .alerts, .recentActivity, .practiceSummary {
+    background-color: var(--ui-background-secondary);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    border: 1px solid var(--ui-border-secondary);
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin-bottom: 1.5rem;
+}
+
+/* --- Stat Card --- */
 .statCard {
   background-color: var(--ui-background-secondary);
+  border-radius: 12px;
   padding: 1.5rem;
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   border: 1px solid var(--ui-border-secondary);
-  box-shadow: var(--shadow-sm);
 }
-
-.statCard h3 {
-  color: var(--ui-text-secondary);
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.statCard p {
-  color: var(--ui-text-primary);
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.mainChart {
-  grid-column: 1 / -1; /* Span full width */
-  min-height: 300px;
-  background-color: var(--ui-background-secondary);
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--ui-border-secondary);
-  box-shadow: var(--shadow-sm);
+.cardIcon {
+  background-color: var(--card-color, var(--brand-primary));
+  color: var(--brand-text-on-primary);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ui-text-tertiary);
+}
+.cardContent { display: flex; flex-direction: column; gap: 0.25rem; }
+.cardTitle { font-size: 0.9rem; font-weight: 500; color: var(--ui-text-secondary); }
+.cardValue { font-size: 1.75rem; font-weight: 700; color: var(--ui-text-primary); }
+
+/* --- Quick Actions --- */
+.actionButtons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.actionButtons button {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+    background-color: var(--ui-background-primary); border: 1px solid var(--ui-border-primary);
+    border-radius: 8px; font-weight: 500; cursor: pointer; color: var(--ui-text-primary);
+    transition: all 0.2s ease;
+}
+.actionButtons button:hover { background-color: var(--ui-background-tertiary); border-color: var(--ui-border-secondary); }
+
+/* --- Alerts --- */
+.alertList { display: flex; flex-direction: column; gap: 1rem; }
+.alert { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 8px; font-weight: 500; }
+.alert.warning { background-color: var(--state-warning-bg); color: var(--state-warning); }
+.alert.danger { background-color: var(--state-danger-bg); color: var(--state-danger-text); }
+.alert.success { background-color: var(--state-success-bg); color: var(--state-success); }
+
+/* --- Recent Activity --- */
+.activityList { display: flex; flex-direction: column; gap: 0.5rem; }
+.activityItem { display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 8px; }
+.activityItem:hover { background-color: var(--ui-background-tertiary); }
+.activityIcon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.activityIcon.entry { background-color: var(--state-success-bg); color: var(--state-success); }
+.activityIcon.payment { background-color: var(--brand-secondary); color: var(--brand-primary); }
+.activityDetails { flex-grow: 1; }
+.activityDetails span { font-weight: 500; }
+.activityDetails small { display: block; color: var(--ui-text-secondary); font-size: 0.8rem; }
+.activityAmount { font-weight: 600; font-family: 'SF Mono', 'Menlo', monospace; }
+.production { color: var(--state-success); }
+.collection { color: var(--brand-primary); }
+
+/* --- Practice Summary --- */
+.practiceSummary { display: flex; flex-direction: column; }
+.practiceList { flex-grow: 1; display: flex; flex-direction: column; gap: 1.25rem; }
+.practiceItem { display: flex; justify-content: space-between; align-items: center; }
+.practiceItem span { font-weight: 500; }
+.dayCount { display: flex; align-items: center; gap: 0.5rem; color: var(--ui-text-secondary); }
+.viewAllButton {
+    margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--ui-border-secondary);
+    background: none; border: none; color: var(--brand-primary); font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1200px) {
+  .statsHeader { grid-template-columns: 1fr 1fr; }
+  .dashboardGrid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "stats stats"
+      "actions alerts"
+      "activity summary";
+  }
+}
+@media (max-width: 768px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "stats" "actions" "alerts" "activity" "summary";
+  }
 }
 

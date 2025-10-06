@@ -1,11 +1,119 @@
-.form { display: flex; flex-direction: column; gap: 1.5rem; padding-top: 1rem; }
-.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.formGroup { display: flex; flex-direction: column; gap: 0.5rem; }
-.formGroup label { font-weight: 500; color: var(--ui-text-secondary); }
-.formGroup input, .formGroup select, .formGroup textarea {
-  padding: 0.75rem; border: 1px solid var(--ui-border-primary); border-radius: 6px; background-color: var(--ui-background-primary); color: var(--ui-text-primary); font-size: 1rem;
+/* A clean, consistent design for the Transaction Form */
+.form {
+  width: 96%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0.5rem; /* Add some padding around the form */
 }
-.formActions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--ui-border-secondary); }
-.formActions button { padding: 0.6rem 1.25rem; border-radius: 6px; font-weight: 500; cursor: pointer; }
-.formActions button:first-child { background-color: var(--ui-interactive-secondary-bg); color: var(--ui-interactive-secondary-text); border: none; }
-.formActions button:last-child { background-color: var(--brand-primary); color: var(--brand-text-on-primary); border: none; }
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.formGroup label {
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* --- Consistent Input Styling --- */
+.form input, 
+.form select,
+.form textarea {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  background-color: var(--ui-background-secondary);
+  color: var(--ui-text-primary);
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form input:focus, 
+.form select:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-secondary);
+}
+
+.form textarea { 
+  resize: vertical; 
+  min-height: 80px; 
+}
+
+
+/* --- Custom Segmented Control for Transaction Type --- */
+.segmentedControl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background-color: var(--ui-background-tertiary);
+  border-radius: 8px;
+  padding: 0.25rem;
+  border: 1px solid var(--ui-border-secondary);
+}
+.segmentedControl button {
+  padding: 0.7rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--ui-text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.segmentedControl button.active {
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+
+/* --- Form Actions --- */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ui-border-secondary);
+}
+
+.formActions button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.formActions button:first-child { /* Cancel Button */
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  border: 1px solid var(--ui-border-primary);
+}
+.formActions button:first-child:hover {
+  border-color: var(--ui-border-secondary);
+  background-color: var(--ui-background-tertiary);
+}
+
+.formActions button:last-child { /* Save Button */
+  background-color: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+.formActions button:last-child:hover {
+  background-color: #2563eb;
+}
+

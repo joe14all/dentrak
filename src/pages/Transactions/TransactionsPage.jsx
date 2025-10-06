@@ -2,24 +2,22 @@ import React, { useState, useMemo } from 'react';
 import styles from './TransactionsPage.module.css';
 import { useTransactions } from '../../contexts/TransactionContext/TransactionContext';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
+import { usePayments } from '../../contexts/PaymentContext/PaymentContext'; 
 import TransactionsToolbar from '../../features/transactions/TransactionsToolbar';
 import TransactionList from '../../features/transactions/TransactionList';
 import Modal from '../../components/common/Modal/Modal';
 import TransactionForm from '../../features/transactions/form-components/TransactionForm';
 import DeleteConfirmation from '../../features/transactions/DeleteConfirmation';
 import TransactionViewCard from '../../features/transactions/TransactionViewCard';
-import { CreditCard, Landmark, MousePointerClick } from 'lucide-react';
+import GeminiImporter from '../../features/transactions/GeminiImporter';
+import { CreditCard, Landmark, MousePointerClick, List } from 'lucide-react';
 
 const TransactionsPage = () => {
-  const { 
-    cheques, directDeposits, eTransfers, isLoading, 
-    addNewCheque, editCheque, removeCheque,
-    addNewDirectDeposit, editDirectDeposit, removeDirectDeposit,
-    addNewETransfer, editETransfer, removeETransfer,
-  } = useTransactions();
+  const { cheques, directDeposits, eTransfers, isLoading: isTransactionsLoading, ...transactionActions } = useTransactions();
   const { practices } = usePractices();
+  const { isLoading: isPaymentsLoading } = usePayments();
   
-  const [activeView, setActiveView] = useState('cheques');
+  const [activeView, setActiveView] = useState('all');
   
   const [isFormModalOpen, setFormModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState(null);
@@ -27,65 +25,87 @@ const TransactionsPage = () => {
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [isViewModalOpen, setViewModalOpen] = useState(false);
   const [transactionToView, setTransactionToView] = useState(null);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
 
-  // By wrapping this object in useMemo, we ensure it's stable between re-renders,
-  // preventing the list from displaying duplicate data.
-  const views = useMemo(() => ({
-    cheques: { label: 'Cheques', icon: CreditCard, data: cheques, remove: removeCheque, edit: editCheque, add: addNewCheque },
-    directDeposits: { label: 'Direct Deposits', icon: Landmark, data: directDeposits, remove: removeDirectDeposit, edit: editDirectDeposit, add: addNewDirectDeposit },
-    eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: eTransfers, remove: removeETransfer, edit: editETransfer, add: addNewETransfer },
-  }), [
-      cheques, directDeposits, eTransfers, 
-      removeCheque, editCheque, addNewCheque,
-      removeDirectDeposit, editDirectDeposit, addNewDirectDeposit,
-      removeETransfer, editETransfer, addNewETransfer
-  ]);
+  const views = useMemo(() => {
+    // Correctly map and add the 'type' and 'uniqueId' to every transaction array.
+    // This ensures data consistency across all views.
+    const mappedCheques = cheques.map(t => ({ ...t, type: 'cheques', uniqueId: `cheque-${t.id}` }));
+    const mappedDeposits = directDeposits.map(t => ({ ...t, type: 'directDeposits', uniqueId: `deposit-${t.id}` }));
+    const mappedTransfers = eTransfers.map(t => ({ ...t, type: 'eTransfers', uniqueId: `transfer-${t.id}` }));
 
+    const allTransactions = [...mappedCheques, ...mappedDeposits, ...mappedTransfers]
+      .sort((a, b) => new Date(b.dateReceived || b.paymentDate) - new Date(a.dateReceived || a.paymentDate));
+    
+    return {
+      all: { label: 'All', icon: List, data: allTransactions },
+      cheques: { label: 'Cheques', icon: CreditCard, data: mappedCheques, ...transactionActions },
+      directDeposits: { label: 'Direct Deposits', icon: Landmark, data: mappedDeposits, ...transactionActions },
+      eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: mappedTransfers, ...transactionActions },
+    };
+  }, [cheques, directDeposits, eTransfers, transactionActions]);
+
+  // All event handlers remain the same and are collapsed for brevity.
   const handleOpenAddModal = () => { setTransactionToEdit(null); setFormModalOpen(true); };
-  const handleOpenEditModal = (transaction) => { setTransactionToEdit({ ...transaction, type: activeView }); setFormModalOpen(true); };
-  const handleOpenDeleteModal = (transactionId) => { setTransactionToDelete({ id: transactionId, type: activeView }); setDeleteModalOpen(true); };
-  const handleOpenViewModal = (transaction) => { setTransactionToView({ ...transaction, type: activeView }); setViewModalOpen(true); };
-
+  const handleOpenEditModal = (transaction) => { setTransactionToEdit(transaction); setFormModalOpen(true); };
+  const handleOpenDeleteModal = (transactionId, type) => { setTransactionToDelete({ id: transactionId, type }); setDeleteModalOpen(true); };
+  const handleOpenViewModal = (transaction) => { setTransactionToView(transaction); setViewModalOpen(true); };
   const handleCloseModals = () => {
     setFormModalOpen(false);
     setDeleteModalOpen(false);
     setViewModalOpen(false);
+    setImportModalOpen(false);
+    setTransactionToEdit(null);
+    setTransactionToDelete(null);
     setTransactionToView(null);
   };
-
+  const handleImportSuccess = (parsedData) => {
+    setImportModalOpen(false);
+    setTransactionToEdit(parsedData);
+    setFormModalOpen(true);
+  };
   const handleSave = (formData) => {
     const { type, ...data } = formData;
-    const saveFunction = transactionToEdit ? views[type].edit : views[type].add;
+    const isEditing = !!transactionToEdit;
     
-    if (transactionToEdit) {
-        saveFunction(transactionToEdit.id, data);
-    } else {
-        saveFunction(data);
+    let action;
+    if (type === 'cheques') action = isEditing ? views.cheques.editCheque : views.cheques.addNewCheque;
+    if (type === 'directDeposits') action = isEditing ? views.directDeposits.editDirectDeposit : views.directDeposits.addNewDirectDeposit;
+    if (type === 'eTransfers') action = isEditing ? views.eTransfers.editETransfer : views.eTransfers.addNewETransfer;
+    
+    if (action) {
+      if (isEditing) {
+        action(transactionToEdit.id, data);
+      } else {
+        action(data);
+      }
     }
     handleCloseModals();
   };
-
   const handleConfirmDelete = () => {
     if (transactionToDelete) {
-      views[transactionToDelete.type].remove(transactionToDelete.id);
+      const type = transactionToDelete.type;
+      const view = Object.values(views).find(v => v.data.some(d => d.type === type));
+      if (view && view.remove) {
+         view.remove(transactionToDelete.id);
+      }
     }
     handleCloseModals();
   };
-  
   const handleStatusUpdate = (newStatus) => {
     if (transactionToView && transactionToView.type === 'cheques') {
       const updatedTransaction = { ...transactionToView, status: newStatus };
-      editCheque(updatedTransaction.id, updatedTransaction);
+      transactionActions.editCheque(updatedTransaction.id, updatedTransaction);
       setTransactionToView(updatedTransaction);
     }
   };
-  
   const handleEditFromView = () => {
       if(transactionToView) {
           setViewModalOpen(false);
           handleOpenEditModal(transactionToView);
       }
   };
+
 
   return (
     <div className={styles.page}>
@@ -94,33 +114,33 @@ const TransactionsPage = () => {
         activeView={activeView}
         setActiveView={setActiveView}
         onAddTransaction={handleOpenAddModal}
+        onOpenImporter={() => setImportModalOpen(true)}
       />
       <div className={styles.content}>
         <TransactionList
           transactions={views[activeView].data}
           transactionType={activeView}
           practices={practices}
-          isLoading={isLoading}
+          isLoading={isTransactionsLoading || isPaymentsLoading}
           onEdit={handleOpenEditModal}
           onDelete={handleOpenDeleteModal}
           onView={handleOpenViewModal}
         />
       </div>
 
-      <Modal isOpen={isFormModalOpen} onClose={handleCloseModals} title={transactionToEdit ? `Edit ${views[activeView].label}` : `Add New ${views[activeView].label}`}>
+      {/* --- Modals --- */}
+      <Modal isOpen={isFormModalOpen} onClose={handleCloseModals} title={transactionToEdit ? `Edit Transaction` : `Log New Transaction`}>
         <TransactionForm
           transactionToEdit={transactionToEdit}
-          transactionType={activeView}
+          initialType={activeView !== 'all' ? activeView : 'cheques'}
           practices={practices}
           onSave={handleSave}
           onCancel={handleCloseModals}
         />
       </Modal>
-
       <Modal isOpen={isDeleteModalOpen} onClose={handleCloseModals} title="Confirm Deletion">
         <DeleteConfirmation onConfirm={handleConfirmDelete} onCancel={handleCloseModals} />
       </Modal>
-      
       <Modal isOpen={isViewModalOpen} onClose={handleCloseModals} title="Transaction Details">
         {transactionToView && (
             <TransactionViewCard 
@@ -130,6 +150,13 @@ const TransactionsPage = () => {
                 onEdit={handleEditFromView}
             />
         )}
+      </Modal>
+      <Modal isOpen={isImportModalOpen} onClose={handleCloseModals} title="Import Transaction with AI">
+        <GeminiImporter 
+          practices={practices}
+          onSuccess={handleImportSuccess}
+          onCancel={handleCloseModals}
+        />
       </Modal>
     </div>
   );
