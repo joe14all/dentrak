@@ -1,0 +1,13 @@
+.activityList { display: flex; flex-direction: column; }
+.activityItem { display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 8px; border-bottom: 1px solid var(--ui-border-secondary); }
+.activityItem:last-child { border-bottom: none; }
+.activityItem:hover { background-color: var(--ui-background-tertiary); }
+.activityIcon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.activityIcon.entry { background-color: var(--state-success-bg); color: var(--state-success); }
+.activityIcon.payment { background-color: var(--brand-secondary); color: var(--brand-primary); }
+.activityDetails { flex-grow: 1; }
+.activityDetails span { font-weight: 500; }
+.activityDetails small { display: block; color: var(--ui-text-secondary); font-size: 0.8rem; }
+.activityAmount { font-weight: 600; font-family: 'SF Mono', 'Menlo', monospace; }
+.production { color: var(--state-success); }
+.collection { color: var(--brand-primary); }

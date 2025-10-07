@@ -7,19 +7,24 @@ import { EntryProvider } from './EntryContext/EntryContext';
 import { TransactionProvider } from './TransactionContext/TransactionContext';
 import { ThemeProvider } from './ThemeContext/ThemeContext';
 import { PaymentProvider } from './PaymentContext/PaymentContext';
-import { NavigationProvider } from './NavigationContext/NavigationContext'; // Import the provider
+import { NavigationProvider } from './NavigationContext/NavigationContext'; 
+import { DashboardProvider } from './DashboardContext/DashboardContext';
+
+
 
 export const AppProvider = ({ children }) => {
   return (
-    <AuthProvider>
+      <AuthProvider>
       <NavigationProvider> 
         <PracticeProvider>
           <EntryProvider>
             <PaymentProvider>
               <TransactionProvider>
-                <ThemeProvider> 
-                  {children}
-                </ThemeProvider>
+                <DashboardProvider> 
+                  <ThemeProvider> 
+                    {children}
+                  </ThemeProvider>
+                </DashboardProvider>
               </TransactionProvider>
             </PaymentProvider>
           </EntryProvider>

@@ -42,13 +42,11 @@ export const TransactionProvider = ({ children }) => {
       // Check the module-level flag to prevent re-running.
       if (!hasInitialized) {
         hasInitialized = true; // Set the flag immediately
-        console.log("[TransactionContext] First run detected. Initializing database...");
         // Populate all transaction tables.
         await Promise.all([populateCheques(), populateDirectDeposits(), populateETransfers()]);
         await refreshTransactions();
       } else if (cheques.length === 0 && directDeposits.length === 0 && eTransfers.length === 0) {
         // On subsequent renders, refresh only if state is empty
-        console.log("[TransactionContext] Database already initialized. Refreshing data.");
         await refreshTransactions();
       }
     };

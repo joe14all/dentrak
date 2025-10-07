@@ -21,7 +21,6 @@ export const EntryProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const allEntriesFromDB = await getAllEntries();
-      console.log(`[EntryContext] Fetched ${allEntriesFromDB.length} entries.`);
       setEntries(allEntriesFromDB);
     } catch (error) {
       console.error(`[EntryContext] Failed to fetch all entries:`, error);
@@ -36,12 +35,10 @@ export const EntryProvider = ({ children }) => {
       if (!hasInitialized) {
         // If it's the first run, set the flag to true immediately.
         hasInitialized = true;
-        console.log("[EntryContext] First run detected. Initializing database...");
         await populateEntries();
         await refreshEntries();
       } else {
         // On subsequent runs (like from Strict Mode), this will be skipped.
-        console.log("[EntryContext] Database already initialized. Skipping population, just refreshing.");
         // We can still refresh to ensure data is up to date if needed.
         if (entries.length === 0) { // Only refresh if state is empty
             await refreshEntries();

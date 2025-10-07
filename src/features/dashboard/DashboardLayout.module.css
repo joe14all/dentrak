@@ -1,0 +1,15 @@
+/* A simple, clean CSS Grid implementation */
+.grid {
+  flex-grow: 1;
+  display: grid;
+  /* 4-column layout with flexible rows */
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 140px; /* A fixed row height for consistency */
+  gap: 1.5rem;
+}
+
+.gridItem {
+    /* Adding a transition to make the reordering smooth */
+    transition: transform 0.2s ease-in-out;
+}
+
