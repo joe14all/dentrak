@@ -2,6 +2,7 @@
 .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--ui-border-secondary); }
 .toolbarLeft, .actions { display: flex; align-items: center; gap: 1rem; }
 .toolButton { display: flex; align-items: center; gap: 0.5rem; background: none; border: 1px solid var(--ui-border-primary); padding: 0.5rem 1rem; border-radius: 6px; font-weight: 500; cursor: pointer; }
+.toolButton:disabled { cursor: not-allowed; opacity: 0.7; }
 .saveButton { background-color: var(--brand-primary); color: white; border: none; }
 
 .tabSwitcher {
@@ -26,39 +27,33 @@
   background-color: var(--ui-background-primary); 
 }
 
-/* --- THE FIX: A More Robust and Standard Printing Method --- */
-@media print {
-  /* 1. Hide everything on the page by default */
-  body * {
-    visibility: hidden;
-  }
+/* --- THE FIX: A More Robust Style for PDF Generation --- */
+.reportContent.printing {
+  /* The container itself becomes a clean slate for printing */
+  width: auto;
+  height: auto;
+  overflow: visible !important;
+  background-color: #ffffff !important;
+  padding: 0;
+  transform: none; /* Remove scaling to rely on width */
+}
 
-  /* 2. Make only the report content container and its children visible */
-  #printable-report, #printable-report * {
-    visibility: visible;
-  }
+/* Target the direct child (e.g., the <PayPeriodStatement> component) when printing */
+.reportContent.printing > div {
+  width: 400px; /* Set a standard, reliable document width for capture */
+  margin: 0;
+  padding: 2rem; /* Ensure the content has padding for the PDF */
+  border: none;
+  box-shadow: none;
+}
 
-  /* 3. Position the report content to take over the entire page */
-  #printable-report {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0; /* Let the report's internal styles handle padding */
-  }
 
-  /* Ensure the viewer toolbar remains hidden */
-  .toolbar {
-    display: none;
-  }
-
-  /* Ensure the report viewer itself doesn't interfere with positioning */
-  .viewer, .reportContent {
-    overflow: visible !important;
-    height: auto !important;
-    width: auto !important;
-    position: static !important;
-  }
+/* New spinner animation */
+.spinner {
+  animation: spin 1.s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
