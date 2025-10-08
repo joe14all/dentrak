@@ -4,26 +4,28 @@ import React from 'react';
 import { AuthProvider } from './AuthContext/AuthContext';
 import { PracticeProvider } from './PracticeContext/PracticeContext';
 import { EntryProvider } from './EntryContext/EntryContext';
-import { TransactionProvider } from './TransactionContext/TransactionContext';
-import { ThemeProvider } from './ThemeContext/ThemeContext';
 import { PaymentProvider } from './PaymentContext/PaymentContext';
-import { NavigationProvider } from './NavigationContext/NavigationContext'; 
+import { TransactionProvider } from './TransactionContext/TransactionContext';
+import { ReportProvider } from './ReportContext/ReportContext'; // 1. Import the new provider
+import { ThemeProvider } from './ThemeContext/ThemeContext';
+import { NavigationProvider } from './NavigationContext/NavigationContext';
 import { DashboardProvider } from './DashboardContext/DashboardContext';
-
 
 
 export const AppProvider = ({ children }) => {
   return (
-      <AuthProvider>
+    <AuthProvider>
       <NavigationProvider> 
         <PracticeProvider>
           <EntryProvider>
             <PaymentProvider>
               <TransactionProvider>
-                <DashboardProvider> 
-                  <ThemeProvider> 
-                    {children}
-                  </ThemeProvider>
+                <DashboardProvider>
+                  <ReportProvider>
+                    <ThemeProvider> 
+                      {children}
+                    </ThemeProvider>
+                  </ReportProvider>
                 </DashboardProvider>
               </TransactionProvider>
             </PaymentProvider>

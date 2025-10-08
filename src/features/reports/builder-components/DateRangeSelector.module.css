@@ -1,0 +1,14 @@
+.formGroup { display: flex; flex-direction: column; gap: 0.75rem; }
+.formGroup label { font-weight: 500; font-size: 0.9rem; color: var(--ui-text-primary); }
+.dateRow { display: flex; align-items: center; gap: 0.75rem; }
+.dateRow input {
+  padding: 0.75rem; border-radius: 8px; border: 1px solid var(--ui-border-primary);
+  background-color: var(--ui-background-tertiary); flex-grow: 1;
+}
+.dateRow span { color: var(--ui-text-secondary); }
+.presets { display: flex; gap: 0.5rem; }
+.presets button {
+  background: none; border: none; font-size: 0.85rem; color: var(--brand-primary);
+  cursor: pointer; padding: 0.25rem;
+}
+.presets button:hover { text-decoration: underline; }

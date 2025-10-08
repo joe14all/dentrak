@@ -1,0 +1,21 @@
+.formGroup { display: flex; flex-direction: column; gap: 0.75rem; }
+.header { display: flex; justify-content: space-between; align-items: center; }
+.header label { font-weight: 500; font-size: 0.9rem; color: var(--ui-text-primary); }
+.header div { display: flex; gap: 0.5rem; }
+.header button { background: none; border: none; color: var(--brand-primary); font-size: 0.85rem; cursor: pointer; }
+
+.practiceList {
+  display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px;
+  overflow-y: auto; background-color: var(--ui-background-tertiary);
+  padding: 0.5rem; border-radius: 8px;
+}
+.practiceItem {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem;
+  border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease;
+}
+.practiceItem:hover { background-color: var(--ui-background-primary); }
+.checkbox {
+  width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--ui-border-primary);
+  display: flex; align-items: center; justify-content: center;
+}
+.selected .checkbox { border-color: var(--brand-primary); background-color: var(--brand-primary); color: white; }

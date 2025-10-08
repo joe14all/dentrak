@@ -1,0 +1,18 @@
+.formGroup { display: flex; flex-direction: column; gap: 0.75rem; }
+.formGroup label { font-weight: 500; font-size: 0.9rem; color: var(--ui-text-primary); }
+.segmentedControl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background-color: var(--ui-background-tertiary);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid var(--ui-border-secondary);
+}
+.segmentButton {
+  padding: 0.6rem; border: none; background: transparent; border-radius: 6px;
+  color: var(--ui-text-secondary); font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+}
+.segmentButton.active {
+  background-color: var(--ui-background-primary); color: var(--ui-text-primary); box-shadow: var(--shadow-sm);
+}
+.segmentButton:disabled { color: var(--ui-text-tertiary); cursor: not-allowed; }

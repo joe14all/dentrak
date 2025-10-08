@@ -1,0 +1,40 @@
+.builder {
+  background-color: var(--ui-background-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--ui-border-secondary);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.title { 
+  display: flex; 
+  align-items: center; 
+  gap: 0.75rem; 
+  font-size: 1.25rem; 
+  margin-bottom: 2rem; 
+  color: var(--ui-text-primary);
+}
+
+.form { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 2.5rem; /* Increased gap for a more spacious feel */
+  flex-grow: 1;
+}
+
+.generateButton { 
+  padding: 0.8rem; 
+  border-radius: 8px; 
+  background-color: var(--brand-primary); 
+  color: white; 
+  font-weight: 600; 
+  border: none; 
+  cursor: pointer; 
+  margin-top: auto; /* Push to the bottom */
+  font-size: 1rem;
+}
+.generateButton:hover {
+    background-color: #2563eb;
+}
+

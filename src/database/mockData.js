@@ -424,3 +424,156 @@ export const mockPayments = [
     notes: "E-transfer for the last week of September.",
   },
 ];
+
+/**
+ * The main Report object. The `type` determines the structure of the `data` payload.
+ *
+ * @typedef {Object} Report
+ * @property {number} id - Unique identifier for the saved report.
+ * @property {string} name - A user-defined name for the report (e.g., "Q3 2025 Production Summary").
+ * @property {'payPeriodStatement' | 'annualSummary' | 'practiceComparison'} type - The type of report.
+ * @property {string} createdAt - The ISO string date when the report was generated.
+ * @property {Object} parameters - The settings used to generate the report.
+ * @property {string} parameters.startDate - The start date for the report's data range.
+ * @property {string} parameters.endDate - The end date for the report's data range.
+ * @property {number[]} [parameters.practiceIds] - An array of practice IDs included in the report.
+ * @property {Object} data - The calculated data payload, with a structure that varies by report type.
+ */
+
+/** @type {Report[]} */
+export const mockReports = [
+  // --- 1. Example: A Detailed Pay Period Statement ---
+  // This is the most common and useful report type for reconciling pay.
+  {
+    id: 1,
+    name: "Smile Bright - Pay Period Oct 1-15, 2025",
+    type: "payPeriodStatement",
+    createdAt: "2025-10-16T10:00:00.000Z",
+    parameters: {
+      startDate: "2025-10-01",
+      endDate: "2025-10-15",
+      practiceIds: [1],
+    },
+    data: {
+      practiceName: "Smile Bright Dental",
+      summary: {
+        grossProduction: 9500.0,
+        grossCollection: 8350.0,
+        totalAdjustments: 1100.0,
+        netProduction: 8400.0, // Gross - Adjustments (pre-split)
+        calculatedPay: 3360.0, // Based on 40% of net production
+        totalPaymentsReceived: 3000.0,
+        balanceDue: 360.0,
+      },
+      // Includes the raw entries used for the calculation
+      lineItems: [
+        {
+          id: 1,
+          date: "2025-10-01",
+          production: 3200,
+          collection: 2850,
+          adjustmentsTotal: 300,
+        },
+        {
+          id: 2,
+          date: "2025-10-02",
+          production: 1800,
+          collection: 1500,
+          adjustmentsTotal: 0,
+        },
+        {
+          id: 6,
+          date: "2025-10-03",
+          production: 4500,
+          collection: 4000,
+          adjustmentsTotal: 800,
+        },
+      ],
+      // Includes any payments received that were linked to this period
+      paymentItems: [
+        { id: 1, paymentDate: "2025-10-15", amount: 3000.0, method: "cheque" },
+      ],
+    },
+  },
+
+  // --- 2. Example: An Annual Summary Report ---
+  // Useful for tax purposes and high-level performance review.
+  {
+    id: 2,
+    name: "2025 Annual Financial Summary",
+    type: "annualSummary",
+    createdAt: "2026-01-05T11:00:00.000Z",
+    parameters: {
+      startDate: "2025-01-01",
+      endDate: "2025-12-31",
+      practiceIds: [1, 2, 3], // All active practices
+    },
+    data: {
+      year: 2025,
+      overallTotals: {
+        totalProduction: 250000,
+        totalCollection: 235000,
+        totalAdjustments: 15000,
+        totalCalculatedPay: 98000,
+      },
+      // Provides a breakdown of totals for each practice
+      byPractice: [
+        {
+          practiceName: "Smile Bright Dental",
+          totalProduction: 120000,
+          totalCalculatedPay: 48000,
+        },
+        {
+          practiceName: "City Center Dentistry",
+          totalProduction: 80000,
+          totalCalculatedPay: 32000,
+        },
+        {
+          practiceName: "Rural Community Clinic",
+          totalProduction: 50000,
+          totalCalculatedPay: 18000,
+        },
+      ],
+    },
+  },
+
+  // --- 3. Example: A Practice Comparison Report ---
+  // Ideal for analyzing performance between different work locations.
+  {
+    id: 3,
+    name: "Q4 2025 - Practice Performance Comparison",
+    type: "practiceComparison",
+    createdAt: "2026-01-02T09:00:00.000Z",
+    parameters: {
+      startDate: "2025-10-01",
+      endDate: "2025-12-31",
+      practiceIds: [1, 2, 3],
+    },
+    data: {
+      // An array of metrics, one for each practice
+      metrics: [
+        {
+          practiceName: "Smile Bright Dental",
+          totalProduction: 65000,
+          totalCollection: 62000,
+          daysWorked: 30,
+          avgProductionPerDay: 2166.67,
+        },
+        {
+          practiceName: "City Center Dentistry",
+          totalProduction: 55000,
+          totalCollection: 54000,
+          daysWorked: 28,
+          avgProductionPerDay: 1964.28,
+        },
+        {
+          practiceName: "Rural Community Clinic",
+          totalProduction: 48000,
+          totalCollection: 48000,
+          daysWorked: 32,
+          avgProductionPerDay: 1500.0,
+        },
+      ],
+    },
+  },
+];
