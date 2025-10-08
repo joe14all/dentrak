@@ -1,6 +1,6 @@
-/* --- Base Collapsed Styles --- */
+/* Base styles remain the same, with additions for the new logo images */
 .sidebar {
-  width: 80px; /* Start in collapsed state */
+  width: 80px;
   background-color: var(--ui-background-secondary);
   border-right: 1px solid var(--ui-border-secondary);
   display: flex;
@@ -8,23 +8,36 @@
   padding: 1.5rem 0.75rem;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  position: relative; /* Needed for z-index */
-  z-index: 100; /* Ensure it floats above content */
+  position: relative;
+  z-index: 100;
 }
 
 .logoContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding-bottom: 1.5rem;
-  color: var(--brand-primary);
+  gap: 0rem;
+  padding-bottom: 1.2rem;
   border-bottom: 1px solid var(--ui-border-secondary);
   margin-bottom: 1rem;
   flex-shrink: 0;
+  height: 40px; /* Set a fixed height for alignment */
 }
 
-.logoText,
+/* --- New styles for the logo images --- */
+.logoImage {
+    height: 100px; /* Control the size of the icon part */
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.logoNameImage {
+    height: 120px; /* Control the size of the text part */
+    opacity: 0;
+    width: 0;
+    transition: opacity 0.2s ease-in-out, width 0.2s ease-in-out;
+}
+
 .navText {
   opacity: 0;
   width: 0;
@@ -33,25 +46,10 @@
   transition: opacity 0.2s ease-in-out, width 0.2s ease-in-out;
 }
 
-.logoText {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--ui-text-primary);
-}
-
-.navigation {
-  flex-grow: 1;
-}
-
-.navigation ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.navigation li a,
-.lockButton {
+/* ... other styles for navigation, footer, etc. ... */
+.navigation { flex-grow: 1; }
+.navigation ul { list-style: none; padding: 0; margin: 0; }
+.navigation li a, .lockButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,47 +58,35 @@
   text-decoration: none;
   color: var(--ui-text-secondary);
   font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
-
 .icon {
   margin-right: 0;
   color: var(--ui-text-tertiary);
-  transition: color 0.2s ease, margin-right 0.3s ease;
+  transition: all 0.3s ease;
   flex-shrink: 0;
 }
-
-.footer {
-  margin-top: auto;
-  flex-shrink: 0;
-}
-
-.lockButton {
-  width: 100%;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+.footer { margin-top: auto; flex-shrink: 0; }
+.lockButton { width: 100%; background: none; border: none; cursor: pointer; }
 
 
 /* --- Expanded Styles on Hover --- */
 
 .sidebar:hover {
-  width: 260px;
+  width: 220px;
   box-shadow: var(--shadow-md);
 }
 
-.sidebar:hover .logoContainer,
-.sidebar:hover .navigation li a,
-.sidebar:hover .lockButton {
+.sidebar:hover .logoContainer {
   justify-content: flex-start;
+  padding-left: 0.5rem; /* Adjust padding on expand */
 }
 
-.sidebar:hover .logoText,
+.sidebar:hover .logoNameImage,
 .sidebar:hover .navText {
   opacity: 1;
-  width: auto; /* Allow text to take up its natural space */
+  width: auto;
 }
 
 .sidebar:hover .icon {
@@ -109,28 +95,13 @@
 
 .sidebar:hover .navigation li a,
 .sidebar:hover .lockButton {
+    justify-content: flex-start;
     padding: 0.75rem 1rem;
 }
 
-/* --- General Hover and Active States (Work in both collapsed and expanded) --- */
-
-.navigation li a:hover {
-  background-color: var(--ui-background-tertiary);
-  color: var(--ui-text-primary);
-}
-
-.lockButton:hover {
-    background-color: var(--ui-background-tertiary);
-    color: var(--ui-text-primary);
-}
-
-.navigation li.active a {
-  background-color: var(--brand-primary);
-  color: var(--brand-text-on-primary);
-  font-weight: 600;
-}
-
-.navigation li.active .icon {
-  color: var(--brand-text-on-primary);
-}
+/* ... other hover/active styles ... */
+.navigation li a:hover { background-color: var(--ui-background-tertiary); color: var(--ui-text-primary); }
+.lockButton:hover { background-color: var(--ui-background-tertiary); color: var(--ui-text-primary); }
+.navigation li.active a { background-color: var(--brand-primary); color: var(--brand-text-on-primary); font-weight: 600; }
+.navigation li.active .icon { color: var(--brand-text-on-primary); }
 
