@@ -9,7 +9,6 @@ import { TransactionProvider } from './TransactionContext/TransactionContext';
 import { ReportProvider } from './ReportContext/ReportContext'; // 1. Import the new provider
 import { ThemeProvider } from './ThemeContext/ThemeContext';
 import { NavigationProvider } from './NavigationContext/NavigationContext';
-import { DashboardProvider } from './DashboardContext/DashboardContext';
 
 
 export const AppProvider = ({ children }) => {
@@ -20,13 +19,11 @@ export const AppProvider = ({ children }) => {
           <EntryProvider>
             <PaymentProvider>
               <TransactionProvider>
-                <DashboardProvider>
                   <ReportProvider>
                     <ThemeProvider> 
                       {children}
                     </ThemeProvider>
                   </ReportProvider>
-                </DashboardProvider>
               </TransactionProvider>
             </PaymentProvider>
           </EntryProvider>

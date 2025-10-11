@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './EntryForm.module.css';
 import { PlusCircle, Trash2, ChevronDown } from 'lucide-react';
 
@@ -58,7 +58,13 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
 
     const handleChange = (e) => {
         const { name, value, type } = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+        
+        // THE FIX: Check if the changed field is 'practiceId' and convert its value to a number.
+        if (name === 'practiceId') {
+            setFormData(prev => ({ ...prev, [name]: parseInt(value, 10) }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+        }
     };
 
     // --- Adjustment Handlers ---

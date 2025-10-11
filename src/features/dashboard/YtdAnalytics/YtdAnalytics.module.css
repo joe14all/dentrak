@@ -1,0 +1,100 @@
+.card {
+  background-color: var(--ui-background-secondary);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  border: 1px solid var(--ui-border-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+}
+
+.ytdMetrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.metricItem {
+  background-color: var(--ui-background-primary);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.metricItem span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+}
+
+.metricItem p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ui-text-primary);
+  margin: 0.5rem 0 0 0;
+}
+
+.chartsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.chartWrapper {
+    background-color: var(--ui-background-primary);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.chartTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+}
+
+.insights {
+    font-size: 0.9rem;
+    color: var(--ui-text-secondary);
+    line-height: 1.6;
+    background-color: var(--ui-background-primary);
+    padding: 1rem;
+    border-radius: 8px;
+}
+.insights p { margin: 0; }
+.insights strong { color: var(--ui-text-primary); font-weight: 600; }
+
+.viewAllButton {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--ui-border-secondary);
+    background: none;
+    border: none;
+    color: var(--brand-primary);
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.viewAllButton:hover {
+    text-decoration: underline;
+}
+

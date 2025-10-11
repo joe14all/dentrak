@@ -1,9 +1,0 @@
-.actionButtons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; height: 100%; }
-.actionButtons button {
-    display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
-    background-color: var(--ui-background-primary); border: 1px solid var(--ui-border-primary);
-    border-radius: 8px; font-weight: 500; cursor: pointer; color: var(--ui-text-primary);
-    text-align: left;
-    transition: all 0.2s ease;
-}
-.actionButtons button:hover { background-color: var(--ui-background-tertiary); border-color: var(--ui-border-secondary); }

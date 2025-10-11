@@ -13,44 +13,39 @@ const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate,
     }).format(amount || 0);
   };
   
-  // This memoized calculation derives all necessary stats for the legend
   const legendData = useMemo(() => {
     if (!practices) return [];
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    // Helper function for robust date checking
+    const isDateInCurrentMonth = (dateStr) => {
+        if (!dateStr) return false;
+        // THE FIX: Parse date as UTC to prevent timezone shifts.
+        const date = new Date(`${dateStr}T00:00:00Z`);
+        return date.getUTCFullYear() === currentYear && date.getUTCMonth() === currentMonth;
+    };
 
     return practices.map(practice => {
-      // Determine the base pay rate for this practice
       const baseRate = practice.basePay || practice.dailyGuarantee || 0;
 
-      // 1. Count existing entries for this practice in the current month
-      const entriesInMonth = attendanceEntries.filter(e => {
-        const entryDate = new Date(e.date);
-        return e.practiceId === practice.id &&
-               entryDate.getFullYear() === year &&
-               entryDate.getMonth() === month;
-      });
+      // 1. Count existing entries using the robust date check
+      const entriesInMonth = attendanceEntries.filter(e => 
+        e.practiceId === practice.id && isDateInCurrentMonth(e.date)
+      );
 
-      // 2. Count staged additions for this practice in the current month
-      const additionsInMonth = Object.values(pendingChanges.additions).filter(add => {
-          const addDate = new Date(add.date);
-          return add.practiceId === practice.id &&
-                 addDate.getFullYear() === year &&
-                 addDate.getMonth() === month;
-      }).length;
+      // 2. Count staged additions using the robust date check
+      const additionsInMonth = Object.values(pendingChanges.additions).filter(add => 
+        add.practiceId === practice.id && isDateInCurrentMonth(add.date)
+      ).length;
 
-      // 3. Count staged removals for this practice in the current month
+      // 3. Count staged removals using the robust date check
       const removalsInMonth = Array.from(pendingChanges.removals).filter(removalId => {
           const entry = attendanceEntries.find(e => e.id === removalId);
-          if (!entry) return false;
-          const removeDate = new Date(entry.date);
-          return entry.practiceId === practice.id &&
-                 removeDate.getFullYear() === year &&
-                 removeDate.getMonth() === month;
+          return entry && entry.practiceId === practice.id && isDateInCurrentMonth(entry.date);
       }).length;
 
-      // 4. Calculate the final day count and estimated pay
       const finalDayCount = entriesInMonth.length + additionsInMonth - removalsInMonth;
       const estimatedPay = finalDayCount * baseRate;
 

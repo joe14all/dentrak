@@ -1,0 +1,109 @@
+.card {
+  background-color: var(--ui-background-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--ui-border-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.practiceTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+}
+
+.detailsButton {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    color: var(--ui-text-tertiary);
+    cursor: pointer;
+    border-radius: 4px;
+}
+.detailsButton:hover {
+    background-color: var(--ui-background-tertiary);
+    color: var(--brand-primary);
+}
+
+.metrics {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.metricItem { 
+    font-size: 0.8rem; 
+    color: var(--ui-text-secondary);
+    font-weight: 500;
+}
+.metricItem p { 
+    font-size: 1.2rem; 
+    font-weight: 600; 
+    color: var(--ui-text-primary); 
+    margin: 0.25rem 0 0 0;
+}
+
+.analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto; /* Push to bottom */
+}
+
+.progressBarContainer {
+    width: 100%;
+    height: 6px;
+    background-color: var(--ui-background-tertiary);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progressBar {
+    height: 100%;
+    background-color: var(--brand-primary);
+    border-radius: 99px;
+    transition: width 0.5s ease-in-out;
+}
+
+.payBreakdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.payBreakdown p { 
+    font-size: 1.5rem; 
+    font-weight: 700;
+    color: var(--ui-text-primary);
+    margin: 0;
+}
+.payBreakdown p span { 
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+    margin-left: 0.25rem;
+}
+
+.trend { 
+    display: flex; 
+    align-items: baseline; 
+    gap: 0.25rem; 
+    font-weight: 600; 
+    font-size: 0.9rem;
+}
+.trend small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ui-text-tertiary);
+}
+
+.positive { color: var(--state-success); }
+.negative { color: var(--state-danger-text); }

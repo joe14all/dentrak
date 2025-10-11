@@ -13,7 +13,12 @@ import GeminiImporter from '../../features/transactions/GeminiImporter';
 import { CreditCard, Landmark, MousePointerClick, List } from 'lucide-react';
 
 const TransactionsPage = () => {
-  const { cheques, directDeposits, eTransfers, isLoading: isTransactionsLoading, ...transactionActions } = useTransactions();
+  const { 
+    cheques, directDeposits, eTransfers, isLoading: isTransactionsLoading, 
+    addNewCheque, editCheque, removeCheque,
+    addNewDirectDeposit, editDirectDeposit, removeDirectDeposit,
+    addNewETransfer, editETransfer, removeETransfer,
+  } = useTransactions();
   const { practices } = usePractices();
   const { isLoading: isPaymentsLoading } = usePayments();
   
@@ -27,29 +32,32 @@ const TransactionsPage = () => {
   const [transactionToView, setTransactionToView] = useState(null);
   const [isImportModalOpen, setImportModalOpen] = useState(false);
 
+  // Refactored to have a consistent API (add, edit, remove) for each view.
   const views = useMemo(() => {
-    // Correctly map and add the 'type' and 'uniqueId' to every transaction array.
-    // This ensures data consistency across all views.
-    const mappedCheques = cheques.map(t => ({ ...t, type: 'cheques', uniqueId: `cheque-${t.id}` }));
-    const mappedDeposits = directDeposits.map(t => ({ ...t, type: 'directDeposits', uniqueId: `deposit-${t.id}` }));
-    const mappedTransfers = eTransfers.map(t => ({ ...t, type: 'eTransfers', uniqueId: `transfer-${t.id}` }));
-
-    const allTransactions = [...mappedCheques, ...mappedDeposits, ...mappedTransfers]
-      .sort((a, b) => new Date(b.dateReceived || b.paymentDate) - new Date(a.dateReceived || a.paymentDate));
+    const allTransactions = [
+      ...cheques.map(t => ({ ...t, type: 'cheques', uniqueId: `cheque-${t.id}` })),
+      ...directDeposits.map(t => ({ ...t, type: 'directDeposits', uniqueId: `deposit-${t.id}` })),
+      ...eTransfers.map(t => ({ ...t, type: 'eTransfers', uniqueId: `transfer-${t.id}` })),
+    ].sort((a, b) => new Date(b.dateReceived || b.paymentDate) - new Date(a.dateReceived || a.paymentDate));
     
     return {
       all: { label: 'All', icon: List, data: allTransactions },
-      cheques: { label: 'Cheques', icon: CreditCard, data: mappedCheques, ...transactionActions },
-      directDeposits: { label: 'Direct Deposits', icon: Landmark, data: mappedDeposits, ...transactionActions },
-      eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: mappedTransfers, ...transactionActions },
+      cheques: { label: 'Cheques', icon: CreditCard, data: cheques, add: addNewCheque, edit: editCheque, remove: removeCheque },
+      directDeposits: { label: 'Direct Deposits', icon: Landmark, data: directDeposits, add: addNewDirectDeposit, edit: editDirectDeposit, remove: removeDirectDeposit },
+      eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: eTransfers, add: addNewETransfer, edit: editETransfer, remove: removeETransfer },
     };
-  }, [cheques, directDeposits, eTransfers, transactionActions]);
+  }, [
+      cheques, directDeposits, eTransfers, 
+      addNewCheque, editCheque, removeCheque,
+      addNewDirectDeposit, editDirectDeposit, removeDirectDeposit,
+      addNewETransfer, editETransfer, removeETransfer
+  ]);
 
-  // All event handlers remain the same and are collapsed for brevity.
   const handleOpenAddModal = () => { setTransactionToEdit(null); setFormModalOpen(true); };
   const handleOpenEditModal = (transaction) => { setTransactionToEdit(transaction); setFormModalOpen(true); };
   const handleOpenDeleteModal = (transactionId, type) => { setTransactionToDelete({ id: transactionId, type }); setDeleteModalOpen(true); };
   const handleOpenViewModal = (transaction) => { setTransactionToView(transaction); setViewModalOpen(true); };
+
   const handleCloseModals = () => {
     setFormModalOpen(false);
     setDeleteModalOpen(false);
@@ -59,22 +67,22 @@ const TransactionsPage = () => {
     setTransactionToDelete(null);
     setTransactionToView(null);
   };
+  
   const handleImportSuccess = (parsedData) => {
     setImportModalOpen(false);
     setTransactionToEdit(parsedData);
     setFormModalOpen(true);
   };
+
   const handleSave = (formData) => {
     const { type, ...data } = formData;
-    const isEditing = !!transactionToEdit;
-    
-    let action;
-    if (type === 'cheques') action = isEditing ? views.cheques.editCheque : views.cheques.addNewCheque;
-    if (type === 'directDeposits') action = isEditing ? views.directDeposits.editDirectDeposit : views.directDeposits.addNewDirectDeposit;
-    if (type === 'eTransfers') action = isEditing ? views.eTransfers.editETransfer : views.eTransfers.addNewETransfer;
+    const view = views[type];
+    if (!view) return;
+
+    const action = transactionToEdit ? view.edit : view.add;
     
     if (action) {
-      if (isEditing) {
+      if (transactionToEdit) {
         action(transactionToEdit.id, data);
       } else {
         action(data);
@@ -82,30 +90,36 @@ const TransactionsPage = () => {
     }
     handleCloseModals();
   };
+
+  // THE FIX: This function now correctly and simply finds the right delete action.
   const handleConfirmDelete = () => {
     if (transactionToDelete) {
-      const type = transactionToDelete.type;
-      const view = Object.values(views).find(v => v.data.some(d => d.type === type));
+      const { id, type } = transactionToDelete;
+      // Directly look up the correct view and its remove function.
+      const view = views[type];
       if (view && view.remove) {
-         view.remove(transactionToDelete.id);
+         view.remove(id);
+      } else {
+        console.error(`Delete failed: No remove function found for transaction type "${type}"`);
       }
     }
     handleCloseModals();
   };
+  
   const handleStatusUpdate = (newStatus) => {
     if (transactionToView && transactionToView.type === 'cheques') {
       const updatedTransaction = { ...transactionToView, status: newStatus };
-      transactionActions.editCheque(updatedTransaction.id, updatedTransaction);
+      views.cheques.edit(updatedTransaction.id, updatedTransaction);
       setTransactionToView(updatedTransaction);
     }
   };
+  
   const handleEditFromView = () => {
       if(transactionToView) {
           setViewModalOpen(false);
           handleOpenEditModal(transactionToView);
       }
   };
-
 
   return (
     <div className={styles.page}>
@@ -128,7 +142,6 @@ const TransactionsPage = () => {
         />
       </div>
 
-      {/* --- Modals --- */}
       <Modal isOpen={isFormModalOpen} onClose={handleCloseModals} title={transactionToEdit ? `Edit Transaction` : `Log New Transaction`}>
         <TransactionForm
           transactionToEdit={transactionToEdit}
@@ -138,9 +151,11 @@ const TransactionsPage = () => {
           onCancel={handleCloseModals}
         />
       </Modal>
+
       <Modal isOpen={isDeleteModalOpen} onClose={handleCloseModals} title="Confirm Deletion">
         <DeleteConfirmation onConfirm={handleConfirmDelete} onCancel={handleCloseModals} />
       </Modal>
+      
       <Modal isOpen={isViewModalOpen} onClose={handleCloseModals} title="Transaction Details">
         {transactionToView && (
             <TransactionViewCard 
@@ -151,6 +166,7 @@ const TransactionsPage = () => {
             />
         )}
       </Modal>
+      
       <Modal isOpen={isImportModalOpen} onClose={handleCloseModals} title="Import Transaction with AI">
         <GeminiImporter 
           practices={practices}

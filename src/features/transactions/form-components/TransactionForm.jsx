@@ -36,14 +36,23 @@ const TransactionForm = ({ transactionToEdit, initialType, practices, onSave, on
     }
   }, [transactionToEdit, initialType, practices]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+ const handleChange = (e) => {
+    const { name, value, type } = e.target;
+
+    // THE FIX: Robustly handle data types for all inputs.
+    let processedValue = value;
+    if (type === 'number') {
+      processedValue = parseFloat(value) || 0;
+    } else if (name === 'practiceId') {
+      processedValue = parseInt(value, 10);
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
   
   const handleTypeChange = (newType) => {
+    if (transactionToEdit) return; // Prevent type change when editing
     setFormType(newType);
-    // Reset form data to defaults for the new type, but keep common fields
     setFormData(prev => ({
       ...getInitialState(newType),
       practiceId: prev.practiceId,
