@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { 
   getAllEntries,
@@ -9,8 +10,6 @@ import {
 
 const EntryContext = createContext();
 
-// This flag exists OUTSIDE the component. It will only be false once
-// when the application first loads.
 let hasInitialized = false;
 
 export const EntryProvider = ({ children }) => {
@@ -21,6 +20,16 @@ export const EntryProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const allEntriesFromDB = await getAllEntries();
+      
+      // THE FIX: Sort all entries chronologically after fetching.
+      allEntriesFromDB.sort((a, b) => {
+        // Robustly get the primary date for sorting (use start date for periods)
+        const dateA = new Date(a.date || a.periodStartDate || 0);
+        const dateB = new Date(b.date || b.periodStartDate || 0);
+        return dateB - dateA; // Sort descending (most recent first)
+      });
+
+      console.log(`[EntryContext] Fetched and sorted ${allEntriesFromDB.length} entries.`);
       setEntries(allEntriesFromDB);
     } catch (error) {
       console.error(`[EntryContext] Failed to fetch all entries:`, error);
@@ -31,25 +40,18 @@ export const EntryProvider = ({ children }) => {
 
   useEffect(() => {
     const initializeDB = async () => {
-      // We check the module-level flag.
       if (!hasInitialized) {
-        // If it's the first run, set the flag to true immediately.
         hasInitialized = true;
         await populateEntries();
         await refreshEntries();
       } else {
-        // On subsequent runs (like from Strict Mode), this will be skipped.
-        // We can still refresh to ensure data is up to date if needed.
-        if (entries.length === 0) { // Only refresh if state is empty
+        if (entries.length === 0) {
             await refreshEntries();
         }
       }
     };
-
     initializeDB();
-    
-    // We no longer need the cleanup function for this pattern.
-  }, [refreshEntries, entries.length]); // Add entries.length to dependencies
+  }, [refreshEntries, entries.length]);
 
   const addNewEntry = async (data) => { await dbAddEntry(data); await refreshEntries(); };
   const editEntry = async (id, data) => { await dbUpdateEntry(id, data); await refreshEntries(); };
@@ -60,7 +62,6 @@ export const EntryProvider = ({ children }) => {
   return <EntryContext.Provider value={value}>{children}</EntryContext.Provider>;
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useEntries = () => {
   const context = useContext(EntryContext);
   if (context === undefined) {

@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown } from 'lucide-reac
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val || 0);
+const formatDateShort = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 
 // --- Reusable Sub-Components ---
 const MetricCard = ({ title, value, trend, trendDirection, children }) => (
@@ -64,25 +65,32 @@ const SummaryInsights = () => {
         });
 
         const entriesInCurrentMonth = getEntriesInPeriod(year, month);
-        const entriesInPrevMonth = getEntriesInPeriod(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
 
-        // --- Calculate for current month ---
         let totalProduction = 0, totalEstimatedPay = 0;
         const daysWorked = new Set(entriesInCurrentMonth.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
         
         const practiceBreakdown = practices.map(practice => {
             const practiceEntries = entriesInCurrentMonth.filter(e => e.practiceId === practice.id);
-            const { calculatedPay, basePayOwed, productionTotal, productionPayComponent } = calculatePay(practice, practiceEntries);
-            totalProduction += productionTotal;
-            totalEstimatedPay += calculatedPay;
-            return { practiceName: practice.name, production: productionTotal, salary: calculatedPay, daysWorked: new Set(practiceEntries.map(e=>e.date)).size, basePayOwed, productionPayComponent };
-        }).filter(p => p.daysWorked > 0 || p.production > 0);
+            const calcResult = calculatePay(practice, practiceEntries, year, month);
+            totalProduction += calcResult.productionTotal;
+            totalEstimatedPay += calcResult.calculatedPay;
+            return { 
+                practiceName: practice.name, 
+                production: calcResult.productionTotal, 
+                salary: calcResult.calculatedPay, 
+                daysWorked: new Set(practiceEntries.map(e=>e.date)).size, 
+                payStructure: calcResult.payStructure, 
+                payPeriods: calcResult.payPeriods,
+                basePayOwed: calcResult.basePayOwed, // Pass these through for the chart
+                productionPayComponent: calcResult.productionPayComponent,
+            };
+        }).filter(p => p.payPeriods.some(period => period.hasEntries) || p.production > 0);
 
-        // --- Calculate for previous month (for trends) ---
+        const entriesInPrevMonth = getEntriesInPeriod(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
         const prevMonthProduction = entriesInPrevMonth.filter(e=>e.entryType !== 'attendanceRecord').reduce((s,e)=>s + (e.production || 0), 0);
-        const prevMonthPay = practices.reduce((sum, p) => sum + calculatePay(p, entriesInPrevMonth.filter(e => e.practiceId === p.id)).calculatedPay, 0);
+        const prevMonthPay = practices.reduce((sum, p) => sum + calculatePay(p, entriesInPrevMonth.filter(e => e.practiceId === p.id), prevMonthDate.getFullYear(), prevMonthDate.getMonth()).calculatedPay, 0);
 
-        // --- Prepare chart data ---
+        // THE FIX: Derive chart data directly from the already calculated breakdown.
         const chartData = practiceBreakdown.map(p => ({
             name: p.practiceName,
             base: p.basePayOwed,
@@ -100,18 +108,14 @@ const SummaryInsights = () => {
         };
     }, [practices, entries, currentDate]);
 
-    const handleMonthChange = (direction) => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));
-    };
-    const handleYearChange = (direction) => {
-        setCurrentDate(new Date(currentDate.getFullYear() + direction, currentDate.getMonth(), 1));
-    };
+    const handleMonthChange = (direction) => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));
+    const handleYearChange = (direction) => setCurrentDate(new Date(currentDate.getFullYear() + direction, currentDate.getMonth(), 1));
     
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                 <h3 className={styles.sectionTitle}>Monthly Performance</h3>
-                 <div className={styles.navigators}>
+                 <h3 className={styles.sectionTitle}>Monthly Performance Hub</h3>
+                <div className={styles.navigators}>
                     <div className={styles.navigator}>
                         <button onClick={() => handleYearChange(-1)}><ChevronLeft size={16} /></button>
                         <span>{currentDate.getFullYear()}</span>
@@ -142,16 +146,21 @@ const SummaryInsights = () => {
                 >
                    {(summary.breakdown || []).map(p => (
                        <div key={p.practiceName} className={styles.payBreakdown}>
-                           <span>{p.practiceName}</span>
-                           <div className={styles.payComponents}>
-                                <div className={styles.payComponent} data-active={p.salary === p.basePayOwed && p.basePayOwed > 0}>
-                                    <span>Base:</span>
-                                    <span>{formatCurrency(p.basePayOwed)}</span>
-                                </div>
-                                <div className={styles.payComponent} data-active={p.salary > p.basePayOwed}>
-                                    <span>Prod %:</span>
-                                    <span>{formatCurrency(p.productionPayComponent)}</span>
-                                </div>
+                           <div className={styles.payPracticeHeader}>
+                               <span>{p.practiceName}</span>
+                               <span className={styles.payValue}>{formatCurrency(p.salary)}</span>
+                           </div>
+                           <small className={styles.payStructure}>{p.payStructure}</small>
+                           <div className={styles.periodDetails}>
+                               {(p.payPeriods || []).filter(period => period.hasEntries || period.final > 0).map((period, index) => (
+                                    <div key={index} className={styles.periodDetail}>
+                                        <span className={styles.periodDateRange}>{formatDateShort(period.start)} - {formatDateShort(period.end)}</span>
+                                        <div className={styles.payComponents}>
+                                            <div className={styles.payComponent} data-active={period.final === period.base && period.base > 0}><span>Base:</span><span>{formatCurrency(period.base)}</span></div>
+                                            <div className={styles.payComponent} data-active={period.final > period.base}><span>Prod %:</span><span>{formatCurrency(period.prod)}</span></div>
+                                        </div>
+                                    </div>
+                               ))}
                            </div>
                        </div>
                    ))}

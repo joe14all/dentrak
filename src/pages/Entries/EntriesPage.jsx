@@ -32,18 +32,32 @@ const EntriesPage = () => {
     
     let performanceEntries = entries.filter(entry => entry.entryType !== 'attendanceRecord');
 
-    // Apply advanced filters
+    // Apply advanced filters with robust logic
     if (filters.practiceId !== 'all') {
       performanceEntries = performanceEntries.filter(e => e.practiceId === parseInt(filters.practiceId));
     }
     if (filters.entryTypes.length > 0) {
       performanceEntries = performanceEntries.filter(e => filters.entryTypes.includes(e.entryType));
     }
+    
+    // THE FIX: More robust date range filtering that handles overlaps.
     if (filters.startDate) {
-      performanceEntries = performanceEntries.filter(e => new Date(e.date || e.periodStartDate) >= new Date(filters.startDate));
+      const startDateFilter = new Date(`${filters.startDate}T00:00:00Z`);
+      performanceEntries = performanceEntries.filter(e => {
+        // For period summaries, check if the period ENDS on or after the filter start date.
+        const dateStr = e.entryType === 'periodSummary' ? e.periodEndDate : e.date;
+        if (!dateStr) return false;
+        return new Date(`${dateStr}T00:00:00Z`) >= startDateFilter;
+      });
     }
     if (filters.endDate) {
-      performanceEntries = performanceEntries.filter(e => new Date(e.date || e.periodEndDate) <= new Date(filters.endDate));
+      const endDateFilter = new Date(`${filters.endDate}T00:00:00Z`);
+      performanceEntries = performanceEntries.filter(e => {
+        // For period summaries, check if the period STARTS on or before the filter end date.
+        const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
+        if (!dateStr) return false;
+        return new Date(`${dateStr}T00:00:00Z`) <= endDateFilter;
+      });
     }
 
     return performanceEntries;
@@ -96,8 +110,7 @@ const EntriesPage = () => {
           practices={practices}
           activeFilters={filters}
           onFilterChange={setFilters}
-                  onAddEntry={handleOpenAddModal}
-
+          onAddEntry={handleOpenAddModal}
         />
       )}
       

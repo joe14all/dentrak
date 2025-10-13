@@ -1,9 +1,9 @@
 import React from 'react';
-import EntryRow from './EntryRow'; // Import the new row component
+import EntryRow from './EntryRow'; 
 import styles from './EntriesList.module.css';
 import { FolderSearch, LoaderCircle } from 'lucide-react';
 
-const EntriesList = ({ entries, practices, isLoading, viewType, onEditEntry, onDeleteEntry }) => {
+const EntriesList = ({ entries, practices, isLoading,onEditEntry, onDeleteEntry }) => {
 
   if (isLoading) {
     return (
