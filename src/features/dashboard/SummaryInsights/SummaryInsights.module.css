@@ -29,20 +29,32 @@
 }
 
 .navigator { 
-    display: flex; align-items: center; gap: 0.5rem;
+    display: flex; 
+    align-items: center; 
+    gap: 0.5rem;
     background-color: var(--ui-background-primary);
     border: 1px solid var(--ui-border-primary);
     border-radius: 8px;
     padding: 4px;
 }
-.navigator span { font-size: 0.9rem; font-weight: 500; width: 120px; text-align: center; }
+.navigator span { 
+    font-size: 0.9rem; 
+    font-weight: 500; 
+    width: 120px; 
+    text-align: center; 
+}
 .navigator button { 
     background: var(--ui-background-tertiary); 
     border: 1px solid var(--ui-border-secondary); 
-    padding: 0.5rem; border-radius: 6px; 
-    cursor: pointer; color: var(--ui-text-secondary); display: flex; 
+    padding: 0.5rem; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    color: var(--ui-text-secondary); 
+    display: flex; 
 }
-.navigator button:hover { background-color: var(--ui-background-primary); }
+.navigator button:hover {
+    background-color: var(--ui-background-primary);
+}
 
 
 .summaryCards {
@@ -120,19 +132,32 @@
   border-bottom: none;
   padding-bottom: 0;
 }
+
 .payPracticeHeader {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
-.payPracticeHeader span { font-weight: 500; color: var(--ui-text-primary); }
-.payValue { font-weight: 600; color: var(--ui-text-primary); font-size: 0.9rem; }
-.payPracticeHeader small { font-size: 0.75rem; color: var(--ui-text-tertiary); font-style: italic; }
+.payPracticeHeader span {
+  font-weight: 500;
+  color: var(--ui-text-primary);
+}
+.payValue {
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  font-size: 0.9rem;
+}
+.payPracticeHeader small {
+  font-size: 0.75rem;
+  color: var(--ui-text-tertiary);
+  font-style: italic;
+}
 
 .periodDetails {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 .periodDetail {
   display: grid;
@@ -182,4 +207,5 @@
   color: var(--ui-text-secondary);
   margin: 0 0 1.5rem 0;
 }
+
 

@@ -3,32 +3,17 @@ import styles from './SummaryInsights.module.css';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { calculatePay } from '../../../utils/calculations';
+import MetricCard from './MetricCard';
 import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val || 0);
 const formatDateShort = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 
-// --- Reusable Sub-Components ---
-const MetricCard = ({ title, value, trend, trendDirection, children }) => (
-    <div className={styles.metricCard}>
-        <div className={styles.metricHeader}>
-          <span className={styles.metricTitle}>{title}</span>
-           {trend && (
-                <div className={`${styles.trendIndicator} ${styles[trendDirection]}`}>
-                    {trendDirection === 'positive' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                    <span>{trend}</span>
-                </div>
-            )}
-        </div>
-        <p className={styles.metricValue}>{value}</p>
-        <div className={styles.breakdown}>{children}</div>
-    </div>
-);
-
+// --- Chart Component ---
 const MonthlyComparisonChart = ({ data }) => (
     <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }} barGap={8}>
+        <BarChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
             <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'var(--ui-text-tertiary)' }} />
             <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} tick={{ fontSize: 12, fill: 'var(--ui-text-tertiary)' }} />
             <Tooltip
@@ -37,8 +22,8 @@ const MonthlyComparisonChart = ({ data }) => (
                 formatter={(value, name) => [formatCurrency(value), name]}
             />
             <Legend iconSize={10} wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-            <Bar dataKey="base" name="Base Pay" fill="var(--ui-border-primary)" radius={[4, 4, 0, 0]} barSize={20} />
-            <Bar dataKey="production" name="Production Pay" fill="var(--brand-primary)" radius={[4, 4, 0, 0]} barSize={20} />
+            <Bar dataKey="base" stackId="a" name="Base Pay" fill="var(--brand-secondary)" barSize={30} />
+            <Bar dataKey="production" stackId="a" name="Production Pay (Additional)" fill="var(--brand-primary)" radius={[4, 4, 0, 0]} barSize={30} />
         </BarChart>
     </ResponsiveContainer>
 );
@@ -81,20 +66,20 @@ const SummaryInsights = () => {
                 daysWorked: new Set(practiceEntries.map(e=>e.date)).size, 
                 payStructure: calcResult.payStructure, 
                 payPeriods: calcResult.payPeriods,
-                basePayOwed: calcResult.basePayOwed, // Pass these through for the chart
+                basePayOwed: calcResult.basePayOwed,
                 productionPayComponent: calcResult.productionPayComponent,
             };
-        }).filter(p => p.payPeriods.some(period => period.hasEntries) || p.production > 0);
+        }).filter(p => p.payPeriods.length > 0 && p.payPeriods.some(period => period.hasEntries));
 
         const entriesInPrevMonth = getEntriesInPeriod(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
         const prevMonthProduction = entriesInPrevMonth.filter(e=>e.entryType !== 'attendanceRecord').reduce((s,e)=>s + (e.production || 0), 0);
         const prevMonthPay = practices.reduce((sum, p) => sum + calculatePay(p, entriesInPrevMonth.filter(e => e.practiceId === p.id), prevMonthDate.getFullYear(), prevMonthDate.getMonth()).calculatedPay, 0);
 
-        // THE FIX: Derive chart data directly from the already calculated breakdown.
         const chartData = practiceBreakdown.map(p => ({
             name: p.practiceName,
             base: p.basePayOwed,
-            production: p.productionPayComponent,
+            // The production value for the chart is only the amount *above* base pay
+            production: Math.max(0, p.salary - p.basePayOwed),
         }));
         
         return {
@@ -152,7 +137,7 @@ const SummaryInsights = () => {
                            </div>
                            <small className={styles.payStructure}>{p.payStructure}</small>
                            <div className={styles.periodDetails}>
-                               {(p.payPeriods || []).filter(period => period.hasEntries || period.final > 0).map((period, index) => (
+                               {(p.payPeriods || []).filter(period => period.hasEntries).map((period, index) => (
                                     <div key={index} className={styles.periodDetail}>
                                         <span className={styles.periodDateRange}>{formatDateShort(period.start)} - {formatDateShort(period.end)}</span>
                                         <div className={styles.payComponents}>
