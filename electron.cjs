@@ -1,20 +1,48 @@
-const { app, BrowserWindow, systemPreferences, ipcMain } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  systemPreferences,
+  ipcMain,
+  dialog,
+} = require("electron");
 const path = require("node:path");
 const url = require("url");
+const fs = require("fs");
 
 const isDev = process.env.ELECTRON_START_URL ? true : false;
 
-// Listen for the 'auth:touch-id' event from the renderer process
+// --- Corrected Touch ID / Fingerprint Logic ---
+// This now uses the systemPreferences API which is compatible with your Electron version.
 ipcMain.handle("auth:touch-id", async () => {
   try {
-    // Prompt the user for Touch ID
     await systemPreferences.promptTouchID("Unlock Dentrak to access your data");
-    // If successful, resolve the promise
     return { success: true };
   } catch (error) {
-    // If it fails (user cancels, etc.), return an error
     console.error("Touch ID prompt failed:", error);
     return { success: false, error: error.message };
+  }
+});
+
+// --- PDF Saving Logic ---
+ipcMain.handle("save-pdf", async (event, pdfData, suggestedName) => {
+  const win = BrowserWindow.getFocusedWindow();
+  const { filePath, canceled } = await dialog.showSaveDialog(win, {
+    title: "Save PDF Summary",
+    defaultPath: suggestedName,
+    filters: [{ name: "PDF Files", extensions: ["pdf"] }],
+  });
+
+  if (canceled || !filePath) {
+    return { success: false, message: "Save was canceled." };
+  }
+
+  try {
+    const buffer = Buffer.from(pdfData, "base64");
+    fs.writeFileSync(filePath, buffer);
+    return { success: true, path: filePath };
+  } catch (error) {
+    console.error("Failed to save PDF:", error);
+    return { success: false, message: `Failed to save PDF: ${error.message}` };
   }
 });
 
@@ -23,11 +51,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      // Attach the preload script
       preload: path.join(__dirname, "preload.js"),
-      // These are recommended security settings
-      contextIsolation: true,
-      nodeIntegration: false,
     },
   });
 

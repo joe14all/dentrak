@@ -1,0 +1,17 @@
+.panel { display: flex; flex-direction: column; gap: 2rem; width: 550px; }
+.formGroup { display: flex; flex-direction: column; gap: 0.75rem; }
+.formGroup label { font-weight: 500; color: var(--ui-text-secondary); }
+.selectWrapper { position: relative; }
+.selectWrapper select { width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--ui-border-primary); -webkit-appearance: none; appearance: none; }
+.selectIcon { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.periodList { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; max-height: 200px; overflow-y: auto; background-color: var(--ui-background-tertiary); padding: 0.5rem; border-radius: 8px; }
+.periodItem { padding: 0.6rem; border-radius: 6px; text-align: center; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; }
+.periodItem:hover { background-color: var(--ui-background-primary); }
+.periodItem.selected { background-color: var(--brand-secondary); color: var(--brand-primary); font-weight: 500; border-color: var(--brand-primary); }
+.actions { display: flex; justify-content: flex-end; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--ui-border-secondary); }
+.cancelButton, .generateButton { padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.cancelButton { background-color: var(--ui-interactive-secondary-bg); color: var(--ui-interactive-secondary-text); border: 1px solid var(--ui-border-secondary); }
+.generateButton { background-color: var(--brand-primary); color: white; border: none; display: flex; align-items: center; gap: 0.5rem; }
+.generateButton:disabled { opacity: 0.7; }
+.spinner { animation: spin 1.5s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
