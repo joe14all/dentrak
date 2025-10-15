@@ -6,9 +6,25 @@
  * Calculates pay for a single, given period of time.
  */
 export const calculateSinglePeriod = (practice, entriesInPeriod) => {
-  const performanceEntries = entriesInPeriod.filter(
-    (e) => e.entryType !== "attendanceRecord"
+  // Check for period summary entries which take precedence for financial calculations
+  const periodSummaries = entriesInPeriod.filter(
+    (e) => e.entryType === "periodSummary"
   );
+
+  let performanceEntries;
+  // If period summaries exist, they are the source of truth for financials.
+  // This prevents double-counting if daily entries also exist for the same period.
+  if (periodSummaries.length > 0) {
+    performanceEntries = periodSummaries;
+  } else {
+    // Otherwise, use daily and individual procedure entries for financials.
+    performanceEntries = entriesInPeriod.filter(
+      (e) =>
+        e.entryType === "dailySummary" || e.entryType === "individualProcedure"
+    );
+  }
+
+  // Attendance is always calculated from all relevant entries in the given period.
   const attendanceDays = new Set(
     entriesInPeriod
       .filter(
@@ -42,12 +58,17 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
 
   const calculatedPay = Math.max(basePayOwed, productionPayComponent);
 
-  return {
+  const result = {
     calculatedPay,
     basePayOwed,
     productionPayComponent,
     productionTotal: grossProduction,
+    collectionTotal: grossCollection,
+    totalAdjustments,
+    netBase,
+    attendanceDays,
   };
+  return result;
 };
 
 /**
@@ -80,7 +101,7 @@ const getPayPeriods = (year, month, payCycle) => {
 /**
  * The main exported function. Calculates pay for a practice over an entire month.
  */
-export const calculatePay = (practice, entriesInMonth, year, month) => {
+export const calculatePay = (practice, allEntriesForPractice, year, month) => {
   if (!practice)
     return {
       calculatedPay: 0,
@@ -91,13 +112,40 @@ export const calculatePay = (practice, entriesInMonth, year, month) => {
       payPeriods: [],
     };
 
-  const productionTotal = entriesInMonth
-    .filter((e) => e.entryType !== "attendanceRecord")
-    .reduce((sum, e) => sum + (e.production || 0), 0);
+  // Robust filtering to ensure only entries from the specified month/year are considered.
+  const entriesInMonth = allEntriesForPractice.filter((e) => {
+    const dateStr =
+      e.entryType === "periodSummary" ? e.periodStartDate : e.date;
+    if (!dateStr) return false;
+    // Use UTC to prevent timezone-related date shifts
+    const entryDate = new Date(`${dateStr}T00:00:00Z`);
+    return (
+      entryDate.getUTCFullYear() === year && entryDate.getUTCMonth() === month
+    );
+  });
 
+  // --- CORRECTED PRODUCTION TOTAL LOGIC ---
   const periodSummaries = entriesInMonth.filter(
     (e) => e.entryType === "periodSummary"
   );
+
+  // Determine which entries to use for the overall month's production total
+  let financialEntriesForMonth;
+  if (periodSummaries.length > 0) {
+    financialEntriesForMonth = periodSummaries;
+  } else {
+    financialEntriesForMonth = entriesInMonth.filter(
+      (e) =>
+        e.entryType === "dailySummary" || e.entryType === "individualProcedure"
+    );
+  }
+
+  const productionTotal = financialEntriesForMonth.reduce(
+    (sum, e) => sum + (e.production || 0),
+    0
+  );
+  // --- END CORRECTION ---
+
   const dailyAndAttendanceEntries = entriesInMonth.filter(
     (e) => e.entryType !== "periodSummary"
   );
@@ -108,7 +156,7 @@ export const calculatePay = (practice, entriesInMonth, year, month) => {
   let payStructure = "";
   let periodDetails = [];
 
-  // THE FIX: The logic is now mutually exclusive. It prioritizes Period Summaries.
+  // This logic is now mutually exclusive and prioritizes Period Summaries for pay calculation.
   if (periodSummaries.length > 0) {
     payStructure = `(Sum of ${periodSummaries.length} Period Summaries)`;
     periodDetails = periodSummaries.map((summaryEntry) => {
@@ -162,13 +210,14 @@ export const calculatePay = (practice, entriesInMonth, year, month) => {
     payStructure = `(Sum of ${relevantPeriods.length} ${practice.payCycle} periods)`;
   }
 
-  return {
+  const finalReturn = {
     calculatedPay: totalCalculatedPay,
     basePayOwed: totalBasePayOwed,
     productionPayComponent: totalProductionPayComponent,
     productionTotal,
     payStructure,
-    // THE FIX: The payPeriods array is now correctly included in the return statement.
     payPeriods: periodDetails.sort((a, b) => a.start - b.start),
   };
+
+  return finalReturn;
 };

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, {useState } from 'react';
 import styles from './DashboardPage.module.css';
 
 // Import all necessary contexts
@@ -22,50 +22,19 @@ import PdfSummaryGenerator from '../../features/dashboard/PdfSummaryGenerator/Pd
 
 const DashboardPage = () => {
   const { practices } = usePractices();
-  const { entries, addNewEntry } = useEntries();
-  const { payments, addNewPayment } = usePayments();
+  const { addNewEntry } = useEntries();
+  const { addNewPayment } = usePayments();
   const { setActivePage } = useNavigation();
   
-  // State management for all modals on the dashboard
   const [isEntryModalOpen, setEntryModalOpen] = useState(false);
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isPdfModalOpen, setPdfModalOpen] = useState(false);
   
-  // Centralized data calculation for YTD analytics
-  const dashboardData = useMemo(() => {
-    if (!practices || !entries || !payments) {
-      return { ytdProduction: 0, ytdPayments: 0 };
-    }
-    const currentYear = new Date().getFullYear();
-    
-    const ytdProduction = entries
-      .filter(e => {
-        const dateStr = e.date || e.periodStartDate;
-        if (!dateStr || e.entryType === 'attendanceRecord') return false;
-        return new Date(`${dateStr}T00:00:00Z`).getUTCFullYear() === currentYear;
-      })
-      .reduce((sum, e) => sum + (e.production || 0), 0);
-      
-    const ytdPayments = payments
-      .filter(p => {
-        if (!p.paymentDate) return false;
-        return new Date(`${p.paymentDate}T00:00:00Z`).getUTCFullYear() === currentYear;
-      })
-      .reduce((sum, p) => sum + p.amount, 0);
-
-    return { ytdProduction, ytdPayments };
-  }, [practices, entries, payments]);
-
-  // --- Event Handlers ---
-  const handleAddAttendance = () => {
-      setActivePage('Entries');
-  };
-
+  const handleAddAttendance = () => setActivePage('Entries');
   const handleSaveEntry = (formData) => {
     addNewEntry(formData);
     setEntryModalOpen(false);
   };
-  
   const handleSavePayment = (formData) => {
     addNewPayment(formData);
     setPaymentModalOpen(false);
@@ -73,30 +42,36 @@ const DashboardPage = () => {
 
   return (
     <div className={styles.page}>
-        <div className={styles.header}>
-            <h2 className={styles.pageTitle}>Dashboard</h2>
-        </div>
+        {/* ** REWORK: The grid is now driven by CSS grid-template-areas for a professional layout ** */}
         <div className={styles.dashboardGrid}>
-            <div className={styles.mainColumn}>
+            {/* The order here is semantic, but the visual layout is controlled by CSS */}
+            
+            {/* Top Row: High-level overview and immediate actions */}
+            <div className={styles.overview}>
+                <CoreOverview />
+            </div>
+            <div className={styles.actions}>
                 <QuickActions 
                     onAddAttendance={handleAddAttendance}
                     onAddEntry={() => setEntryModalOpen(true)}
                     onAddPayment={() => setPaymentModalOpen(true)}
                     onCreatePdf={() => setPdfModalOpen(true)}
                 />
-                <SummaryInsights />
-                <CoreOverview />
             </div>
-            <div className={styles.sidebarColumn}>
-                <YtdAnalytics 
-                    ytdProduction={dashboardData.ytdProduction} 
-                    ytdPayments={dashboardData.ytdPayments} 
-                />
+
+            {/* Main Content: The detailed monthly performance analysis */}
+            <div className={styles.main}>
+                <SummaryInsights />
+            </div>
+
+            {/* Sidebar: Supporting contextual modules */}
+            <div className={styles.sidebar}>
+                <YtdAnalytics />
                 <BalanceTracker />
             </div>
         </div>
 
-        {/* --- Modals for Quick Actions --- */}
+        {/* --- Modals for Quick Actions (Unchanged) --- */}
         <Modal isOpen={isEntryModalOpen} onClose={() => setEntryModalOpen(false)} title="Add New Performance Entry">
           <EntryForm
             practices={practices}
@@ -122,4 +97,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-

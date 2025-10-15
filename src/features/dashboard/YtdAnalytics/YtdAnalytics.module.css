@@ -1,100 +1,144 @@
 .card {
-  background-color: var(--ui-background-secondary);
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  border: 1px solid var(--ui-border-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+    background-color: var(--ui-background-secondary);
+    border: 1px solid var(--ui-border-secondary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ui-border-secondary);
 }
 
 .sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ui-text-primary);
-  margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
 }
 
-.ytdMetrics {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+.tabControls {
+    display: flex;
+    gap: 0.25rem;
+    background-color: var(--ui-background-primary);
+    border: 1px solid var(--ui-border-secondary);
+    border-radius: 8px;
+    padding: 0.2rem;
 }
 
-.metricItem {
-  background-color: var(--ui-background-primary);
-  padding: 1rem;
-  border-radius: 8px;
+.tabControls button {
+    background: none;
+    border: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.metricItem span {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--ui-text-secondary);
+.tabControls button.active {
+    background-color: var(--ui-background-secondary);
+    color: var(--ui-text-primary);
+    box-shadow: var(--shadow-sm);
 }
 
-.metricItem p {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--ui-text-primary);
-  margin: 0.5rem 0 0 0;
+.tabContent {
+    padding-top: 1.25rem;
 }
 
-.chartsGrid {
+.overviewGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
-.chartWrapper {
+.kpiItem {
+    background-color: var(--ui-background-primary);
+    border: 1px solid var(--ui-border-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+}
+.kpiItem span {
+    font-size: 0.85rem;
+    color: var(--ui-text-secondary);
+    font-weight: 500;
+}
+.kpiItem p {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--ui-text-primary);
+    margin-top: 0.25rem;
+}
+
+.highlights {
+    grid-column: 1 / -1; 
+    display: grid;
+    /* This creates the 2x2 grid layout */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.highlightCard {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     background-color: var(--ui-background-primary);
     padding: 1rem;
     border-radius: 8px;
 }
 
+.highlightIcon {
+    flex-shrink: 0;
+    padding: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+}
+.highlightIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.highlightText {
+    display: flex;
+    flex-direction: column;
+}
+
+.highlightTitle {
+    font-size: 0.8rem;
+    color: var(--ui-text-secondary);
+}
+.highlightValue {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+}
+.highlightSubtext {
+    font-size: 0.8rem;
+    color: var(--ui-text-tertiary);
+}
+
+.breakdownContainer {
+    display: flex;
+    flex-direction: column;
+}
 .chartTitle {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--ui-text-secondary);
-    margin: 0 0 1rem 0;
-    text-transform: uppercase;
-}
-
-.insights {
     font-size: 0.9rem;
-    color: var(--ui-text-secondary);
-    line-height: 1.6;
-    background-color: var(--ui-background-primary);
-    padding: 1rem;
-    border-radius: 8px;
-}
-.insights p { margin: 0; }
-.insights strong { color: var(--ui-text-primary); font-weight: 600; }
-
-.viewAllButton {
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid var(--ui-border-secondary);
-    background: none;
-    border: none;
-    color: var(--brand-primary);
     font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    color: var(--ui-text-secondary);
+    margin-bottom: 0.5rem;
 }
-.viewAllButton:hover {
-    text-decoration: underline;
-}
-

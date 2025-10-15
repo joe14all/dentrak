@@ -1,211 +1,162 @@
-/* A more compact and professional design */
+/* Container is now a simple vertical stack */
 .container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  background-color: var(--ui-background-secondary);
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
+/* Header spans full width */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ui-border-secondary);
 }
 
 .sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ui-text-primary);
-  margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
 }
 
+/* Container for the two date navigators */
 .navigators {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-.navigator { 
-    display: flex; 
-    align-items: center; 
+.navigator {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
-    background-color: var(--ui-background-primary);
-    border: 1px solid var(--ui-border-primary);
+    background-color: var(--ui-background-secondary);
+    border: 1px solid var(--ui-border-secondary);
     border-radius: 8px;
-    padding: 4px;
+    padding: 0.25rem;
 }
-.navigator span { 
-    font-size: 0.9rem; 
-    font-weight: 500; 
-    width: 120px; 
-    text-align: center; 
-}
-.navigator button { 
-    background: var(--ui-background-tertiary); 
-    border: 1px solid var(--ui-border-secondary); 
-    padding: 0.5rem; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    color: var(--ui-text-secondary); 
-    display: flex; 
+.navigator button {
+    background-color: var(--ui-background-tertiary);
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem;
+    display: flex;
+    color: var(--ui-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 .navigator button:hover {
-    background-color: var(--ui-background-primary);
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+}
+.navigator span {
+    font-weight: 500;
+    color: var(--ui-text-primary);
+    padding: 0 0.5rem;
+    font-size: 0.9rem;
+    min-width: 60px; /* Prevents layout shift for short month names */
+    text-align: center;
 }
 
-
-.summaryCards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+/* ** NEW: 2x2 Grid for the main content ** */
+.mainGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
+    gap: 1.5rem;
+    align-items: flex-start; /* Aligns items in each row to the top */
 }
 
-.metricCard {
-  background-color: var(--ui-background-primary);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.metricHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.metricTitle {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--ui-text-secondary);
-}
-.trendIndicator {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.2rem 0.5rem;
-  border-radius: 99px;
-}
-.positive { color: var(--state-success); background-color: var(--state-success-bg); }
-.negative { color: var(--state-danger-text); background-color: var(--state-danger-bg); }
-
-.metricValue {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--ui-text-primary);
-  margin: 0;
-  line-height: 1;
-}
-.breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ui-border-secondary);
-}
-.breakdownItem {
-  display: flex;
-  justify-content: space-between;
-  color: var(--ui-text-secondary);
+/* Simple breakdown styles (used in Production and Days Worked cards) */
+.simpleBreakdownItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--ui-text-secondary);
 }
 .breakdownValue {
-  font-weight: 500;
-  color: var(--ui-text-primary);
+    font-weight: 500;
+    color: var(--ui-text-primary);
 }
 
-/* --- Redesigned Pay Breakdown --- */
-.payBreakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--ui-border-secondary);
+/* Chart Card Styling */
+.chartCard {
+    background-color: var(--ui-background-secondary);
+    border: 1px solid var(--ui-border-secondary);
+    border-radius: 12px;
+    padding: 1rem 1rem 0.5rem 0.5rem;
+    /* Ensures the chart card has enough height to look good next to the tall pay card */
+    height: 100%; 
 }
-.payBreakdown:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.payPracticeHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.payPracticeHeader span {
-  font-weight: 500;
-  color: var(--ui-text-primary);
-}
-.payValue {
-  font-weight: 600;
-  color: var(--ui-text-primary);
-  font-size: 0.9rem;
-}
-.payPracticeHeader small {
-  font-size: 0.75rem;
-  color: var(--ui-text-tertiary);
-  font-style: italic;
+.chartTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+    margin-left: 1.25rem;
+    margin-bottom: 0.5rem;
 }
 
-.periodDetails {
+
+/* Compact Pay Breakdown Styles (Unchanged from previous version) */
+.practiceBreakdown {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+}
+.practiceHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.practiceName {
+    font-weight: 600;
+    color: var(--ui-text-primary);
+    font-size: 0.9rem;
+}
+.practiceSalary {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ui-text-accent);
 }
 .periodDetail {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 1rem;
+    background-color: var(--ui-background-primary);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--ui-border-secondary);
 }
 .periodDateRange {
-  font-size: 0.8rem;
-  color: var(--ui-text-tertiary);
-  white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ui-text-tertiary);
+    margin-bottom: 0.25rem;
+    display: block;
 }
 .payComponents {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  align-items: flex-end;
+    display: flex;
+    gap: 0.5rem;
 }
 .payComponent {
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: space-between;
-  border: 1px solid transparent;
-  width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    flex-basis: 50%;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    opacity: 0.7;
+}
+.payComponent span:first-child {
+    color: var(--ui-text-secondary);
+    margin-right: 0.5rem;
+}
+.payComponent span:last-child {
+    font-weight: 600;
+    color: var(--ui-text-primary);
 }
 .payComponent[data-active="true"] {
-  background-color: var(--brand-secondary);
+    opacity: 1;
+    background-color: var(--brand-secondary);
 }
-.payComponent span:first-child { color: var(--ui-text-secondary); }
-.payComponent span:last-child { font-weight: 600; color: var(--ui-text-primary); font-family: 'SF Mono', 'Menlo', monospace; }
-
-
-.chartSection {
-  background-color: var(--ui-background-primary);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border-secondary);
+.payComponent[data-active="true"] span {
+    color: var(--brand-primary) !important;
 }
-.chartTitle {
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--ui-text-secondary);
-  margin: 0 0 1.5rem 0;
-}
-
-

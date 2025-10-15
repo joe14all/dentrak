@@ -1,125 +1,165 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './YtdAnalytics.module.css';
-import { useNavigation } from '../../../contexts/NavigationContext/NavigationContext';
+import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
-import { usePayments } from '../../../contexts/PaymentContext/PaymentContext';
-import { ExternalLink, TrendingUp, BarChart as BarChartIcon } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { calculatePay } from '../../../utils/calculations';
+// ** UPDATED: Added the 'Activity' icon for the new metric **
+import { BarChart as BarChartIcon, Trophy, CalendarClock, Banknote, Activity } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const formatCurrency = (val, compact = false) => {
-  const options = { style: 'currency', currency: 'USD' };
-  if (compact) {
-    options.notation = 'compact';
-    options.maximumFractionDigits = 1;
-  } else {
-    options.minimumFractionDigits = 0;
-    options.maximumFractionDigits = 0;
-  }
-  return new Intl.NumberFormat('en-US', options).format(val || 0);
+    const options = { style: 'currency', currency: 'USD' };
+    if (compact) {
+        options.notation = 'compact';
+        options.maximumFractionDigits = 1;
+    } else {
+        options.minimumFractionDigits = 0;
+        options.maximumFractionDigits = 0;
+    }
+    return new Intl.NumberFormat('en-US', options).format(val || 0);
 };
 
-// --- Chart Sub-Components ---
-const ProductionTrendChart = ({ data }) => (
-    <ResponsiveContainer width="100%" height={100}>
-        <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-            <Tooltip
-                cursor={false}
-                contentStyle={{ background: 'var(--ui-background-secondary)', border: 'none', borderRadius: '8px' }}
-                formatter={(value) => [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value), 'Production']}
-            />
-            <defs>
-                <linearGradient id="colorProductionGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--state-success)" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="var(--state-success)" stopOpacity={0}/>
-                </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="production" stroke="var(--state-success)" strokeWidth={2} fill="url(#colorProductionGradient)" />
-        </AreaChart>
-    </ResponsiveContainer>
-);
-
-const PaymentsChart = ({ data }) => (
-    <ResponsiveContainer width="100%" height={100}>
-        <BarChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+const MonthlyBreakdownChart = ({ data }) => (
+    <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={data} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'var(--ui-text-tertiary)' }} />
+            <YAxis tickLine={false} axisLine={false} tickFormatter={(val) => formatCurrency(val, true)} tick={{ fontSize: 11, fill: 'var(--ui-text-tertiary)' }} />
             <Tooltip
                 cursor={{ fill: 'var(--ui-background-tertiary)' }}
-                contentStyle={{ background: 'var(--ui-background-secondary)', border: 'none', borderRadius: '8px' }}
-                 formatter={(value) => [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value), 'Payments']}
+                contentStyle={{ background: 'var(--ui-background-secondary)', border: '1px solid var(--ui-border-secondary)', borderRadius: '8px' }}
+                formatter={(value, name) => [formatCurrency(value), name.replace(/([A-Z])/g, ' $1').trim()]}
             />
-            <Bar dataKey="payments" fill="var(--brand-primary)" radius={[2, 2, 0, 0]} />
+            <Legend iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+            <Bar dataKey="production" name="Production" fill="var(--brand-secondary)" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="calculatedPay" name="Calculated Pay" fill="var(--brand-primary)" radius={[2, 2, 0, 0]} />
         </BarChart>
     </ResponsiveContainer>
 );
 
+const HighlightCard = ({ icon, title, value, subtext }) => (
+    <div className={styles.highlightCard}>
+        <div className={styles.highlightIcon}>{icon}</div>
+        <div className={styles.highlightText}>
+            <span className={styles.highlightTitle}>{title}</span>
+            <span className={styles.highlightValue}>{value}</span>
+            <span className={styles.highlightSubtext}>{subtext}</span>
+        </div>
+    </div>
+);
 
-// --- Main Component ---
-const YtdAnalytics = ({ ytdProduction, ytdPayments }) => {
+const YtdAnalytics = () => {
     const { entries } = useEntries();
-    const { payments } = usePayments();
-    const { setActivePage } = useNavigation();
+    const { practices } = usePractices();
+    const [activeTab, setActiveTab] = useState('overview');
 
-    const { chartData, bestMonth } = useMemo(() => {
-        if (!entries || !payments) return { chartData: [], bestMonth: null };
+    const analyticsData = useMemo(() => {
+        if (!entries || !practices || entries.length === 0 || practices.length === 0) {
+            return { ytdProduction: 0, ytdCalculatedPay: 0, chartData: [], bestProductionMonth: null, mostDaysWorkedMonth: null, bestPayMonth: null, bestAvgProdDay: null };
+        }
 
         const currentYear = new Date().getFullYear();
-        let bestMonth = null;
+        const currentMonth = new Date().getMonth();
+        let ytdProductionTotal = 0, ytdCalculatedPayTotal = 0;
+        let bestProductionMonth = { month: 'N/A', production: -Infinity };
+        let mostDaysWorkedMonth = { month: 'N/A', days: -Infinity };
+        let bestPayMonth = { month: 'N/A', pay: -Infinity };
+        // ** ADDED: Initialize a fourth "best of" metric **
+        let bestAvgProdDay = { month: 'N/A', avg: -Infinity };
 
-        const chartData = Array(12).fill(null).map((_, i) => {
-            const monthProduction = entries.filter(e => new Date(e.date || e.periodStartDate).getFullYear() === currentYear && new Date(e.date || e.periodStartDate).getMonth() === i && e.entryType !== 'attendanceRecord').reduce((sum, e) => sum + (e.production || 0), 0);
-            const monthPayments = payments.filter(p => new Date(p.paymentDate).getFullYear() === currentYear && new Date(p.paymentDate).getMonth() === i).reduce((sum, p) => sum + p.amount, 0);
+        const monthlyData = Array.from({ length: currentMonth + 1 }, (_, i) => {
+            const monthName = new Date(currentYear, i).toLocaleString('default', { month: 'long'});
+            const monthEntries = entries.filter(e => {
+                const dateStr = e.date || e.periodStartDate;
+                if (!dateStr) return false;
+                const date = new Date(`${dateStr}T00:00:00Z`);
+                return date.getUTCFullYear() === currentYear && date.getUTCMonth() === i;
+            });
+            const monthProduction = monthEntries.filter(e => e.entryType !== 'attendanceRecord').reduce((sum, e) => sum + (e.production || 0), 0);
+            const daysWorked = new Set(monthEntries.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
+            const monthCalculatedPay = practices.reduce((sum, p) => {
+                const practiceEntries = monthEntries.filter(e => e.practiceId === p.id);
+                const payResult = calculatePay(p, practiceEntries, currentYear, i);
+                return sum + payResult.calculatedPay;
+            }, 0);
             
-            if (!bestMonth || monthProduction > bestMonth.production) {
-                bestMonth = { month: new Date(currentYear, i).toLocaleString('default', { month: 'long'}), production: monthProduction };
-            }
+            // ** ADDED: Calculate the average production per day **
+            const avgProdPerDay = daysWorked > 0 ? monthProduction / daysWorked : 0;
 
-            return {
-                name: new Date(currentYear, i).toLocaleString('default', { month: 'short'}),
-                production: monthProduction,
-                payments: monthPayments,
-            };
+            ytdProductionTotal += monthProduction;
+            ytdCalculatedPayTotal += monthCalculatedPay;
+            
+            if (monthProduction > bestProductionMonth.production) bestProductionMonth = { month: monthName, production: monthProduction };
+            if (daysWorked > mostDaysWorkedMonth.days) mostDaysWorkedMonth = { month: monthName, days: daysWorked };
+            if (monthCalculatedPay > bestPayMonth.pay) bestPayMonth = { month: monthName, pay: monthCalculatedPay };
+            // ** ADDED: Check and set the best month for the new metric **
+            if (avgProdPerDay > bestAvgProdDay.avg) bestAvgProdDay = { month: monthName, avg: avgProdPerDay };
+
+            return { name: new Date(currentYear, i).toLocaleString('default', { month: 'short'}), production: monthProduction, calculatedPay: monthCalculatedPay, daysWorked: daysWorked };
         });
-
-        return { chartData, bestMonth };
-    }, [entries, payments]);
+        
+        // ** ADDED: Return the fourth metric from the calculation **
+        return { ytdProduction: ytdProductionTotal, ytdCalculatedPay: ytdCalculatedPayTotal, chartData: monthlyData, bestProductionMonth, mostDaysWorkedMonth, bestPayMonth, bestAvgProdDay };
+    }, [entries, practices]);
 
     return (
         <div className={styles.card}>
             <div className={styles.header}>
-                <h3 className={styles.sectionTitle}>Year-to-Date Analytics</h3>
-            </div>
-
-            <div className={styles.ytdMetrics}>
-                <div className={styles.metricItem}>
-                    <span>Total Production</span>
-                    <p>{formatCurrency(ytdProduction, true)}</p>
-                </div>
-                <div className={styles.metricItem}>
-                    <span>Total Payments</span>
-                    <p>{formatCurrency(ytdPayments, true)}</p>
+                <h3 className={styles.sectionTitle}>YTD Analytics</h3>
+                <div className={styles.tabControls}>
+                    <button onClick={() => setActiveTab('overview')} className={activeTab === 'overview' ? styles.active : ''}>Overview</button>
+                    <button onClick={() => setActiveTab('breakdown')} className={activeTab === 'breakdown' ? styles.active : ''}>Monthly Breakdown</button>
                 </div>
             </div>
 
-            <div className={styles.chartsGrid}>
-                <div className={styles.chartWrapper}>
-                    <h4 className={styles.chartTitle}><TrendingUp size={14}/> Production Trend</h4>
-                    <ProductionTrendChart data={chartData} />
-                </div>
-                <div className={styles.chartWrapper}>
-                    <h4 className={styles.chartTitle}><BarChartIcon size={14}/> Monthly Payments</h4>
-                    <PaymentsChart data={chartData} />
-                </div>
-            </div>
-            
-            <div className={styles.insights}>
-                <p>Your best production month was <strong>{bestMonth?.month || 'N/A'}</strong> with <strong>{formatCurrency(bestMonth?.production)}</strong> billed.</p>
-            </div>
+            <div className={styles.tabContent}>
+                {activeTab === 'overview' && (
+                    <div className={styles.overviewGrid}>
+                        <div className={styles.kpiItem}>
+                            <span>YTD Total Production</span>
+                            <p>{formatCurrency(analyticsData.ytdProduction, true)}</p>
+                        </div>
+                        <div className={styles.kpiItem}>
+                            <span>YTD Total Calculated Pay</span>
+                            <p>{formatCurrency(analyticsData.ytdCalculatedPay, true)}</p>
+                        </div>
+                        <div className={styles.highlights}>
+                            <HighlightCard 
+                                icon={<Trophy />} 
+                                title="Highest Production" 
+                                value={formatCurrency(analyticsData.bestProductionMonth?.production)} 
+                                subtext={`in ${analyticsData.bestProductionMonth?.month}`}
+                            />
+                             <HighlightCard 
+                                icon={<Banknote />} 
+                                title="Highest Pay" 
+                                value={formatCurrency(analyticsData.bestPayMonth?.pay)} 
+                                subtext={`in ${analyticsData.bestPayMonth?.month}`}
+                            />
+                            <HighlightCard 
+                                icon={<CalendarClock />} 
+                                title="Most Days Worked" 
+                                value={`${analyticsData.mostDaysWorkedMonth?.days} days`}
+                                subtext={`in ${analyticsData.mostDaysWorkedMonth?.month}`}
+                            />
+                             <HighlightCard 
+                                icon={<Activity />} 
+                                title="Avg. Prod / Day" 
+                                value={formatCurrency(analyticsData.bestAvgProdDay?.avg)}
+                                subtext={`in ${analyticsData.bestAvgProdDay?.month}`}
+                            />
+                        </div>
+                    </div>
+                )}
 
-             <button className={styles.viewAllButton} onClick={() => setActivePage('Reports')}>
-                Generate Annual Report <ExternalLink size={14} />
-            </button>
+                {activeTab === 'breakdown' && (
+                    <div className={styles.breakdownContainer}>
+                         <h4 className={styles.chartTitle}><BarChartIcon size={14}/> Production vs. Calculated Pay</h4>
+                         <MonthlyBreakdownChart data={analyticsData.chartData} />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
 
 export default YtdAnalytics;
-

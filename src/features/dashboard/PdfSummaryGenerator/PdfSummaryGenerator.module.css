@@ -1,17 +1,229 @@
-.panel { display: flex; flex-direction: column; gap: 2rem; width: 550px; }
-.formGroup { display: flex; flex-direction: column; gap: 0.75rem; }
-.formGroup label { font-weight: 500; color: var(--ui-text-secondary); }
-.selectWrapper { position: relative; }
-.selectWrapper select { width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid var(--ui-border-primary); -webkit-appearance: none; appearance: none; }
-.selectIcon { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; }
-.periodList { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; max-height: 200px; overflow-y: auto; background-color: var(--ui-background-tertiary); padding: 0.5rem; border-radius: 8px; }
-.periodItem { padding: 0.6rem; border-radius: 6px; text-align: center; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; }
-.periodItem:hover { background-color: var(--ui-background-primary); }
-.periodItem.selected { background-color: var(--brand-secondary); color: var(--brand-primary); font-weight: 500; border-color: var(--brand-primary); }
-.actions { display: flex; justify-content: flex-end; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--ui-border-secondary); }
-.cancelButton, .generateButton { padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
-.cancelButton { background-color: var(--ui-interactive-secondary-bg); color: var(--ui-interactive-secondary-text); border: 1px solid var(--ui-border-secondary); }
-.generateButton { background-color: var(--brand-primary); color: white; border: none; display: flex; align-items: center; gap: 0.5rem; }
-.generateButton:disabled { opacity: 0.7; }
-.spinner { animation: spin 1.5s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* ============================================
+   PDF Summary Generator -- Redesigned Modal
+   ============================================ */
+
+.modalContainer {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Fixed config panel, flexible periods panel */
+    grid-template-rows: 1fr auto; /* Main content row, action row */
+    gap: 2rem;
+
+    height: 550px;
+    background-color: var(--ui-background-primary);
+    padding: 1.5rem;
+}
+
+/* == Configuration Panel (Left) == */
+.configPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-right: 2rem;
+    border-right: 1px solid var(--ui-border-secondary);
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ui-text-primary);
+    margin-bottom: -0.5rem;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: var(--ui-text-secondary);
+    line-height: 1.5;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.formGroup label {
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+    font-size: 0.9rem;
+}
+
+.selectWrapper {
+    position: relative;
+}
+
+.selectWrapper select {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--ui-border-primary);
+    background-color: var(--ui-background-secondary);
+    color: var(--ui-text-primary);
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selectWrapper select:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px var(--brand-secondary);
+}
+
+.selectIcon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--ui-text-tertiary);
+}
+
+/* == Periods Panel (Right) == */
+.periodsPanel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Necessary for flex child to scroll */
+}
+
+.scrollContainer {
+    overflow-y: auto;
+    padding-right: 0.5rem; /* Space for scrollbar */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+/* Custom scrollbar for a refined look */
+.scrollContainer::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scrollContainer::-webkit-scrollbar-thumb {
+    background-color: var(--ui-border-primary);
+    border-radius: 10px;
+}
+
+.monthGroup {
+    /* No extra background needed, creates cleaner look */
+}
+
+.monthHeader {
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+    border-bottom: 1px solid var(--ui-border-secondary);
+}
+
+.periodList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+
+.periodItem {
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--ui-border-secondary);
+    background-color: var(--ui-background-secondary);
+    color: var(--ui-text-secondary);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.periodItem:hover {
+    border-color: var(--ui-border-primary);
+    background-color: var(--ui-background-tertiary);
+    transform: translateY(-2px);
+}
+
+.periodItem.selected {
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+    font-weight: 600;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px var(--brand-secondary);
+}
+
+.periodItem.disabled {
+    opacity: 0.5;
+    background-color: var(--ui-background-tertiary);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.noPeriods {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--ui-text-secondary);
+    font-size: 1rem;
+    background-color: var(--ui-background-tertiary);
+    border-radius: 8px;
+}
+
+/* == Actions Footer == */
+.actions {
+    grid-column: 1 / -1; /* Span both columns */
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--ui-border-secondary);
+}
+
+.cancelButton, .generateButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.cancelButton {
+    background-color: var(--ui-interactive-secondary-bg);
+    color: var(--ui-interactive-secondary-text);
+    border: 1px solid var(--ui-border-primary);
+}
+
+.cancelButton:hover {
+    background-color: var(--neutral-200); /* A bit darker for hover */
+}
+
+.generateButton {
+    background-color: var(--brand-primary);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.generateButton:hover:not(:disabled) {
+    opacity: 0.9;
+    box-shadow: var(--shadow-md);
+}
+
+.generateButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.spinner {
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

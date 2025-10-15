@@ -10,13 +10,11 @@ const CoreOverview = () => {
   const { entries } = useEntries();
 
   const practicePerformances = useMemo(() => {
+    // ... Calculation logic is unchanged ...
     if (!practices || !entries) return [];
-
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
-
-    // Calculate performance for each active practice
     return practices
       .filter(p => p.status === 'active')
       .map(practice => {
@@ -26,9 +24,7 @@ const CoreOverview = () => {
                  date.getFullYear() === currentYear && 
                  date.getMonth() === currentMonth;
         });
-
         const performanceData = calculatePay(practice, entriesInMonth);
-        
         return { practice, performance: performanceData };
       });
   }, [practices, entries]);

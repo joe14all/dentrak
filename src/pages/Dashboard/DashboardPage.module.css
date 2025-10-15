@@ -1,55 +1,32 @@
 .page {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.pageTitle {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--ui-text-primary);
+    /* No styles needed here */
 }
 
 .dashboardGrid {
-  flex-grow: 1;
-  display: grid;
-  grid-template-columns: 2fr 1fr; /* Main column is twice as wide as the sidebar */
-  gap: 2rem;
-  overflow: hidden; /* Prevent the grid itself from scrolling */
+    display: grid;
+    grid-template-columns: 1fr 420px; 
+    grid-template-rows: min-content 1fr;
+    gap: 1.5rem; /* This creates the 1.5rem gap between all rows and columns */
+    grid-template-areas:
+        "overview actions"
+        "main     sidebar";
 }
 
-.mainColumn, .sidebarColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  overflow-y: auto; /* Allow each column to scroll independently */
-  
-  /* Custom scrollbar styling for a professional look */
-  scrollbar-width: thin;
-  scrollbar-color: var(--ui-border-primary) transparent;
+.overview {
+    grid-area: overview;
 }
 
-/* Hide scrollbar until hover on Webkit browsers */
-.mainColumn::-webkit-scrollbar,
-.sidebarColumn::-webkit-scrollbar {
-  width: 8px;
-}
-.mainColumn::-webkit-scrollbar-thumb,
-.sidebarColumn::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 4px;
-}
-.mainColumn:hover::-webkit-scrollbar-thumb,
-.sidebarColumn:hover::-webkit-scrollbar-thumb {
-  background-color: var(--ui-border-primary);
+.actions {
+    grid-area: actions;
 }
 
+.main {
+    grid-area: main;
+}
+
+.sidebar {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}

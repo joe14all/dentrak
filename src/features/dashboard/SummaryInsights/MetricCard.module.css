@@ -1,183 +1,59 @@
-/* A more compact and professional design */
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  background-color: var(--ui-background-secondary);
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border-secondary);
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.sectionTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--ui-text-primary);
-  margin: 0;
-}
-
-.navigators {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.navigator { 
-    display: flex; align-items: center; gap: 0.5rem;
-    background-color: var(--ui-background-primary);
-    border: 1px solid var(--ui-border-primary);
-    border-radius: 8px;
-    padding: 4px;
-}
-.navigator span { font-size: 0.9rem; font-weight: 500; width: 120px; text-align: center; }
-.navigator button { 
-    background: var(--ui-background-tertiary); 
-    border: 1px solid var(--ui-border-secondary); 
-    padding: 0.5rem; border-radius: 6px; 
-    cursor: pointer; color: var(--ui-text-secondary); display: flex; 
-}
-.navigator button:hover { background-color: var(--ui-background-primary); }
-
-
-.summaryCards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
+/* Styles for a more compact MetricCard */
 .metricCard {
-  background-color: var(--ui-background-primary);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+    background-color: var(--ui-background-secondary);
+    border: 1px solid var(--ui-border-secondary);
+    border-radius: 12px;
+    padding: 1rem; /* Reduced padding */
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; /* Reduced gap */
 }
+
 .metricHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
 }
+
 .metricTitle {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--ui-text-secondary);
+    font-size: 0.9rem; /* Reduced font size */
+    font-weight: 600;
+    color: var(--ui-text-primary);
 }
-.trendIndicator {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.2rem 0.5rem;
-  border-radius: 99px;
-}
-.positive { color: var(--state-success); background-color: var(--state-success-bg); }
-.negative { color: var(--state-danger-text); background-color: var(--state-danger-bg); }
 
 .metricValue {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--ui-text-primary);
-  margin: 0;
-  line-height: 1;
+    font-size: 2rem; /* Reduced font size */
+    font-weight: 700;
+    color: var(--ui-text-primary);
+    line-height: 1.1;
+    margin: 0.25rem 0;
 }
+
+.trendIndicator {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 2px 8px; /* Reduced padding */
+    border-radius: 999px;
+    font-size: 0.75rem; /* Reduced font size */
+    font-weight: 600;
+}
+
+.trendIndicator.positive {
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+}
+.trendIndicator.negative {
+    background-color: var(--state-danger-bg);
+    color: var(--state-danger-text);
+}
+
 .breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ui-border-secondary);
+    margin-top: auto;
+    padding-top: 0.75rem; /* Reduced padding */
+    border-top: 1px solid var(--ui-border-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Reduced gap */
 }
-.breakdownItem {
-  display: flex;
-  justify-content: space-between;
-  color: var(--ui-text-secondary);
-}
-.breakdownValue {
-  font-weight: 500;
-  color: var(--ui-text-primary);
-}
-
-.payBreakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--ui-border-secondary);
-}
-.payBreakdown:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-.payPracticeHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.payPracticeHeader span {
-  font-weight: 500;
-  color: var(--ui-text-primary);
-}
-.payPracticeHeader small {
-  font-size: 0.75rem;
-  color: var(--ui-text-tertiary);
-}
-.periodDetail {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-left: 1rem;
-}
-.periodDateRange {
-  font-size: 0.8rem;
-  color: var(--ui-text-tertiary);
-  white-space: nowrap;
-}
-.payComponents {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  align-items: flex-end;
-}
-.payComponent {
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: space-between;
-  border: 1px solid transparent;
-  width: fit-content;
-}
-.payComponent[data-active="true"] {
-  background-color: var(--brand-secondary);
-}
-.payComponent span:first-child { color: var(--ui-text-secondary); }
-.payComponent span:last-child { font-weight: 600; color: var(--ui-text-primary); font-family: 'SF Mono', 'Menlo', monospace; }
-
-
-.chartSection {
-  background-color: var(--ui-background-primary);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--ui-border-secondary);
-}
-.chartTitle {
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--ui-text-secondary);
-  margin: 0 0 1.5rem 0;
-}
-
