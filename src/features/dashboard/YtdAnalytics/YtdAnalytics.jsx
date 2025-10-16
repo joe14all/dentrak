@@ -3,7 +3,6 @@ import styles from './YtdAnalytics.module.css';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { calculatePay } from '../../../utils/calculations';
-// ** UPDATED: Added the 'Activity' icon for the new metric **
 import { BarChart as BarChartIcon, Trophy, CalendarClock, Banknote, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -59,46 +58,73 @@ const YtdAnalytics = () => {
 
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth();
-        let ytdProductionTotal = 0, ytdCalculatedPayTotal = 0;
+        let ytdProductionTotal = 0;
+        let ytdCalculatedPayTotal = 0;
+
         let bestProductionMonth = { month: 'N/A', production: -Infinity };
         let mostDaysWorkedMonth = { month: 'N/A', days: -Infinity };
         let bestPayMonth = { month: 'N/A', pay: -Infinity };
-        // ** ADDED: Initialize a fourth "best of" metric **
         let bestAvgProdDay = { month: 'N/A', avg: -Infinity };
 
         const monthlyData = Array.from({ length: currentMonth + 1 }, (_, i) => {
             const monthName = new Date(currentYear, i).toLocaleString('default', { month: 'long'});
+            
+            // CORRECTED: This filter now correctly handles dates for all entry types.
             const monthEntries = entries.filter(e => {
-                const dateStr = e.date || e.periodStartDate;
+                const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
                 if (!dateStr) return false;
                 const date = new Date(`${dateStr}T00:00:00Z`);
                 return date.getUTCFullYear() === currentYear && date.getUTCMonth() === i;
             });
-            const monthProduction = monthEntries.filter(e => e.entryType !== 'attendanceRecord').reduce((sum, e) => sum + (e.production || 0), 0);
+
+            const financialEntries = monthEntries.filter(e => e.entryType !== 'attendanceRecord');
+            const monthProduction = financialEntries.reduce((sum, e) => sum + (e.production || 0), 0);
+            
             const daysWorked = new Set(monthEntries.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
+            
             const monthCalculatedPay = practices.reduce((sum, p) => {
                 const practiceEntries = monthEntries.filter(e => e.practiceId === p.id);
+                if(practiceEntries.length === 0) return sum;
+
                 const payResult = calculatePay(p, practiceEntries, currentYear, i);
                 return sum + payResult.calculatedPay;
             }, 0);
             
-            // ** ADDED: Calculate the average production per day **
             const avgProdPerDay = daysWorked > 0 ? monthProduction / daysWorked : 0;
 
             ytdProductionTotal += monthProduction;
             ytdCalculatedPayTotal += monthCalculatedPay;
             
-            if (monthProduction > bestProductionMonth.production) bestProductionMonth = { month: monthName, production: monthProduction };
-            if (daysWorked > mostDaysWorkedMonth.days) mostDaysWorkedMonth = { month: monthName, days: daysWorked };
-            if (monthCalculatedPay > bestPayMonth.pay) bestPayMonth = { month: monthName, pay: monthCalculatedPay };
-            // ** ADDED: Check and set the best month for the new metric **
-            if (avgProdPerDay > bestAvgProdDay.avg) bestAvgProdDay = { month: monthName, avg: avgProdPerDay };
+            if (monthProduction > bestProductionMonth.production) {
+                bestProductionMonth = { month: monthName, production: monthProduction };
+            }
+            if (daysWorked > mostDaysWorkedMonth.days) {
+                mostDaysWorkedMonth = { month: monthName, days: daysWorked };
+            }
+            if (monthCalculatedPay > bestPayMonth.pay) {
+                bestPayMonth = { month: monthName, pay: monthCalculatedPay };
+            }
+            if (avgProdPerDay > bestAvgProdDay.avg) {
+                bestAvgProdDay = { month: monthName, avg: avgProdPerDay };
+            }
 
-            return { name: new Date(currentYear, i).toLocaleString('default', { month: 'short'}), production: monthProduction, calculatedPay: monthCalculatedPay, daysWorked: daysWorked };
+            return { 
+                name: new Date(currentYear, i).toLocaleString('default', { month: 'short'}), 
+                production: monthProduction, 
+                calculatedPay: monthCalculatedPay, 
+                daysWorked: daysWorked 
+            };
         });
         
-        // ** ADDED: Return the fourth metric from the calculation **
-        return { ytdProduction: ytdProductionTotal, ytdCalculatedPay: ytdCalculatedPayTotal, chartData: monthlyData, bestProductionMonth, mostDaysWorkedMonth, bestPayMonth, bestAvgProdDay };
+        return { 
+            ytdProduction: ytdProductionTotal, 
+            ytdCalculatedPay: ytdCalculatedPayTotal, 
+            chartData: monthlyData, 
+            bestProductionMonth, 
+            mostDaysWorkedMonth, 
+            bestPayMonth, 
+            bestAvgProdDay 
+        };
     }, [entries, practices]);
 
     return (

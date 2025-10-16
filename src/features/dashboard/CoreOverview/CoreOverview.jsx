@@ -10,21 +10,35 @@ const CoreOverview = () => {
   const { entries } = useEntries();
 
   const practicePerformances = useMemo(() => {
-    // ... Calculation logic is unchanged ...
-    if (!practices || !entries) return [];
+    console.log("--- [Core Overview] Recalculating ---");
+    if (!practices || !entries) {
+      console.log("[Core Overview] Missing practices or entries.");
+      return [];
+    }
+
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
+    console.log(`[Core Overview] Calculating for Year: ${currentYear}, Month: ${currentMonth}`);
+
     return practices
       .filter(p => p.status === 'active')
       .map(practice => {
         const entriesInMonth = entries.filter(e => {
-          const date = new Date(e.date || e.periodStartDate);
+          const dateStr = e.date || e.periodStartDate;
+          if (!dateStr) return false;
+          // CORRECTED: Parse date as UTC to prevent timezone shifts.
+          const date = new Date(`${dateStr}T00:00:00Z`);
           return e.practiceId === practice.id && 
-                 date.getFullYear() === currentYear && 
-                 date.getMonth() === currentMonth;
+                 date.getUTCFullYear() === currentYear && 
+                 date.getUTCMonth() === currentMonth;
         });
-        const performanceData = calculatePay(practice, entriesInMonth);
+
+        console.log(`  - Practice: ${practice.name}, Found ${entriesInMonth.length} entries for this month.`);
+        
+        const performanceData = calculatePay(practice, entriesInMonth, currentYear, currentMonth);
+        console.log(`  - Performance Data for ${practice.name}:`, performanceData);
+        
         return { practice, performance: performanceData };
       });
   }, [practices, entries]);
