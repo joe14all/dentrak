@@ -10,10 +10,10 @@
   overflow: auto; /* Allows the content (list or calendar) to scroll */
   scrollbar-width: none;
   display: flex; /* Ensures the child takes up the full height */
+  padding: 0 1rem; /* Add padding to contain the scrolling content */
 }
 
 /* Make sure the direct child of viewContent fills the space */
 .viewContent > * {
     flex-grow: 1;
 }
-

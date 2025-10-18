@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { usePayments } from '../../contexts/PaymentContext/PaymentContext';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import PaymentsToolbar from '../../features/payments/PaymentsToolbar';
+import PaymentsSummary from '../../features/payments/PaymentsSummary'; // Import the new component
 import PaymentsList from '../../features/payments/PaymentsList';
 import Modal from '../../components/common/Modal/Modal';
 import PaymentForm from '../../features/payments/form-components/PaymentForm';
@@ -36,6 +37,15 @@ const PaymentsPage = () => {
       return practiceMatch && methodMatch && startDateMatch && endDateMatch;
     });
   }, [payments, filters]);
+
+  // Calculate summary data from the filtered payments
+  const paymentsSummaryData = useMemo(() => {
+    return filteredPayments.reduce((acc, payment) => {
+      acc.totalAmount += payment.amount || 0;
+      acc.paymentCount += 1;
+      return acc;
+    }, { totalAmount: 0, paymentCount: 0 });
+  }, [filteredPayments]);
 
   const handleOpenAddModal = () => {
     setPaymentToEdit(null);
@@ -83,6 +93,7 @@ const PaymentsPage = () => {
         onFilterChange={setFilters}
         onAddPayment={handleOpenAddModal}
       />
+      <PaymentsSummary summaryData={paymentsSummaryData} />
       <div className={styles.content}>
         <PaymentsList
           payments={filteredPayments}
@@ -108,4 +119,3 @@ const PaymentsPage = () => {
 };
 
 export default PaymentsPage;
-

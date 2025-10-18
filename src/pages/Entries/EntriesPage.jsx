@@ -3,8 +3,9 @@ import { useEntries } from '../../contexts/EntryContext/EntryContext';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import PageHeader from '../../features/entries/PageHeader';
 import PerformanceToolbar from '../../features/entries/PerformanceToolbar';
+import PerformanceSummary from '../../features/entries/PerformanceSummary'; // Import the new component
 import EntriesList from '../../features/entries/EntriesList';
-import AttendanceTracker from '../../features/entries/attendance/AttendanceTracker'; 
+import AttendanceTracker from '../../features/entries/attendance/AttendanceTracker';
 import Modal from '../../components/common/Modal/Modal';
 import EntryForm from '../../features/entries/form-components/EntryForm';
 import DeleteConfirmation from '../../features/entries/DeleteConfirmation';
@@ -13,7 +14,7 @@ import styles from './EntriesPage.module.css';
 const EntriesPage = () => {
   const { entries, isLoading, addNewEntry, editEntry, removeEntry } = useEntries();
   const { practices } = usePractices();
-  
+
   const [activeView, setActiveView] = useState('performance');
   const [filters, setFilters] = useState({
     practiceId: 'all',
@@ -32,7 +33,6 @@ const EntriesPage = () => {
     
     let performanceEntries = entries.filter(entry => entry.entryType !== 'attendanceRecord');
 
-    // Apply advanced filters with robust logic
     if (filters.practiceId !== 'all') {
       performanceEntries = performanceEntries.filter(e => e.practiceId === parseInt(filters.practiceId));
     }
@@ -40,11 +40,9 @@ const EntriesPage = () => {
       performanceEntries = performanceEntries.filter(e => filters.entryTypes.includes(e.entryType));
     }
     
-    // THE FIX: More robust date range filtering that handles overlaps.
     if (filters.startDate) {
       const startDateFilter = new Date(`${filters.startDate}T00:00:00Z`);
       performanceEntries = performanceEntries.filter(e => {
-        // For period summaries, check if the period ENDS on or after the filter start date.
         const dateStr = e.entryType === 'periodSummary' ? e.periodEndDate : e.date;
         if (!dateStr) return false;
         return new Date(`${dateStr}T00:00:00Z`) >= startDateFilter;
@@ -53,7 +51,6 @@ const EntriesPage = () => {
     if (filters.endDate) {
       const endDateFilter = new Date(`${filters.endDate}T00:00:00Z`);
       performanceEntries = performanceEntries.filter(e => {
-        // For period summaries, check if the period STARTS on or before the filter end date.
         const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
         if (!dateStr) return false;
         return new Date(`${dateStr}T00:00:00Z`) <= endDateFilter;
@@ -62,6 +59,17 @@ const EntriesPage = () => {
 
     return performanceEntries;
   }, [entries, filters]);
+
+  // Calculate summary data from the filtered entries
+  const performanceSummaryData = useMemo(() => {
+    return filteredPerformanceEntries.reduce((acc, entry) => {
+      acc.totalProduction += entry.production || 0;
+      acc.totalCollection += entry.collection || 0;
+      acc.totalAdjustments += (entry.adjustments || []).reduce((sum, adj) => sum + adj.amount, 0);
+      return acc;
+    }, { totalProduction: 0, totalCollection: 0, totalAdjustments: 0 });
+  }, [filteredPerformanceEntries]);
+
 
   const handleOpenAddModal = () => {
     setEntryToEdit(null);
@@ -99,19 +107,23 @@ const EntriesPage = () => {
 
   return (
     <div className={styles.entriesPage}>
-      <PageHeader 
+      <PageHeader
         title="Entries"
         activeView={activeView}
         setActiveView={setActiveView}
       />
       
       {activeView === 'performance' && (
-        <PerformanceToolbar
-          practices={practices}
-          activeFilters={filters}
-          onFilterChange={setFilters}
-          onAddEntry={handleOpenAddModal}
-        />
+        <>
+          <PerformanceToolbar
+            practices={practices}
+            activeFilters={filters}
+            onFilterChange={setFilters}
+            onAddEntry={handleOpenAddModal}
+          />
+          {/* Add the new summary component here */}
+          <PerformanceSummary summaryData={performanceSummaryData} />
+        </>
       )}
       
       <div className={styles.viewContent}>
@@ -149,4 +161,3 @@ const EntriesPage = () => {
 };
 
 export default EntriesPage;
-

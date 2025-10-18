@@ -27,8 +27,12 @@ const PeriodCard = ({ periodData, practice }) => {
             <div className={styles.periodContent}>
                 <div className={styles.detailGrid}>
                     <div className={styles.detailItem}><span>Production in Period</span><span>{formatCurrency(p.productionTotal)}</span></div>
-                    <div className={styles.detailItem}><span>Total Adjustments</span><span>-{formatCurrency(p.totalAdjustments)}</span></div>
-                    <div className={styles.detailItem}><span>Net for Calculation</span><span>{formatCurrency(p.netBase)}</span></div>
+                    {p.totalAdjustments > 0 && (
+                        <>
+                            <div className={styles.detailItem}><span>Total Adjustments</span><span>-{formatCurrency(p.totalAdjustments)}</span></div>
+                            <div className={styles.detailItem}><span>Net for Calculation</span><span>{formatCurrency(p.netBase)}</span></div>
+                        </>
+                    )}
                 </div>
                 <div className={styles.detailGrid}>
                     <div className={`${styles.detailItem} ${!isProductionPay && p.basePayOwed > 0 ? styles.activePay : ''}`}>
@@ -132,4 +136,3 @@ const PdfDocument = ({ practice, periods }) => {
 };
 
 export default PdfDocument;
-
