@@ -1,115 +1,219 @@
+/* ================================== */
+/* Balance Tracker Card - Uplifted    */
+/* ================================== */
+
 .card {
     background-color: var(--ui-background-secondary);
     border: 1px solid var(--ui-border-secondary);
     border-radius: 12px;
-    padding: 1.25rem;
+    padding: 1rem 1.25rem; /* Adjusted padding */
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1rem; /* Consistent gap */
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    overflow: hidden;
 }
 
-/* --- New Hero Section --- */
+.card.isEmpty {
+    padding: 0;
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    justify-content: center;
+}
+.card.isEmpty .heroSection { display: none; }
+.card.isEmpty .viewAllButton { display: none; }
+.card.isEmpty .balanceList { display: none; }
+.card.isEmpty .emptyState { display: flex; height: 100%; }
+
+
+/* ================================== */
+/* Header / Hero Section             */
+/* ================================== */
+
 .heroSection {
-    text-align: left;
-    padding-bottom: 1rem;
+    padding-bottom: 0.75rem; /* Space below hero */
     border-bottom: 1px solid var(--ui-border-secondary);
 }
 
 .title {
-    font-size: 0.9rem;
+    font-size: 0.75rem; /* Smaller title */
     font-weight: 500;
-    color: var(--ui-text-secondary);
-    margin-bottom: 0.25rem;
+    color: var(--ui-text-tertiary); /* More subtle */
+    margin-bottom: 0.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .totalAmount {
-    font-size: 2.25rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--ui-text-primary);
-    line-height: 1;
+    line-height: 1.2;
+}
+.totalSubtext {
+    font-size: 0.75rem;
+    color: var(--ui-text-secondary);
+    display: block; /* Put on new line */
+    margin-top: 0.1rem;
 }
 
-/* --- Balance List --- */
+
+/* ================================== */
+/* Balance List & Items             */
+/* ================================== */
+
 .balanceList {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem; /* Tighter gap between items */
+    /* Allow scrolling if needed, hide scrollbar */
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
+.balanceList::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
 
 .balanceItem {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    padding: 0.75rem;
-    border-radius: 8px;
-    background-color: var(--ui-background-primary);
-    border: 1px solid var(--ui-border-secondary);
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem; /* Slightly reduced padding */
+    border-radius: 6px; /* Match button radius */
+    background-color: transparent; /* Transparent item background */
+    border: 1px solid transparent; /* Transparent border */
+    border-left-width: 3px; /* Keep left border for state */
     transition: background-color 0.2s ease;
 }
-
-/* ** NEW: Style to make overdue items stand out ** */
-.overdueItem {
-    background-color: var(--state-danger-bg);
-    border-left: 3px solid var(--state-danger);
-}
-.overdueItem .practiceName, .overdueItem .amountOwed {
-    color: var(--ui-text-primary);
-    font-weight: 600;
+.balanceItem:hover {
+    background-color: var(--ui-background-tertiary); /* Subtle hover */
 }
 
+/* State Styling using Borders + Subtle Backgrounds */
+.isOverdue { border-left-color: var(--state-danger); background-color: var(--state-danger-bg); }
+.isW2 { border-left-color: var(--state-warning); background-color: var(--state-warning-bg); }
+.isPendingClearance { border-left-color: var(--ui-text-tertiary); background-color: var(--ui-background-tertiary); }
+.isDueSoon { border-left-color: var(--state-info-text, var(--brand-primary)); background-color: var(--state-info-bg, var(--brand-secondary)); }
+
+
+/* Left Column: Practice Info */
 .practiceInfo {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.15rem; /* Very tight */
     align-items: flex-start;
+    min-width: 0;
 }
 
 .practiceName {
     font-weight: 500;
     color: var(--ui-text-primary);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.isOverdue .practiceName { color: var(--state-danger-text); font-weight: 600; }
+.isW2 .practiceName { color: var(--state-warning); font-weight: 600; }
+
+
+/* Right Column: Amount Info */
+.amountInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem; /* Tight gap */
+    text-align: right;
+    flex-shrink: 0;
 }
 
-.amountOwed {
+.amountPrimary { /* Main balance or W2 estimate */
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem; /* Slightly smaller primary amount */
     color: var(--ui-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+.isOverdue .amountPrimary { color: var(--state-danger-text); }
+.w2Amount { /* Specific style for W2 amount */
+    font-style: italic;
+    color: var(--ui-text-secondary);
+    font-weight: 500;
+}
+.isOverdue .w2Amount { color: var(--state-warning); } /* Keep W2 amount less prominent */
+
+
+.amountSecondaryGroup {
+    display: flex;
+    align-items: center; /* Align secondary items horizontally */
+    gap: 0.5rem; /* Add gap between secondary items */
+    margin-top: 0.1rem;
 }
 
-/* --- Status Tags --- */
+.amountSecondary { /* Base style for Pending and Current Est. */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem; /* Even smaller secondary text */
+    font-weight: 500;
+    color: var(--ui-text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap; /* Prevent wrapping */
+}
+.amountSecondary svg { width: 10px; height: 10px; } /* Smaller icons */
+
+.currentEstimate { color: var(--state-success); }
+.pendingPaymentBadge {
+    /* Uses .amountSecondary base styles */
+    color: var(--ui-text-tertiary);
+    /* Remove background/border for cleaner look */
+}
+
+
+/* ================================== */
+/* Status Tags - Refined Visuals      */
+/* ================================== */
+
 .statusTag {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1.2;
+    gap: 0.3rem;
+    padding: 0.1rem 0.4rem; /* Tighter padding */
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-top: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    border: 1px solid transparent;
 }
-.statusIcon {
-    /* To perfectly align icon with text */
-    position: relative;
-    top: -1px;
-}
+.statusIcon { flex-shrink: 0; position: relative; top: 0px; margin-right: 0.1rem; }
 
-.statusTag.pending {
-    background-color: var(--state-warning-bg);
-    color: var(--state-warning);
-}
+/* Status Colors using Theme Variables */
+/* Base colors - more subtle now, rely on item border */
+.statusTag.statusPaid { color: var(--state-success); background-color: transparent; border-color: transparent;}
+.statusTag.statusDueSoon { color: var(--state-info-text, var(--brand-primary)); background-color: transparent; border-color: transparent;}
+.statusTag.statusW2 { color: var(--state-warning); background-color: transparent; border-color: transparent;}
+.statusTag.statusPendingClearance { color: var(--ui-text-tertiary); background-color: transparent; border-color: transparent;}
+.statusTag.statusOverdue { color: var(--state-danger-text); background-color: transparent; border-color: transparent;}
 
-.statusTag.overdue {
-    background-color: var(--state-danger-bg);
-    color: var(--state-danger-text);
-}
-/* Overdue item gets a more prominent tag style */
-.overdueItem .statusTag.overdue {
-    background-color: var(--state-danger);
-    color: white;
-}
+/* Enhance tag within specifically styled items */
+.isOverdue .statusTag.statusOverdue { background-color: var(--state-danger); color: white; border-color: var(--state-danger); }
+.isW2 .statusTag.statusW2 { background-color: var(--state-warning); color: var(--neutral-800); border-color: var(--state-warning); } /* Darker text on warning bg */
+.isDueSoon .statusTag.statusDueSoon { background-color: var(--state-info-bg, var(--brand-secondary)); color: var(--state-info-text, var(--brand-primary)); border-color: var(--state-info-bg, var(--brand-secondary)); }
+.isPendingClearance .statusTag.statusPendingClearance { background-color: var(--ui-background-tertiary); color: var(--ui-text-secondary); border-color: var(--ui-border-secondary); }
 
 
-/* --- New Empty State --- */
+/* ================================== */
+/* Empty State & Footer Button        */
+/* ================================== */
+
 .emptyState {
     display: flex;
     flex-direction: column;
@@ -117,45 +221,51 @@
     justify-content: center;
     text-align: center;
     padding: 2rem 1rem;
-    color: var(--state-success);
+    color: var(--ui-text-secondary);
+    flex-grow: 1; /* Fill available space */
+    min-height: 150px;
+}
+.emptyIcon {
+    color: var(--state-success); /* Use theme color */
+    margin-bottom: 0.75rem;
 }
 .emptyState p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
-    margin-top: 0.75rem;
+    color: var(--ui-text-primary);
+    margin: 0 0 0.25rem 0;
 }
 .emptyState span {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--ui-text-secondary);
-    margin-top: 0.25rem;
 }
 
-/* The card is smaller when empty */
-.card.isEmpty {
-    padding-bottom: 1rem;
-}
-.card.isEmpty .heroSection {
-    border-bottom: none;
-}
-
-
-/* --- View All Button --- */
+/* View All Button */
 .viewAllButton {
-    background: none;
+    background-color: transparent;
     border: none;
-    color: var(--ui-text-accent);
+    color: var(--ui-text-accent); /* Use accent color */
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* Smaller */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 6px;
-    margin-top: 0.5rem;
-    transition: background-color 0.2s ease;
+    gap: 0.25rem;
+    padding: 0.5rem 0; /* Only vertical padding */
+    margin-top: auto; /* Push to bottom */
+    padding-top: 0.75rem; /* Add space above button */
+    border-top: 1px solid var(--ui-border-secondary); /* Separator */
+    transition: color 0.2s ease;
+    width: calc(100% + 2.5rem); /* Span full width including padding */
+    margin-left: -1.25rem; /* Offset padding */
+    margin-right: -1.25rem;
+    margin-bottom: -1.25rem; /* Offset padding */
+    border-radius: 0 0 12px 12px; /* Round bottom corners */
 }
 .viewAllButton:hover {
-    background-color: var(--ui-background-tertiary);
+    color: var(--ui-text-primary);
+    background-color: var(--ui-background-tertiary); /* Subtle hover */
 }
+.viewAllButton svg { transition: transform 0.2s ease; }
+.viewAllButton:hover svg { transform: translateX(3px); }
