@@ -10,16 +10,14 @@ const CoreOverview = () => {
   const { entries } = useEntries();
 
   const practicePerformances = useMemo(() => {
-    console.log("--- [Core Overview] Recalculating ---");
     if (!practices || !entries) {
-      console.log("[Core Overview] Missing practices or entries.");
       return [];
     }
 
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
-    console.log(`[Core Overview] Calculating for Year: ${currentYear}, Month: ${currentMonth}`);
+
 
     return practices
       .filter(p => p.status === 'active')
@@ -34,10 +32,9 @@ const CoreOverview = () => {
                  date.getUTCMonth() === currentMonth;
         });
 
-        console.log(`  - Practice: ${practice.name}, Found ${entriesInMonth.length} entries for this month.`);
         
         const performanceData = calculatePay(practice, entriesInMonth, currentYear, currentMonth);
-        console.log(`  - Performance Data for ${practice.name}:`, performanceData);
+
         
         return { practice, performance: performanceData };
       });
