@@ -34,25 +34,47 @@ const TransactionsPage = () => {
 
   // Refactored to have a consistent API (add, edit, remove) for each view.
   const views = useMemo(() => {
+    // Combine all transactions WITH their type for the 'all' view
     const allTransactions = [
       ...cheques.map(t => ({ ...t, type: 'cheques', uniqueId: `cheque-${t.id}` })),
       ...directDeposits.map(t => ({ ...t, type: 'directDeposits', uniqueId: `deposit-${t.id}` })),
       ...eTransfers.map(t => ({ ...t, type: 'eTransfers', uniqueId: `transfer-${t.id}` })),
     ].sort((a, b) => new Date(b.dateReceived || b.paymentDate) - new Date(a.dateReceived || a.paymentDate));
-    
+
     return {
       all: { label: 'All', icon: List, data: allTransactions },
-      cheques: { label: 'Cheques', icon: CreditCard, data: cheques, add: addNewCheque, edit: editCheque, remove: removeCheque },
-      directDeposits: { label: 'Direct Deposits', icon: Landmark, data: directDeposits, add: addNewDirectDeposit, edit: editDirectDeposit, remove: removeDirectDeposit },
-      eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: eTransfers, add: addNewETransfer, edit: editETransfer, remove: removeETransfer },
+      // FIX: Add the 'type' property when mapping data for specific views
+      cheques: {
+        label: 'Cheques',
+        icon: CreditCard,
+        data: cheques.map(t => ({ ...t, type: 'cheques' })), // Add type here
+        add: addNewCheque,
+        edit: editCheque,
+        remove: removeCheque
+      },
+      directDeposits: {
+        label: 'Direct Deposits',
+        icon: Landmark,
+        data: directDeposits.map(t => ({ ...t, type: 'directDeposits' })), // Add type here
+        add: addNewDirectDeposit,
+        edit: editDirectDeposit,
+        remove: removeDirectDeposit
+      },
+      eTransfers: {
+        label: 'E-Transfers',
+        icon: MousePointerClick,
+        data: eTransfers.map(t => ({ ...t, type: 'eTransfers' })), // Add type here
+        add: addNewETransfer,
+        edit: editETransfer,
+        remove: removeETransfer
+      },
     };
   }, [
-      cheques, directDeposits, eTransfers, 
+      cheques, directDeposits, eTransfers,
       addNewCheque, editCheque, removeCheque,
       addNewDirectDeposit, editDirectDeposit, removeDirectDeposit,
       addNewETransfer, editETransfer, removeETransfer
   ]);
-
   const handleOpenAddModal = () => { setTransactionToEdit(null); setFormModalOpen(true); };
   const handleOpenEditModal = (transaction) => { setTransactionToEdit(transaction); setFormModalOpen(true); };
   const handleOpenDeleteModal = (transactionId, type) => { setTransactionToDelete({ id: transactionId, type }); setDeleteModalOpen(true); };

@@ -44,5 +44,16 @@ export const updateETransfer = async (id, updatedData) => {
  * @param {number} id
  */
 export const deleteETransfer = async (id) => {
-  return await db.eTransfers.delete(id);
+  console.log(`[eTransfers.js] Attempting to delete e-transfer with ID: ${id}`); // Added log
+  try {
+    const result = await db.eTransfers.delete(id);
+    console.log(`[eTransfers.js] Deletion result for ID ${id}:`, result); // Added log
+    return result;
+  } catch (error) {
+    console.error(
+      `[eTransfers.js] Error deleting e-transfer with ID ${id}:`,
+      error
+    ); // Added error log
+    throw error; // Re-throw the error after logging
+  }
 };

@@ -316,20 +316,7 @@ export const mockCheques = [
  */
 
 /** @type {DirectDeposit[]} */
-export const mockDirectDeposits = [
-  {
-    id: 1,
-    practiceId: 2,
-    linkedPaymentId: 2,
-    paymentDate: "2025-10-05",
-    amount: 7200.0,
-    payPeriodStartDate: "2025-09-16",
-    payPeriodEndDate: "2025-09-30",
-    transactionId: "DD-987654",
-    paystubImage: null,
-    notes: "Standard bi-weekly payroll deposit.",
-  },
-];
+export const mockDirectDeposits = [{}];
 
 // --- 3. New E-Transfer Schema ---
 
@@ -350,20 +337,7 @@ export const mockDirectDeposits = [
  */
 
 /** @type {ETransfer[]} */
-export const mockETransfers = [
-  {
-    id: 1,
-    practiceId: 3,
-    linkedPaymentId: 3,
-    paymentDate: "2025-10-03",
-    amount: 4750.0,
-    confirmationNumber: "ETR-ABC123XYZ",
-    senderEmail: "accounting@ruralclinic.com",
-    status: "Accepted",
-    screenshotImage: null,
-    notes: "Security answer: 'dentist'",
-  },
-];
+export const mockETransfers = [];
 
 /**
  * Represents a single payment received from a practice.

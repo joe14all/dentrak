@@ -46,5 +46,18 @@ export const updateDirectDeposit = async (id, updatedData) => {
  * @param {number} id
  */
 export const deleteDirectDeposit = async (id) => {
-  return await db.directDeposits.delete(id);
+  console.log(
+    `[directDeposits.js] Attempting to delete direct deposit with ID: ${id}`
+  ); // Added log
+  try {
+    const result = await db.directDeposits.delete(id);
+    console.log(`[directDeposits.js] Deletion result for ID ${id}:`, result); // Added log
+    return result;
+  } catch (error) {
+    console.error(
+      `[directDeposits.js] Error deleting direct deposit with ID ${id}:`,
+      error
+    ); // Added error log
+    throw error; // Re-throw the error after logging
+  }
 };

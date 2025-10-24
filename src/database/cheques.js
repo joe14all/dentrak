@@ -45,5 +45,13 @@ export const updateCheque = async (id, updatedData) => {
  * @param {number} id
  */
 export const deleteCheque = async (id) => {
-  return await db.cheques.delete(id);
+  console.log(`[cheques.js] Attempting to delete cheque with ID: ${id}`); // Added log
+  try {
+    const result = await db.cheques.delete(id);
+    console.log(`[cheques.js] Deletion result for ID ${id}:`, result); // Added log (result might be undefined or 1 depending on Dexie version/operation success)
+    return result;
+  } catch (error) {
+    console.error(`[cheques.js] Error deleting cheque with ID ${id}:`, error); // Added error log
+    throw error; // Re-throw the error after logging
+  }
 };
