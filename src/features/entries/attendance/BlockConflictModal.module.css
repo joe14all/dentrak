@@ -1,0 +1,93 @@
+.container {
+  padding: 1.5rem 2rem;
+  text-align: center;
+  max-width: 500px; /* Wider for conflict list */
+  margin: 0 auto;
+}
+
+.iconWrapper {
+    margin-bottom: 1rem;
+}
+
+.alertIcon {
+    color: var(--state-warning); /* Warning instead of danger */
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.message {
+  color: var(--ui-text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.conflictList {
+    background-color: var(--ui-background-tertiary);
+    border: 1px solid var(--ui-border-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    text-align: left;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.conflictList h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ui-text-primary);
+}
+
+.conflictList ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ui-text-secondary);
+}
+.conflictList li {
+    padding: 0.25rem 0;
+}
+
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.cancelButton, .confirmButton {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cancelButton {
+  background-color: var(--ui-interactive-secondary-bg);
+  color: var(--ui-interactive-secondary-text);
+  border: 1px solid var(--ui-border-primary);
+}
+.cancelButton:hover {
+  background-color: var(--ui-background-tertiary);
+}
+
+.confirmButton {
+  background-color: var(--state-warning); /* Orange for confirm */
+  color: var(--neutral-800); /* Darker text on orange */
+}
+.confirmButton:hover {
+  background-color: #f59e0b; /* Slightly darker orange */
+  opacity: 0.9;
+}

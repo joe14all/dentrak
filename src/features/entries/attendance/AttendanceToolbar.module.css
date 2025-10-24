@@ -99,3 +99,38 @@
   cursor: not-allowed;
 }
 
+/* ... (existing styles) ... */
+
+/* Mode Switcher Styles (similar to other segmented controls) */
+.modeSwitcher {
+  display: flex;
+  background-color: var(--ui-background-tertiary);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid var(--ui-border-secondary);
+}
+
+.modeButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem; /* Adjust padding as needed */
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ui-text-secondary);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.modeButton:hover:not(.active) {
+  color: var(--ui-text-primary);
+}
+
+.modeButton.active {
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  box-shadow: var(--shadow-sm);
+}

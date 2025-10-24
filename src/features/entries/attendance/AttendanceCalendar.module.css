@@ -139,3 +139,77 @@
     text-decoration: line-through;
 }
 
+/* ... (existing styles) ... */
+
+/* Styles for Blocked Days */
+.dayBlocked {
+  background-color: var(--ui-background-tertiary); /* Example: Light gray */
+  cursor: not-allowed; /* Indicate non-interactive for attendance */
+}
+.dayBlocked .dayNumber {
+    color: var(--ui-text-tertiary);
+}
+
+/* Style for the block icon in the header */
+.blockStatusIcon {
+    color: var(--ui-text-tertiary); /* Default subtle color */
+    margin-left: auto; /* Push to the right */
+}
+
+/* Style for days staged to be blocked */
+.stagedBlockAdd {
+    background-color: #e0e7ff; /* Light indigo background */
+    border: 1px dashed #6366f1; /* Indigo dashed border */
+}
+.stagedBlockAdd .blockStatusIcon {
+    color: #4f46e5; /* Indigo color for icon */
+}
+
+/* Style for days staged to be unblocked */
+.stagedBlockRemove {
+     background-color: var(--ui-background-primary); /* Keep original background */
+     position: relative; /* Needed for pseudo-element */
+}
+/* Add a subtle line-through effect visually */
+.stagedBlockRemove::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    border-top: 2px solid var(--state-danger); /* Red line */
+    opacity: 0.6;
+    transform: translateY(-50%);
+}
+.stagedBlockRemove .blockStatusIcon {
+    color: var(--state-danger); /* Red color for icon */
+}
+
+
+/* Style for attendance dots when the day is blocked */
+.dotDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none; /* Disable pointer events */
+}
+
+/* Ensure block click works even with dots */
+.dayCell {
+    /* ... existing styles ... */
+    cursor: default; /* Default cursor for the cell */
+}
+.dayCell.stagedBlockAdd,
+.dayCell.stagedBlockRemove,
+.dayCell.dayBlocked {
+     /* Allow pointer events only if in block mode */
+     cursor: pointer;
+}
+
+/* Adjust practice dot cursor */
+.dot {
+    /* ... existing styles ... */
+    cursor: pointer; /* Default cursor for dots */
+}
+.dot.dotDisabled {
+    cursor: not-allowed; /* Not-allowed cursor when disabled */
+}

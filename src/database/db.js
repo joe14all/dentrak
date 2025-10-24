@@ -1,39 +1,39 @@
+/* eslint-disable no-unused-vars */
 import Dexie from "dexie";
 
 export const db = new Dexie("DentrakDatabase");
 
-// Increment the version number from 6 to 7
+// Version 7: Adds scheduleBlocks table.
 db.version(7)
   .stores({
     practices: "++id, name, status, taxStatus",
     entries: "++id, practiceId, date, entryType",
-    // Add '&linkedChequeId' to index this field (the '&' makes it optional/sparse)
-    payments: "++id, practiceId, paymentDate, &linkedChequeId",
+    payments: "++id, practiceId, paymentDate",
     cheques: "++id, practiceId, status, dateReceived",
     directDeposits: "++id, practiceId, paymentDate",
     eTransfers: "++id, practiceId, status, paymentDate",
-    // Define reports store if it wasn't explicitly defined before (or keep existing definition)
-    reports: "++id, createdAt", // Example definition, adjust if needed
+    scheduleBlocks: "++id, startDate, endDate", // New table for schedule blocks
   })
-  // eslint-disable-next-line no-unused-vars
   .upgrade((tx) => {
-    // Optional: Add upgrade logic here if needed for existing data,
-    // but for just adding an index, Dexie often handles it automatically.
+    // Migration logic for future versions can go here if needed.
+    // For adding a table, Dexie handles it automatically if the table doesn't exist.
     console.log(
-      "Upgrading database schema to version 7: Added index for linkedChequeId on payments."
+      "Upgrading database to version 7, adding scheduleBlocks table if it doesn't exist."
     );
   });
 
-// If you had older versions, keep them but make sure the latest one is version 7
-// Example: Keep version 6 definition if it exists
+// Apply previous versions migrations if necessary (e.g., coming from v6 or lower)
 db.version(6).stores({
   practices: "++id, name, status, taxStatus",
   entries: "++id, practiceId, date, entryType",
-  payments: "++id, practiceId, paymentDate", // Old definition without the index
+  payments: "++id, practiceId, paymentDate",
   cheques: "++id, practiceId, status, dateReceived",
   directDeposits: "++id, practiceId, paymentDate",
   eTransfers: "++id, practiceId, status, paymentDate",
-  reports: "++id, createdAt", // Assuming reports was added in v6 or earlier
+  // Removed 'preferences' table from previous schemas if upgrading from < v6
 });
 
-// Add other older versions if they exist below version 6...
+// Ensure DB is open
+db.open().catch((err) => {
+  console.error(`Failed to open db: ${err.stack || err}`);
+});
