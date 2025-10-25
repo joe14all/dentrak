@@ -1,0 +1,23 @@
+/* Reuse existing page styles for consistency */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 1rem; /* Add padding consistent with other pages */
+}
+
+.content {
+  flex-grow: 1;
+  overflow: auto; /* Allow the list to scroll */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+.content::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+
+/* Ensure the list component grows */
+.content > * {
+    flex-grow: 1;
+}

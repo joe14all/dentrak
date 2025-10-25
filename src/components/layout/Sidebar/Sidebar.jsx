@@ -5,7 +5,7 @@ import { useNavigation } from '../../../contexts/NavigationContext/NavigationCon
 
 // Correctly import the image files to get their paths
 import logo from '../../../assets/images/logo.png';
-import name from '../../../assets/images/name.png'; 
+import name from '../../../assets/images/name.png';
 
 import { LayoutDashboard, Building2, PenSquare, Banknote, Receipt, FileText, Settings, Lock } from 'lucide-react';
 
@@ -13,19 +13,21 @@ const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
     { name: 'Practices', icon: Building2 },
     { name: 'Entries', icon: PenSquare },
-    { name: 'Payments', icon: Banknote },
-    { name: 'Transactions', icon: Receipt }, 
+    // { name: 'Payments', icon: Banknote },
+    // { name: 'Transactions', icon: Receipt }, 
+    { name: 'Financials', icon: Receipt },
     { name: 'Reports', icon: FileText },
     { name: 'Settings', icon: Settings },
 ];
 
 // The component is now simpler and only relies on hover (handled in CSS)
 const Sidebar = ({ onMouseEnter, onMouseLeave }) => {
-    const { lockApp } = useAuth();
+    // lockApp is deprecated, use logout instead if needed, or remove if unused.
+    const { logout } = useAuth(); // Changed from lockApp
     const { activePage, setActivePage } = useNavigation();
 
     return (
-        <aside 
+        <aside
           className={styles.sidebar}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
@@ -48,7 +50,8 @@ const Sidebar = ({ onMouseEnter, onMouseLeave }) => {
                 </ul>
             </nav>
             <div className={styles.footer}>
-                <button onClick={lockApp} className={styles.lockButton}>
+                {/* Updated button to use logout if locking isn't the desired action */}
+                <button onClick={logout} className={styles.lockButton}>
                     <Lock className={styles.icon} size={16} />
                     <span className={styles.navText}>Lock App</span>
                 </button>
@@ -58,4 +61,3 @@ const Sidebar = ({ onMouseEnter, onMouseLeave }) => {
 };
 
 export default Sidebar;
-
