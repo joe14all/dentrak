@@ -2,15 +2,17 @@ import React, { useMemo, useState } from 'react';
 import styles from './SummaryInsights.module.css';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
+import { useGoals } from '../../../contexts/GoalContext/GoalContext';
 import { calculatePay } from '../../../utils/calculations';
 import MetricCard from './MetricCard';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Target, ArrowUp, ArrowDown } from 'lucide-react'; // Added Target, ArrowUp, ArrowDown
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-// --- Helper, Chart, and Breakdown Components (Unchanged) ---
+// --- Helper, Chart, and Breakdown Components ---
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val || 0);
 const formatDateShort = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 
+// --- Chart and Breakdown Components (Keep existing) ---
 const MonthlyComparisonChart = ({ data }) => (
     <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
@@ -60,20 +62,24 @@ const PayBreakdownDetail = ({ breakdown }) => (
 const SummaryInsights = () => {
     const { practices } = usePractices();
     const { entries } = useEntries();
+    const { goals } = useGoals(); // Assuming useGoals context exists
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const { summary, chartData } = useMemo(() => {
-        // ... (Calculation logic remains completely unchanged)
-        if (!practices || !entries) return { summary: {}, chartData: [] };
+        // ... (Keep existing calculation logic including goal finding and progress) ...
+        if (!practices || !entries || !goals) return { summary: {}, chartData: [] };
+
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         const prevMonthDate = new Date(year, month - 1, 1);
+
         const getEntriesInPeriod = (targetYear, targetMonth) => entries.filter(e => {
             const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
             if (!dateStr) return false;
             const date = new Date(`${dateStr}T00:00:00Z`);
             return date.getUTCFullYear() === targetYear && date.getUTCMonth() === targetMonth;
         });
+
         const entriesInCurrentMonth = getEntriesInPeriod(year, month);
         let totalProduction = 0, totalEstimatedPay = 0;
         const daysWorked = new Set(entriesInCurrentMonth.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
@@ -84,27 +90,105 @@ const SummaryInsights = () => {
             totalEstimatedPay += calcResult.calculatedPay;
             return { practiceName: practice.name, production: calcResult.productionTotal, salary: calcResult.calculatedPay, daysWorked: new Set(practiceEntries.map(e=>e.date)).size, payStructure: calcResult.payStructure, payPeriods: calcResult.payPeriods, basePayOwed: calcResult.basePayOwed, productionPayComponent: calcResult.productionPayComponent };
         }).filter(p => p.payPeriods.length > 0 && p.payPeriods.some(period => period.hasEntries));
+
         const entriesInPrevMonth = getEntriesInPeriod(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
         const prevMonthProduction = entriesInPrevMonth.filter(e=>e.entryType !== 'attendanceRecord').reduce((s,e)=>s + (e.production || 0), 0);
         const prevMonthPay = practices.reduce((sum, p) => sum + calculatePay(p, entriesInPrevMonth.filter(e => e.practiceId === p.id), prevMonthDate.getFullYear(), prevMonthDate.getMonth()).calculatedPay, 0);
+
+        const overallMonthlyProductionGoal = goals.find(g =>
+            g.timePeriod === 'monthly' &&
+            g.year === year &&
+            g.month === month &&
+            g.type === 'production' &&
+            g.practiceId == null
+        );
+        const overallMonthlyIncomeGoal = goals.find(g =>
+            g.timePeriod === 'monthly' &&
+            g.year === year &&
+            g.month === month &&
+            g.type === 'income' &&
+            g.practiceId == null
+        );
+
+        const productionGoalProgress = overallMonthlyProductionGoal?.targetAmount
+            ? (totalProduction / overallMonthlyProductionGoal.targetAmount) * 100
+            : null;
+
+        const incomeGoalProgress = overallMonthlyIncomeGoal?.targetAmount
+            ? (totalEstimatedPay / overallMonthlyIncomeGoal.targetAmount) * 100
+            : null;
+
         const chartData = practiceBreakdown.map(p => ({
             name: p.practiceName,
             base: p.basePayOwed,
             production: Math.max(0, p.salary - p.basePayOwed),
         }));
+
         return {
-            summary: { totalProduction, totalEstimatedPay, daysWorked, breakdown: practiceBreakdown, productionTrend: prevMonthProduction > 0 ? ((totalProduction - prevMonthProduction) / prevMonthProduction) * 100 : (totalProduction > 0 ? 100 : 0), payTrend: prevMonthPay > 0 ? ((totalEstimatedPay - prevMonthPay) / prevMonthPay) * 100 : (totalEstimatedPay > 0 ? 100 : 0) },
+            summary: {
+                totalProduction,
+                totalEstimatedPay,
+                daysWorked,
+                breakdown: practiceBreakdown,
+                productionTrend: prevMonthProduction > 0 ? ((totalProduction - prevMonthProduction) / prevMonthProduction) * 100 : (totalProduction > 0 ? 100 : 0),
+                payTrend: prevMonthPay > 0 ? ((totalEstimatedPay - prevMonthPay) / prevMonthPay) * 100 : (totalEstimatedPay > 0 ? 100 : 0),
+                productionGoalTarget: overallMonthlyProductionGoal?.targetAmount,
+                productionGoalProgress: productionGoalProgress,
+                incomeGoalTarget: overallMonthlyIncomeGoal?.targetAmount,
+                incomeGoalProgress: incomeGoalProgress,
+            },
             chartData,
         };
-    }, [practices, entries, currentDate]);
+    }, [practices, entries, goals, currentDate]);
 
-    // ** REWORK: Restored separate handlers for month and year **
     const handleMonthChange = (direction) => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));
     const handleYearChange = (direction) => setCurrentDate(new Date(currentDate.getFullYear() + direction, currentDate.getMonth(), 1));
-    
+
+    // --- Helper to render goal info with status badge ---
+    const renderGoalInfo = (target, progress) => {
+        if (target == null || progress == null) return null; // No goal set
+
+        const progressPercent = parseFloat(progress.toFixed(0));
+        let status = 'onTrack';
+        let statusText = `${progressPercent}%`;
+
+        if (progressPercent < 50) { status = 'behind'; }
+        else if (progressPercent < 90) { status = 'onTrack'; }
+        else if (progressPercent < 100) { status = 'ahead'; }
+        else { status = 'exceeded'; statusText = `+${(progressPercent - 100).toFixed(0)}%`; } // Show amount over 100%
+
+        return (
+            <div className={styles.goalInfo}>
+                 <Target size={12} />
+                 <span className={`${styles.goalStatusBadge} ${styles[status]}`}>
+                     {statusText}
+                 </span>
+                 <span className={styles.goalTargetValue}>of {formatCurrency(target)}</span>
+            </div>
+        );
+    };
+
+    // --- NEW Helper to render trend info ---
+    const renderTrendInfo = (trend, trendDirection) => {
+        if (trend == null) return null; // No trend data
+
+        const trendValue = `${trend.toFixed(0)}%`;
+        const TrendIcon = trendDirection === 'positive' ? ArrowUp : ArrowDown;
+
+        return (
+             <div className={styles.trendInfo}>
+                 <span className={`${styles.trendIndicator} ${styles[trendDirection]}`}>
+                     <TrendIcon size={12} strokeWidth={3}/> {/* Bolder Icon */}
+                     <span>{trendValue}</span>
+                 </span>
+                 <span className={styles.trendDescription}>vs last month</span>
+            </div>
+        );
+    };
+
+
     return (
         <div className={styles.container}>
-            {/* ** REWORK: Header is now a separate, full-width element ** */}
             <div className={styles.header}>
                  <h3 className={styles.sectionTitle}>Monthly Performance</h3>
                 <div className={styles.navigators}>
@@ -121,14 +205,14 @@ const SummaryInsights = () => {
                 </div>
             </div>
 
-            {/* ** REWORK: Main content is a 2x2 grid for symmetry ** */}
             <div className={styles.mainGrid}>
-                {/* --- Row 1 --- */}
-                <MetricCard 
-                    title="Total Production" 
+                {/* --- Production Card --- */}
+                <MetricCard
+                    title="Total Production"
                     value={formatCurrency(summary.totalProduction)}
-                    trend={`${summary.productionTrend?.toFixed(0)}%`}
-                    trendDirection={summary.productionTrend >= 0 ? 'positive' : 'negative'}
+                    // Pass rendered JSX elements for stacking
+                    trendIndicator={renderTrendInfo(summary.productionTrend, summary.productionTrend >= 0 ? 'positive' : 'negative')}
+                    goalIndicator={renderGoalInfo(summary.productionGoalTarget, summary.productionGoalProgress)}
                 >
                    {(summary.breakdown || []).map(p => (
                        <div key={p.practiceName} className={styles.simpleBreakdownItem}>
@@ -138,6 +222,7 @@ const SummaryInsights = () => {
                     ))}
                 </MetricCard>
 
+                {/* --- Days Worked Card --- */}
                 <MetricCard title="Days Worked" value={summary.daysWorked || 0}>
                    {(summary.breakdown || []).map(p => (
                        <div key={p.practiceName} className={styles.simpleBreakdownItem}>
@@ -147,16 +232,18 @@ const SummaryInsights = () => {
                     ))}
                 </MetricCard>
 
-                {/* --- Row 2 --- */}
-                <MetricCard 
-                    title="Calculated Pay" 
+                {/* --- Calculated Pay Card --- */}
+                <MetricCard
+                    title="Calculated Pay"
                     value={formatCurrency(summary.totalEstimatedPay)}
-                    trend={`${summary.payTrend?.toFixed(0)}%`}
-                    trendDirection={summary.payTrend >= 0 ? 'positive' : 'negative'}
+                     // Pass rendered JSX elements for stacking
+                    trendIndicator={renderTrendInfo(summary.payTrend, summary.payTrend >= 0 ? 'positive' : 'negative')}
+                    goalIndicator={renderGoalInfo(summary.incomeGoalTarget, summary.incomeGoalProgress)}
                 >
                    <PayBreakdownDetail breakdown={summary.breakdown || []} />
                 </MetricCard>
 
+                {/* --- Chart Card --- */}
                 <div className={styles.chartCard}>
                    <h4 className={styles.chartTitle}>Pay Composition by Practice</h4>
                    <MonthlyComparisonChart data={chartData} />

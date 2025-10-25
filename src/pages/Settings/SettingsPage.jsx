@@ -4,8 +4,8 @@ import { useTheme } from '../../contexts/ThemeContext/ThemeContext';
 import { db } from '../../database/db';
 import Modal from '../../components/common/Modal/Modal';
 import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
-import { Sun, Moon, Laptop, Upload, Download, Trash2 } from 'lucide-react';
-
+import GoalsManager from '../../features/settings/GoalsManager'; 
+import { Sun, Moon, Laptop, Upload, Download, Trash2, Target } from 'lucide-react'; 
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const [isClearModalOpen, setClearModalOpen] = useState(false);
@@ -101,6 +101,15 @@ const SettingsPage = () => {
               <Laptop size={18} /> System
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* --- Goal Setting Section (New Section) --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><Target size={20} /> Performance Goals</h3>
+        <p className={styles.sectionDescription}>Set monthly or annual goals for production, collection, or income.</p>
+        <div className={styles.card}>
+           <GoalsManager /> 
         </div>
       </div>
 

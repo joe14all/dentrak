@@ -1,22 +1,28 @@
 import React from 'react';
-import styles from './MetricCard.module.css';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import styles from './MetricCard.module.css'; // Assuming this is MetricCard.module.css
 
-const MetricCard = ({ title, value, trend, trendDirection, children }) => (
-    // The card now has a flex column layout to ensure consistent alignment
+// Accept trendIndicator and goalIndicator as direct JSX props
+const MetricCard = ({ title, value, trendIndicator, goalIndicator, children }) => (
     <div className={styles.metricCard}>
+        {/* UPDATED: Header is now a grid container */}
         <div className={styles.metricHeader}>
+          {/* Column 1: Title */}
           <h4 className={styles.metricTitle}>{title}</h4>
-           {trend && (
-                // The trend indicator is now a self-contained "pill" for better visual parsing
-                <div className={`${styles.trendIndicator} ${styles[trendDirection]}`}>
-                    {trendDirection === 'positive' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                    <span>{trend}</span>
-                </div>
-            )}
+
+          {/* Column 2: Stacked Indicators */}
+          {(trendIndicator || goalIndicator) && (
+            <div className={styles.indicatorContainer}>
+                {/* Render the passed JSX directly */}
+                {trendIndicator}
+                {goalIndicator}
+            </div>
+          )}
         </div>
+
+        {/* Value remains separate, below the header grid */}
         <p className={styles.metricValue}>{value}</p>
-        {/* The breakdown section is now styled to handle its content gracefully */}
+
+        {/* Breakdown section */}
         <div className={styles.breakdown}>{children}</div>
     </div>
 );

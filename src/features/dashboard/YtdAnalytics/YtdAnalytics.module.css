@@ -142,3 +142,56 @@
     color: var(--ui-text-secondary);
     margin-bottom: 0.5rem;
 }
+/* Add these styles to YtdAnalytics.module.css */
+
+.kpiItem {
+    /* ... existing styles ... */
+    display: flex; /* Enable flex for better layout */
+    flex-direction: column;
+}
+.kpiItem p {
+    margin-bottom: 0.5rem; /* Add space below the main value */
+}
+
+.goalProgressContainer {
+    margin-top: auto; /* Push goal to bottom of KPI item */
+    padding-top: 0.5rem; /* Space above goal */
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.goalLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--ui-text-secondary);
+}
+.goalLabel svg {
+    color: var(--brand-primary);
+}
+.goalLabel span {
+    font-weight: 500;
+}
+
+.goalBarBackground {
+    width: 100%;
+    height: 6px;
+    background-color: var(--ui-background-tertiary);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.goalBarForeground {
+    height: 100%;
+    background-color: var(--brand-primary);
+    border-radius: 99px;
+    transition: width 0.5s ease-in-out;
+}
+
+.goalTargetAmount {
+    font-size: 0.7rem;
+    color: var(--ui-text-tertiary);
+    text-align: right;
+}

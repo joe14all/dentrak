@@ -2,8 +2,9 @@ import React, { useMemo, useState } from 'react';
 import styles from './YtdAnalytics.module.css';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
+import { useGoals } from '../../../contexts/GoalContext/GoalContext'; 
 import { calculatePay } from '../../../utils/calculations';
-import { BarChart as BarChartIcon, Trophy, CalendarClock, Banknote, Activity } from 'lucide-react';
+import { BarChart as BarChartIcon, Trophy, CalendarClock, Banknote, Activity, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const formatCurrency = (val, compact = false) => {
@@ -49,11 +50,17 @@ const HighlightCard = ({ icon, title, value, subtext }) => (
 const YtdAnalytics = () => {
     const { entries } = useEntries();
     const { practices } = usePractices();
+    const { goals } = useGoals(); 
     const [activeTab, setActiveTab] = useState('overview');
 
     const analyticsData = useMemo(() => {
-        if (!entries || !practices || entries.length === 0 || practices.length === 0) {
-            return { ytdProduction: 0, ytdCalculatedPay: 0, chartData: [], bestProductionMonth: null, mostDaysWorkedMonth: null, bestPayMonth: null, bestAvgProdDay: null };
+if (!entries || !practices || entries.length === 0 || practices.length === 0 || !goals) { 
+           return {
+                ytdProduction: 0, ytdCalculatedPay: 0, chartData: [],
+                bestProductionMonth: null, mostDaysWorkedMonth: null, bestPayMonth: null, bestAvgProdDay: null,
+                annualProductionGoalTarget: null, annualProductionGoalProgress: null,
+                annualIncomeGoalTarget: null, annualIncomeGoalProgress: null,
+             };
         }
 
         const currentYear = new Date().getFullYear();
@@ -69,7 +76,7 @@ const YtdAnalytics = () => {
         const monthlyData = Array.from({ length: currentMonth + 1 }, (_, i) => {
             const monthName = new Date(currentYear, i).toLocaleString('default', { month: 'long'});
             
-            // CORRECTED: This filter now correctly handles dates for all entry types.
+        
             const monthEntries = entries.filter(e => {
                 const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
                 if (!dateStr) return false;
@@ -115,6 +122,29 @@ const YtdAnalytics = () => {
                 daysWorked: daysWorked 
             };
         });
+
+        // --- 4. Find Relevant Annual Goals ---
+        const annualProductionGoal = goals.find(g =>
+            g.timePeriod === 'annual' &&
+            g.year === currentYear &&
+            g.type === 'production' &&
+            g.practiceId == null // Overall goal
+        );
+         const annualIncomeGoal = goals.find(g =>
+            g.timePeriod === 'annual' &&
+            g.year === currentYear &&
+            g.type === 'income' &&
+            g.practiceId == null // Overall goal
+        );
+
+        // --- 5. Calculate YTD Progress ---
+        const annualProductionGoalProgress = annualProductionGoal?.targetAmount
+            ? (ytdProductionTotal / annualProductionGoal.targetAmount) * 100
+            : null;
+
+        const annualIncomeGoalProgress = annualIncomeGoal?.targetAmount
+            ? (ytdCalculatedPayTotal / annualIncomeGoal.targetAmount) * 100
+            : null;
         
         return { 
             ytdProduction: ytdProductionTotal, 
@@ -123,9 +153,30 @@ const YtdAnalytics = () => {
             bestProductionMonth, 
             mostDaysWorkedMonth, 
             bestPayMonth, 
-            bestAvgProdDay 
+            bestAvgProdDay,
+            annualProductionGoalTarget: annualProductionGoal?.targetAmount,
+            annualProductionGoalProgress: annualProductionGoalProgress,
+            annualIncomeGoalTarget: annualIncomeGoal?.targetAmount,
+            annualIncomeGoalProgress: annualIncomeGoalProgress,
         };
-    }, [entries, practices]);
+    }, [entries, practices, goals]);
+
+    const renderGoalProgress = (target, progress, label) => {
+        if (target == null || progress == null) return null; // No goal set
+        const progressPercent = Math.min(100, Math.max(0, progress)).toFixed(0);
+        return (
+            <div className={styles.goalProgressContainer}>
+                <div className={styles.goalLabel}>
+                    <Target size={12} />
+                    <span>{label} Goal: {progressPercent}%</span>
+                </div>
+                 <div className={styles.goalBarBackground}>
+                    <div className={styles.goalBarForeground} style={{ width: `${progressPercent}%` }}></div>
+                </div>
+                <span className={styles.goalTargetAmount}>Target: {formatCurrency(target, true)}</span>
+            </div>
+        );
+    };
 
     return (
         <div className={styles.card}>
@@ -140,13 +191,26 @@ const YtdAnalytics = () => {
             <div className={styles.tabContent}>
                 {activeTab === 'overview' && (
                     <div className={styles.overviewGrid}>
+                        {/* KPI Items */}
                         <div className={styles.kpiItem}>
                             <span>YTD Total Production</span>
                             <p>{formatCurrency(analyticsData.ytdProduction, true)}</p>
+                             {/* Render Production Goal Progress */}
+                            {renderGoalProgress(
+                                analyticsData.annualProductionGoalTarget,
+                                analyticsData.annualProductionGoalProgress,
+                                'Production'
+                            )}
                         </div>
                         <div className={styles.kpiItem}>
                             <span>YTD Total Calculated Pay</span>
                             <p>{formatCurrency(analyticsData.ytdCalculatedPay, true)}</p>
+                             {/* Render Income Goal Progress */}
+                             {renderGoalProgress(
+                                analyticsData.annualIncomeGoalTarget,
+                                analyticsData.annualIncomeGoalProgress,
+                                'Income'
+                            )}
                         </div>
                         <div className={styles.highlights}>
                             <HighlightCard 

@@ -1,162 +1,283 @@
-/* Container is now a simple vertical stack */
+/* src/features/dashboard/SummaryInsights/SummaryInsights.module.css */
+
+/* --- Container, Header, Navigators (Keep existing styles) --- */
 .container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
 }
-
-/* Header spans full width */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1rem;
+    padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--ui-border-secondary);
 }
-
 .sectionTitle {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: var(--ui-text-primary);
+    letter-spacing: -0.5px;
 }
-
-/* Container for the two date navigators */
 .navigators {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
 }
-
 .navigator {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     background-color: var(--ui-background-secondary);
     border: 1px solid var(--ui-border-secondary);
-    border-radius: 8px;
-    padding: 0.25rem;
+    border-radius: 9px;
+    padding: 4px;
+    box-shadow: var(--shadow-sm);
 }
 .navigator button {
-    background-color: var(--ui-background-tertiary);
+    background-color: transparent;
     border: none;
     border-radius: 6px;
-    padding: 0.35rem;
+    padding: 0.5rem;
     display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--ui-text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 .navigator button:hover {
-    background-color: var(--brand-secondary);
-    color: var(--brand-primary);
+    background-color: var(--ui-background-tertiary);
+    color: var(--ui-text-primary);
 }
 .navigator span {
     font-weight: 500;
     color: var(--ui-text-primary);
-    padding: 0 0.5rem;
-    font-size: 0.9rem;
-    min-width: 60px; /* Prevents layout shift for short month names */
+    padding: 0 0.75rem;
+    font-size: 0.95rem;
+    min-width: 100px;
     text-align: center;
 }
 
-/* ** NEW: 2x2 Grid for the main content ** */
+/* --- Main Grid (Keep existing styles) --- */
 .mainGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
-    gap: 1.5rem;
-    align-items: flex-start; /* Aligns items in each row to the top */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    align-items: stretch;
 }
 
-/* Simple breakdown styles (used in Production and Days Worked cards) */
+/* --- Simple Breakdown (Keep existing styles) --- */
 .simpleBreakdownItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--ui-text-secondary);
+    padding: 0.25rem 0;
 }
 .breakdownValue {
     font-weight: 500;
     color: var(--ui-text-primary);
+    font-family: 'SF Mono', 'Menlo', monospace;
 }
 
-/* Chart Card Styling */
+/* --- Chart Card (Keep existing styles) --- */
 .chartCard {
     background-color: var(--ui-background-secondary);
     border: 1px solid var(--ui-border-secondary);
     border-radius: 12px;
-    padding: 1rem 1rem 0.5rem 0.5rem;
-    /* Ensures the chart card has enough height to look good next to the tall pay card */
-    height: 100%; 
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
 }
 .chartTitle {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--ui-text-primary);
-    margin-left: 1.25rem;
-    margin-bottom: 0.5rem;
+    margin: 0 0 1rem 0;
+}
+.chartCard > div {
+    flex-grow: 1;
+    min-height: 250px;
 }
 
-
-/* Compact Pay Breakdown Styles (Unchanged from previous version) */
+/* --- Pay Breakdown Detail (Keep existing styles) --- */
 .practiceBreakdown {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--ui-border-secondary);
+}
+.practiceBreakdown:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 .practiceHeader {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
 }
 .practiceName {
     font-weight: 600;
     color: var(--ui-text-primary);
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 .practiceSalary {
     font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--ui-text-accent);
+    font-size: 1rem;
+    color: var(--brand-primary);
+    font-family: 'SF Mono', 'Menlo', monospace;
 }
 .periodDetail {
     background-color: var(--ui-background-primary);
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--ui-border-secondary);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--ui-border-primary);
 }
 .periodDateRange {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: var(--ui-text-tertiary);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     display: block;
 }
 .payComponents {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 .payComponent {
     display: flex;
     justify-content: space-between;
     flex-basis: 50%;
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    opacity: 0.7;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    opacity: 0.8;
 }
 .payComponent span:first-child {
     color: var(--ui-text-secondary);
-    margin-right: 0.5rem;
+    margin-right: 0.75rem;
 }
 .payComponent span:last-child {
     font-weight: 600;
     color: var(--ui-text-primary);
+    font-family: 'SF Mono', 'Menlo', monospace;
 }
 .payComponent[data-active="true"] {
     opacity: 1;
     background-color: var(--brand-secondary);
+    border: 1px solid var(--brand-primary);
 }
 .payComponent[data-active="true"] span {
-    color: var(--brand-primary) !important;
+    color: var(--brand-primary);
+}
+
+/* ============================================
+   NEW: Container for Stacked Indicators
+   ============================================ */
+.indicatorContainer {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align badges to the left */
+    gap: 0.35rem; /* Space between the trend and goal indicators */
+    margin-top: 0.5rem; /* Space above the container */
+}
+
+/* ============================================
+   Trend Section Styles - REFINED
+   ============================================ */
+.trendInfo {
+    display: flex; /* Keep trend items in a row */
+    align-items: center;
+    gap: 0.5rem; /* Space between trend badge and description */
+}
+
+/* Base styles for the trend badge (pill shape) */
+.trendIndicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 3px 8px; /* Adjusted padding */
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.trendIndicator svg {
+    width: 14px;
+    height: 14px;
+}
+.trendIndicator.positive {
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+}
+.trendIndicator.negative {
+    background-color: var(--state-danger-bg);
+    color: var(--state-danger-text);
+}
+
+/* NEW: Style for the trend description ("vs last month") */
+.trendDescription {
+    font-size: 0.8rem;
+    color: var(--ui-text-secondary);
+    font-weight: 500;
+}
+
+/* ============================================
+   Goal Section Styles - REFINED
+   ============================================ */
+.goalInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* margin-top removed, handled by indicatorContainer gap */
+}
+
+.goalInfo svg { /* The Target icon */
+    color: var(--ui-text-tertiary);
+    flex-shrink: 0;
+}
+
+/* Base styles for the goal status badge (pill shape) */
+.goalStatusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Color variations using theme variables */
+.goalStatusBadge.behind {
+    background-color: var(--state-danger-bg);
+    color: var(--state-danger-text);
+}
+.goalStatusBadge.onTrack {
+    background-color: var(--state-warning-bg);
+    color: var(--state-warning);
+}
+.goalStatusBadge.ahead {
+    background-color: var(--brand-secondary);
+    color: var(--brand-primary);
+}
+.goalStatusBadge.exceeded {
+    background-color: var(--state-success-bg);
+    color: var(--state-success);
+}
+
+/* Style for the "of $Target" text */
+.goalTargetValue {
+    font-size: 0.8rem;
+    color: var(--ui-text-secondary);
+    font-weight: 500;
 }

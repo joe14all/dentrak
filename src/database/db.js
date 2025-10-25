@@ -3,8 +3,8 @@ import Dexie from "dexie";
 
 export const db = new Dexie("DentrakDatabase");
 
-// Version 7: Adds scheduleBlocks table.
-db.version(7)
+// Version 8: Adds goals table with compound index.
+db.version(8)
   .stores({
     practices: "++id, name, status, taxStatus",
     entries: "++id, practiceId, date, entryType",
@@ -12,17 +12,29 @@ db.version(7)
     cheques: "++id, practiceId, status, dateReceived",
     directDeposits: "++id, practiceId, paymentDate",
     eTransfers: "++id, practiceId, status, paymentDate",
-    scheduleBlocks: "++id, startDate, endDate", // New table for schedule blocks
+    scheduleBlocks: "++id, startDate, endDate",
+    reports: "++id, name, type, createdAt",
+    // Corrected goals table definition with the compound index
+    goals: "++id, type, timePeriod, year, month, practiceId, [year+month]",
   })
   .upgrade((tx) => {
-    // Migration logic for future versions can go here if needed.
-    // For adding a table, Dexie handles it automatically if the table doesn't exist.
     console.log(
-      "Upgrading database to version 7, adding scheduleBlocks table if it doesn't exist."
+      "Upgrading database to version 8, adding goals table with [year+month] index if it doesn't exist."
     );
   });
 
-// Apply previous versions migrations if necessary (e.g., coming from v6 or lower)
+// Apply previous versions migrations if necessary
+db.version(7).stores({
+  practices: "++id, name, status, taxStatus",
+  entries: "++id, practiceId, date, entryType",
+  payments: "++id, practiceId, paymentDate",
+  cheques: "++id, practiceId, status, dateReceived",
+  directDeposits: "++id, practiceId, paymentDate",
+  eTransfers: "++id, practiceId, status, paymentDate",
+  scheduleBlocks: "++id, startDate, endDate",
+  reports: "++id, name, type, createdAt", // Ensure reports is defined in previous versions too
+});
+
 db.version(6).stores({
   practices: "++id, name, status, taxStatus",
   entries: "++id, practiceId, date, entryType",

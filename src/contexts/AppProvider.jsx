@@ -9,7 +9,8 @@ import { TransactionProvider } from './TransactionContext/TransactionContext';
 import { ReportProvider } from './ReportContext/ReportContext';
 import { ThemeProvider } from './ThemeContext/ThemeContext';
 import { NavigationProvider } from './NavigationContext/NavigationContext';
-import { ScheduleBlockProvider } from './ScheduleBlockContext/ScheduleBlockContext'; // 1. Import the new provider
+import { ScheduleBlockProvider } from './ScheduleBlockContext/ScheduleBlockContext';
+import { GoalProvider } from './GoalContext/GoalContext'; // 1. Import the new provider
 
 
 export const AppProvider = ({ children }) => {
@@ -17,6 +18,7 @@ export const AppProvider = ({ children }) => {
     <AuthProvider>
       <NavigationProvider>
         <PracticeProvider>
+         <GoalProvider> {/* 2. Wrap relevant providers */}
           <ScheduleBlockProvider>
             <EntryProvider>
               <PaymentProvider>
@@ -29,7 +31,8 @@ export const AppProvider = ({ children }) => {
                 </TransactionProvider>
               </PaymentProvider>
             </EntryProvider>
-          </ScheduleBlockProvider> 
+          </ScheduleBlockProvider>
+         </GoalProvider> {/* 2. Close the wrap */}
         </PracticeProvider>
       </NavigationProvider>
     </AuthProvider>
