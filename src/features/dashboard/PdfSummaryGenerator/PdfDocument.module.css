@@ -11,7 +11,7 @@
 /* New style for handling page breaks */
 .page {
   /* This class now just defines a logical page container */
-  margin-bottom: 20px;
+  margin-bottom: 50px;
   page-break-after: always;
 }
 .page:last-child {
@@ -23,7 +23,7 @@
 .header {
   text-align: center;
   border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
   margin-bottom: 1.5rem;
 }
 
@@ -35,7 +35,7 @@
   font-size: 15px;
   font-weight: 600;
   border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
   margin: 2rem 0 1rem 0;
 }
 
@@ -123,5 +123,41 @@
   font-weight: bold; font-size: 1rem;
   display: flex; justify-content: space-between;
   padding: 0.75rem 1rem;
+}
+
+/* --- Mini Calendar for Attendance --- */
+.miniCalendar {
+  width: auto;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+margin-left: 0.75rem; /* ADDED to align with card padding */
+ margin-bottom: 0.75rem; /* ADDED for spacing */
+}
+.miniCalendar th {
+  font-size: 10px;
+  font-weight: 500;
+  color: #64748b;
+  padding-bottom: 4px;
+  text-align: center;
+  width: 26px; 
+  height: 20px;
+}
+.miniCalDay, .miniCalDay_pad {
+  font-size: 11px;
+  text-align: center;
+  padding: 0;
+  height: 26px;
+  width: 26px;
+  color: #333;
+  line-height: 26px;
+}
+.miniCalDay_pad {
+  background-color: transparent;
+}
+.miniCalDay_attended {
+  background-color: #3B82F6; /* --brand-primary */
+  color: #ffffff;
+  font-weight: bold;
+  border-radius: 50%;
 }
 

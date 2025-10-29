@@ -5,6 +5,48 @@ import { ArrowRight } from 'lucide-react';
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
 const formatDate = (date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
+const MiniCalendar = ({ startDate, endDate, attendedDates }) => {
+  const attendedDayNumbers = new Set(
+    attendedDates.map(dateStr => new Date(`${dateStr}T00:00:00Z`).getUTCDate())
+  );
+
+  const startDayOfMonth = startDate.getUTCDate(); // e.g., 1 or 16
+  const endDayOfMonth = endDate.getUTCDate(); // e.g., 15 or 31
+  const startingWeekday = startDate.getUTCDay(); // 0 = Sun, 1 = Mon...
+
+  const days = [];
+
+  // 1. Add padding for the first week
+  for (let i = 0; i < startingWeekday; i++) { // <<< FIX: Added i++
+    days.push(<td key={`pad-${i}`} className={styles.miniCalDay_pad}></td>);
+  }
+
+  // 2. Add the actual days of the period
+  for (let day = startDayOfMonth; day <= endDayOfMonth; day++) { // <<< FIX: Added day++
+    const isAttended = attendedDayNumbers.has(day);
+    const className = `${styles.miniCalDay} ${isAttended ? styles.miniCalDay_attended : ''}`;
+    days.push(<td key={day} className={className}>{day}</td>);
+  }
+
+  // 3. Chunk days into weeks (rows)
+  const weeks = [];
+  // --- THIS IS THE CORRECTED LOOP ---
+  for (let i = 0; i < days.length; i += 7) { 
+    weeks.push(days.slice(i, i + 7)); 
+  }
+
+  return (
+    <table className={styles.miniCalendar}>
+      <thead>
+        <tr>{['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'].map(d => <th key={d}>{d}</th>)}</tr>
+      </thead>
+      <tbody>
+        {weeks.map((week, i) => <tr key={i}>{week.map(day => day)}</tr>)}
+      </tbody>
+    </table>
+  );
+};
+
 const PeriodCard = ({ periodData, practice }) => {
     const p = periodData;
     const isProductionPay = p.calculatedPay > p.basePayOwed;
@@ -45,6 +87,9 @@ const PeriodCard = ({ periodData, practice }) => {
                     </div>
                 </div>
             </div>
+            {p.attendedDates && p.attendedDates.length > 0 && (
+                 <MiniCalendar startDate={p.period.start} endDate={p.period.end} attendedDates={p.attendedDates} />
+           )}
              <div className={styles.explanation}>
                 <p>{explanation}</p>
             </div>

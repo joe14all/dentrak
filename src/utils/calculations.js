@@ -25,14 +25,20 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
   }
 
   // Attendance is always calculated from all relevant entries in the given period.
-  const attendanceDays = new Set(
-    entriesInPeriod
-      .filter(
-        (e) =>
-          e.entryType === "attendanceRecord" || e.entryType === "dailySummary"
-      )
-      .map((e) => e.date)
-  ).size;
+  const attendedDates = [
+    ...new Set(
+      entriesInPeriod
+        .filter(
+          (e) =>
+            (e.entryType === "attendanceRecord" ||
+              e.entryType === "dailySummary") &&
+            e.date // Ensure date exists
+        )
+        .map((e) => e.date)
+    ),
+  ].sort(); // Sort the dates chronologically
+
+  const attendanceDays = attendedDates.length; // The count is now the length
 
   const basePayOwed =
     (practice.basePay || practice.dailyGuarantee || 0) * attendanceDays;
@@ -67,6 +73,7 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
     totalAdjustments,
     netBase,
     attendanceDays,
+    attendedDates,
   };
   return result;
 };
