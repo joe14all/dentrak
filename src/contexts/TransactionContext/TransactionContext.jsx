@@ -81,21 +81,24 @@ export const TransactionProvider = ({ children }) => {
 
   const addNewDirectDeposit = async (data) => {
      console.log("[TransactionContext] Adding new direct deposit:", data); // Log add deposit
-    await addDirectDeposit(data);
-    await addNewPayment({
+      const newId = await addDirectDeposit(data);    
+      await addNewPayment({
       practiceId: data.practiceId, paymentDate: data.paymentDate,
       amount: data.amount, paymentMethod: 'directDeposit', referenceNumber: data.transactionId,
+      linkedDirectDepositId: newId,
       notes: `Direct Deposit. Source: ${data.sourceBank || 'N/A'}`, // Added fallback
     });
     await autoRefreshAll();
   };
 
   const addNewETransfer = async (data) => {
-    console.log("[TransactionContext] Adding new e-transfer:", data); // Log add e-transfer
+    console.log("[TransactionContext] Adding new e-transfer:", data); 
     await addETransfer(data);
+    const newId = await addETransfer(data);
     await addNewPayment({
       practiceId: data.practiceId, paymentDate: data.paymentDate,
       amount: data.amount, paymentMethod: 'e-transfer', referenceNumber: data.confirmationNumber,
+      linkedETransferId: newId,
       notes: `E-Transfer from ${data.senderEmail || 'N/A'}`, // Added fallback
     });
     await autoRefreshAll();
@@ -123,8 +126,10 @@ export const TransactionProvider = ({ children }) => {
   const editDirectDeposit = async (id, data) => {
     console.log(`[TransactionContext] Editing direct deposit ID ${id}:`, data); // Log edit deposit
     await updateDirectDeposit(id, data);
-    // Find and update the corresponding payment record (assuming referenceNumber matches transactionId)
-     const linkedPayment = await db.payments.where({ practiceId: data.practiceId, paymentDate: data.paymentDate, amount: data.amount, paymentMethod: 'directDeposit', referenceNumber: data.transactionId }).first();
+  
+     // Find and update the corresponding payment record using the new index
+     const linkedPayment = await db.payments.where({ linkedDirectDepositId: id }).first();
+
      if(linkedPayment) {
         console.log(`[TransactionContext] Found linked payment ID ${linkedPayment.id} for deposit ${id}. Updating...`);
          await db.payments.update(linkedPayment.id, {
@@ -143,8 +148,9 @@ export const TransactionProvider = ({ children }) => {
   const editETransfer = async (id, data) => {
     console.log(`[TransactionContext] Editing e-transfer ID ${id}:`, data); // Log edit e-transfer
     await updateETransfer(id, data);
-    // Find and update the corresponding payment record (assuming referenceNumber matches confirmationNumber)
-    const linkedPayment = await db.payments.where({ practiceId: data.practiceId, paymentDate: data.paymentDate, amount: data.amount, paymentMethod: 'e-transfer', referenceNumber: data.confirmationNumber }).first();
+    // Find and update the corresponding payment record using the new index
+    const linkedPayment = await db.payments.where({ linkedETransferId: id }).first();
+
      if(linkedPayment) {
         console.log(`[TransactionContext] Found linked payment ID ${linkedPayment.id} for e-transfer ${id}. Updating...`);
          await db.payments.update(linkedPayment.id, {
@@ -161,7 +167,6 @@ export const TransactionProvider = ({ children }) => {
   };
 
   // --- Remove Functions ---
-  // ** FIX: Modified remove functions to also delete linked payments **
   const removeCheque = async (id) => {
     console.log(`[TransactionContext] Removing cheque ID ${id}...`); // Log remove cheque
     // Find the linked payment first
@@ -179,15 +184,9 @@ export const TransactionProvider = ({ children }) => {
   const removeDirectDeposit = async (id) => {
     console.log(`[TransactionContext] Removing direct deposit ID ${id}...`); // Log remove deposit
     // Find the corresponding payment to delete it. Need to query based on details.
-    const depositToDelete = await db.directDeposits.get(id); // Get details before deleting
-    if (depositToDelete) {
-       const linkedPayment = await db.payments.where({
-           practiceId: depositToDelete.practiceId,
-           paymentDate: depositToDelete.paymentDate,
-           amount: depositToDelete.amount,
-           paymentMethod: 'directDeposit',
-           referenceNumber: depositToDelete.transactionId
-       }).first();
+    // Find the linked payment using the new index
+     const linkedPayment = await db.payments.where({ linkedDirectDepositId: id }).first();
+     try{
 
        await deleteDirectDeposit(id); // Delete the deposit record
 
@@ -197,9 +196,10 @@ export const TransactionProvider = ({ children }) => {
        } else {
            console.warn(`[TransactionContext] Could not find matching payment to delete for deposit ID ${id}`);
        }
-    } else {
+    } catch (error) {
          console.warn(`[TransactionContext] Direct deposit ID ${id} not found for deletion.`);
-         await deleteDirectDeposit(id); // Still attempt delete in case it exists but wasn't fetched
+         console.warn(`[TransactionContext]  ${error} `)
+         await deleteDirectDeposit(id); 
     }
     await autoRefreshAll();
   };
@@ -208,14 +208,9 @@ export const TransactionProvider = ({ children }) => {
     console.log(`[TransactionContext] Removing e-transfer ID ${id}...`); // Log remove e-transfer
     // Find the corresponding payment to delete it.
      const transferToDelete = await db.eTransfers.get(id); // Get details before deleting
-     if(transferToDelete) {
-        const linkedPayment = await db.payments.where({
-            practiceId: transferToDelete.practiceId,
-            paymentDate: transferToDelete.paymentDate,
-            amount: transferToDelete.amount,
-            paymentMethod: 'e-transfer',
-            referenceNumber: transferToDelete.confirmationNumber
-        }).first();
+     const linkedPayment = await db.payments.where({ linkedETransferId: id }).first();
+
+     try {
 
         await deleteETransfer(id); // Delete the e-transfer record
 
@@ -225,10 +220,9 @@ export const TransactionProvider = ({ children }) => {
         } else {
             console.warn(`[TransactionContext] Could not find matching payment to delete for e-transfer ID ${id}`);
         }
-     } else {
-        console.warn(`[TransactionContext] E-transfer ID ${id} not found for deletion.`);
-        await deleteETransfer(id); // Attempt delete anyway
-     }
+    } catch (error) {
++        console.warn(`[TransactionContext] E-transfer ID ${id} not found for deletion.`, error);
+      }
     await autoRefreshAll();
   };
 

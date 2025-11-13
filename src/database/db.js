@@ -3,23 +3,41 @@ import Dexie from "dexie";
 
 export const db = new Dexie("DentrakDatabase");
 
-// Version 8: Adds goals table with compound index.
+//Version 9: Adds indexes to 'payments' for linking to transaction types.
 db.version(8)
   .stores({
     practices: "++id, name, status, taxStatus",
     entries: "++id, practiceId, date, entryType",
     payments: "++id, practiceId, paymentDate",
-    cheques: "++id, practiceId, status, dateReceived",
     directDeposits: "++id, practiceId, paymentDate",
     eTransfers: "++id, practiceId, status, paymentDate",
     scheduleBlocks: "++id, startDate, endDate",
     reports: "++id, name, type, createdAt",
-    // Corrected goals table definition with the compound index
     goals: "++id, type, timePeriod, year, month, practiceId, [year+month]",
   })
   .upgrade((tx) => {
     console.log(
       "Upgrading database to version 8, adding goals table with [year+month] index if it doesn't exist."
+    );
+  });
++db
+  .version(9)
+  .stores({
+    practices: "++id, name, status, taxStatus",
+    entries: "++id, practiceId, date, entryType",
+    // ADDED indexes for linkedChequeId, linkedDirectDepositId, linkedETransferId
+    payments:
+      "++id, practiceId, paymentDate, linkedChequeId, linkedDirectDepositId, linkedETransferId",
+    cheques: "++id, practiceId, status, dateReceived",
+    directDeposits: "++id, practiceId, paymentDate",
+    eTransfers: "++id, practiceId, status, paymentDate",
+    scheduleBlocks: "++id, startDate, endDate",
+    reports: "++id, name, type, createdAt",
+    goals: "++id, type, timePeriod, year, month, practiceId, [year+month]",
+  })
+  .upgrade((tx) => {
+    console.log(
+      "Upgrading database to version 9, adding indexes to payments table."
     );
   });
 
