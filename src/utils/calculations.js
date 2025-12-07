@@ -89,7 +89,25 @@ const getPayPeriods = (year, month, payCycle) => {
 
   switch (payCycle) {
     case "weekly": {
-      /* Logic for weekly can be added here */ return periods;
+      // Generate weekly periods (7-day chunks) for the month
+      let currentStart = new Date(startDate);
+      while (currentStart <= endDate) {
+        const weekEnd = new Date(currentStart);
+        weekEnd.setUTCDate(currentStart.getUTCDate() + 6);
+
+        // Cap the week end at the month's end
+        const periodEnd = weekEnd > endDate ? endDate : weekEnd;
+
+        periods.push({
+          start: new Date(currentStart),
+          end: periodEnd,
+        });
+
+        // Move to next week
+        currentStart = new Date(periodEnd);
+        currentStart.setUTCDate(currentStart.getUTCDate() + 1);
+      }
+      return periods;
     }
     case "bi-weekly":
       return [

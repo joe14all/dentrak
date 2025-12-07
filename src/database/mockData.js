@@ -330,7 +330,7 @@ export const mockDirectDeposits = [{}];
  * @property {string} paymentDate - The date the transfer was accepted.
  * @property {number} amount - The amount of the transfer.
  * @property {string} confirmationNumber - The confirmation or reference number from the e-transfer.
- * @property {string} [senderEmail] - The email address of the sender, for tracking.
+ * @property {string} [senderContact] - The email address or phone number of the sender, for tracking.
  * @property {'Pending' | 'Accepted' | 'Expired' | 'Cancelled'} status - The status of the e-transfer.
  * @property {string} [screenshotImage] - A path or URI to a screenshot of the confirmation.
  * @property {string} [notes] - Any notes, such as the security answer.

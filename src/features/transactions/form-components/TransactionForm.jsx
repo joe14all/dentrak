@@ -13,7 +13,7 @@ const getInitialState = (type) => ({
   transactionId: '',
   sourceBank: '',
   confirmationNumber: '',
-  senderEmail: '',
+  senderContact: '',
 });
 
 const TransactionForm = ({ transactionToEdit, initialType, practices, onSave, onCancel }) => {
@@ -96,7 +96,8 @@ const TransactionForm = ({ transactionToEdit, initialType, practices, onSave, on
       {formType === 'eTransfers' && (
          <>
             <div className={styles.formRow}><div className={styles.formGroup}><label>Amount ($)</label><input type="number" name="amount" value={formData.amount} onChange={handleChange} /></div><div className={styles.formGroup}><label>Payment Date</label><input type="date" name="paymentDate" value={formData.paymentDate} onChange={handleChange} /></div></div>
-            <div className={styles.formRow}><div className={styles.formGroup}><label>Confirmation #</label><input type="text" name="confirmationNumber" value={formData.confirmationNumber} onChange={handleChange} /></div><div className={styles.formGroup}><label>Sender Email</label><input type="email" name="senderEmail" value={formData.senderEmail} onChange={handleChange} /></div></div>
+            <div className={styles.formRow}><div className={styles.formGroup}><label>Confirmation #</label><input type="text" name="confirmationNumber" value={formData.confirmationNumber} onChange={handleChange} /></div><div className={styles.formGroup}><label>Status</label><select name="status" value={formData.status} onChange={handleChange}><option>Pending</option><option>Accepted</option><option>Expired</option><option>Cancelled</option></select></div></div>
+            <div className={styles.formRow}><div className={styles.formGroup}><label>Sender Contact (Email/Phone)</label><input type="text" name="senderContact" value={formData.senderContact} onChange={handleChange} placeholder="email@example.com or 123-456-7890" /></div></div>
          </>
       )}
       

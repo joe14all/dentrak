@@ -304,6 +304,9 @@ export const calculatePracticeBalances = (
         today
       );
 
+      // Track periods that actually have entries with financial data
+      const periodsWithFinancialData = [];
+
       historicalPeriods.forEach((period) => {
         const entriesInPeriod = practiceEntries.filter((e) => {
           const dateStr = e.date || e.periodStartDate;
@@ -322,12 +325,28 @@ export const calculatePracticeBalances = (
           }
         });
 
-        if (entriesInPeriod.length > 0) {
+        // Only calculate pay if there are entries AND they contain financial data
+        const hasFinancialData = entriesInPeriod.some(
+          (e) =>
+            e.entryType === "dailySummary" ||
+            e.entryType === "periodSummary" ||
+            e.entryType === "individualProcedure" ||
+            (e.entryType === "attendanceRecord" &&
+              practice.paymentType === "employment" &&
+              practice.basePay)
+        );
+
+        if (entriesInPeriod.length > 0 && hasFinancialData) {
           const { calculatedPay } = calculateSinglePeriod(
             practice,
             entriesInPeriod
           );
           totalCalculatedPayForCompletedPeriods += calculatedPay;
+          periodsWithFinancialData.push({
+            period,
+            calculatedPay,
+            entries: entriesInPeriod,
+          });
           // Track the end date of the latest period with entries
           if (!lastCompletedPeriodEnd || period.end > lastCompletedPeriodEnd) {
             lastCompletedPeriodEnd = period.end;
@@ -382,7 +401,19 @@ export const calculatePracticeBalances = (
             return false;
           }
         });
-        if (entriesInCurrentPeriod.length > 0) {
+
+        // Only calculate if there are financial entries
+        const hasFinancialData = entriesInCurrentPeriod.some(
+          (e) =>
+            e.entryType === "dailySummary" ||
+            e.entryType === "periodSummary" ||
+            e.entryType === "individualProcedure" ||
+            (e.entryType === "attendanceRecord" &&
+              practice.paymentType === "employment" &&
+              practice.basePay)
+        );
+
+        if (entriesInCurrentPeriod.length > 0 && hasFinancialData) {
           estimatedCurrentPeriodPay = calculateSinglePeriod(
             practice,
             entriesInCurrentPeriod

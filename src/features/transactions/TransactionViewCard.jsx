@@ -78,7 +78,7 @@ const TransactionViewCard = ({ transaction, practice, onStatusChange, onEdit }) 
           <span className={styles.label}>Reference #</span>
           <span className={styles.value}>{reference}</span>
         </div>
-        {transaction.senderEmail && <div className={styles.detailItem}><span className={styles.label}>Sender</span><span className={styles.value}>{transaction.senderEmail}</span></div>}
+        {transaction.senderContact && <div className={styles.detailItem}><span className={styles.label}>Sender Contact</span><span className={styles.value}>{transaction.senderContact}</span></div>}
         {transaction.sourceBank && <div className={styles.detailItem}><span className={styles.label}>Source Bank</span><span className={styles.value}>{transaction.sourceBank}</span></div>}
       </div>
       

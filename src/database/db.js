@@ -20,8 +20,8 @@ db.version(8)
       "Upgrading database to version 8, adding goals table with [year+month] index if it doesn't exist."
     );
   });
-+db
-  .version(9)
+
+db.version(9)
   .stores({
     practices: "++id, name, status, taxStatus",
     entries: "++id, practiceId, date, entryType",

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { usePayments } from '../PaymentContext/PaymentContext';
 
@@ -93,13 +94,12 @@ export const TransactionProvider = ({ children }) => {
 
   const addNewETransfer = async (data) => {
     console.log("[TransactionContext] Adding new e-transfer:", data); 
-    await addETransfer(data);
     const newId = await addETransfer(data);
     await addNewPayment({
       practiceId: data.practiceId, paymentDate: data.paymentDate,
       amount: data.amount, paymentMethod: 'e-transfer', referenceNumber: data.confirmationNumber,
       linkedETransferId: newId,
-      notes: `E-Transfer from ${data.senderEmail || 'N/A'}`, // Added fallback
+      notes: `E-Transfer from ${data.senderContact || 'N/A'}`, // Changed to senderContact
     });
     await autoRefreshAll();
   };
@@ -158,7 +158,7 @@ export const TransactionProvider = ({ children }) => {
             paymentDate: data.paymentDate,
             amount: data.amount,
             referenceNumber: data.confirmationNumber,
-            notes: `E-Transfer from ${data.senderEmail || 'N/A'}`
+            notes: `E-Transfer from ${data.senderContact || 'N/A'}`
          });
      } else {
         console.warn(`[TransactionContext] Could not find matching payment to update for e-transfer ID ${id}`);

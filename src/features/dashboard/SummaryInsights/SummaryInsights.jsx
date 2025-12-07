@@ -88,8 +88,23 @@ const SummaryInsights = () => {
             const calcResult = calculatePay(practice, practiceEntries, year, month);
             totalProduction += calcResult.productionTotal;
             totalEstimatedPay += calcResult.calculatedPay;
-            return { practiceName: practice.name, production: calcResult.productionTotal, salary: calcResult.calculatedPay, daysWorked: new Set(practiceEntries.map(e=>e.date)).size, payStructure: calcResult.payStructure, payPeriods: calcResult.payPeriods, basePayOwed: calcResult.basePayOwed, productionPayComponent: calcResult.productionPayComponent };
-        }).filter(p => p.payPeriods.length > 0 && p.payPeriods.some(period => period.hasEntries));
+            // Calculate days worked only from entries with date field (attendance and daily summaries)
+            const practiceWorkDays = new Set(
+                practiceEntries
+                    .filter(e => (e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary') && e.date)
+                    .map(e => e.date)
+            ).size;
+            return { 
+                practiceName: practice.name, 
+                production: calcResult.productionTotal, 
+                salary: calcResult.calculatedPay, 
+                daysWorked: practiceWorkDays, 
+                payStructure: calcResult.payStructure, 
+                payPeriods: calcResult.payPeriods, 
+                basePayOwed: calcResult.basePayOwed, 
+                productionPayComponent: calcResult.productionPayComponent 
+            };
+        });
 
         const entriesInPrevMonth = getEntriesInPeriod(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
         const prevMonthProduction = entriesInPrevMonth.filter(e=>e.entryType !== 'attendanceRecord').reduce((s,e)=>s + (e.production || 0), 0);
