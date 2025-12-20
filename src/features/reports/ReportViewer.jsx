@@ -3,12 +3,18 @@ import styles from './ReportViewer.module.css';
 import PayPeriodStatement from './viewer-components/PayPeriodStatement';
 import AnnualSummary from './viewer-components/AnnualSummary';
 import PracticeComparison from './viewer-components/PracticeComparison';
+import YtdIncomeReport from './viewer-components/YtdIncomeReport';
+import TaxSummary from './viewer-components/TaxSummary';
 import { X, Save, Download, LoaderCircle } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const reportComponentMap = {
   payPeriodStatement: PayPeriodStatement,
   annualSummary: AnnualSummary,
   practiceComparison: PracticeComparison,
+  ytdIncome: YtdIncomeReport,
+  taxSummary: TaxSummary,
 };
 
 const ReportViewer = ({ reports, onClose, onSaveAll }) => {

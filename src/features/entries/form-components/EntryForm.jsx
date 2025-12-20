@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './EntryForm.module.css';
-import { PlusCircle, Trash2, ChevronDown } from 'lucide-react';
+import { PlusCircle, Trash2, ChevronDown, Copy } from 'lucide-react';
+import { useEntryTemplates } from '../../../contexts/EntryTemplateContext/EntryTemplateContext';
 
 // A more robust initial state that reflects the full data model
 const getInitialState = (initialType = 'dailySummary') => ({
@@ -36,7 +37,9 @@ const SegmentedControl = ({ name, options, selectedValue, onChange }) => (
 );
 
 const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel }) => {
+    const { getTemplatesForPractice, createFromTemplate } = useEntryTemplates();
     const [formData, setFormData] = useState(getInitialState(initialEntryType));
+    const [availableTemplates, setAvailableTemplates] = useState([]);
 
     useEffect(() => {
         if (entryToEdit) {
@@ -56,6 +59,14 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
         }
     }, [entryToEdit, practices, initialEntryType]);
 
+    // Update available templates when practice changes
+    useEffect(() => {
+        if (formData.practiceId && !entryToEdit) {
+            const templates = getTemplatesForPractice(formData.practiceId);
+            setAvailableTemplates(templates);
+        }
+    }, [formData.practiceId, getTemplatesForPractice, entryToEdit]);
+
     const handleChange = (e) => {
         const { name, value, type } = e.target;
         
@@ -65,6 +76,27 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
         } else {
             setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
         }
+    };
+
+    const handleApplyTemplate = (e) => {
+        const templateId = parseInt(e.target.value, 10);
+        if (!templateId) return;
+
+        const template = availableTemplates.find(t => t.id === templateId);
+        if (!template) return;
+
+        // Create entry from template, preserving the current date
+        const templateEntry = createFromTemplate(template, formData.date);
+        
+        // Merge with existing form data
+        setFormData(prev => ({
+            ...prev,
+            ...templateEntry,
+            date: prev.date, // Keep the current date
+        }));
+
+        // Reset the select
+        e.target.value = '';
     };
 
     // --- Adjustment Handlers ---
@@ -96,6 +128,24 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
           <div className={styles.formContent}>
             <div className={styles.section}>
                 <label className={styles.sectionLabel}>Entry Details</label>
+                
+                {!entryToEdit && availableTemplates.length > 0 && (
+                    <div className={styles.templateSelector}>
+                        <label htmlFor="template" className={styles.templateLabel}>
+                            <Copy size={16} />
+                            Quick Fill from Template
+                        </label>
+                        <select id="template" onChange={handleApplyTemplate} className={styles.templateSelect}>
+                            <option value="">Select a template...</option>
+                            {availableTemplates.map(template => (
+                                <option key={template.id} value={template.id}>
+                                    {template.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+                
                 <div className={styles.formGroup}>
                     <label htmlFor="practiceId">Practice</label>
                     <div className={styles.selectWrapper}>

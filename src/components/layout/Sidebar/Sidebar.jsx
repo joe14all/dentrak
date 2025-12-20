@@ -7,7 +7,7 @@ import { useNavigation } from '../../../contexts/NavigationContext/NavigationCon
 import logo from '../../../assets/images/logo.png';
 import name from '../../../assets/images/name.png';
 
-import { LayoutDashboard, Building2, PenSquare, Banknote, Receipt, FileText, Settings, Lock } from 'lucide-react';
+import { LayoutDashboard, Building2, PenSquare, Banknote, Receipt, FileText, TrendingUp, Settings, Lock } from 'lucide-react';
 
 const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
@@ -16,6 +16,8 @@ const navItems = [
     // { name: 'Payments', icon: Banknote },
     // { name: 'Transactions', icon: Receipt }, 
     { name: 'Financials', icon: Receipt },
+    { name: 'Expenses', icon: Banknote },
+    { name: 'Practice Comparison', icon: TrendingUp },
     { name: 'Reports', icon: FileText },
     { name: 'Settings', icon: Settings },
 ];

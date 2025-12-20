@@ -4,8 +4,9 @@ import { useTheme } from '../../contexts/ThemeContext/ThemeContext';
 import { db } from '../../database/db';
 import Modal from '../../components/common/Modal/Modal';
 import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
-import GoalsManager from '../../features/settings/GoalsManager'; 
-import { Sun, Moon, Laptop, Upload, Download, Trash2, Target } from 'lucide-react'; 
+import GoalsManager from '../../features/settings/GoalsManager';
+import TemplateManager from '../../features/entries/TemplateManager';
+import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy } from 'lucide-react'; 
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const [isClearModalOpen, setClearModalOpen] = useState(false);
@@ -113,6 +114,15 @@ const SettingsPage = () => {
         </div>
       </div>
 
+      {/* --- Entry Templates Section --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><Copy size={20} /> Entry Templates</h3>
+        <p className={styles.sectionDescription}>Create and manage templates for quick entry creation.</p>
+        <div className={styles.card}>
+           <TemplateManager /> 
+        </div>
+      </div>
+
       {/* --- Data Management Section --- */}
       <div className={styles.settingsSection}>
         <h3 className={styles.sectionTitle}>Data Management</h3>
@@ -151,4 +161,3 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
-

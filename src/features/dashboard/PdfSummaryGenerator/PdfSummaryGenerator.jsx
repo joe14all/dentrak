@@ -6,44 +6,27 @@ import { calculatePay, calculateSinglePeriod } from '../../../utils/calculations
 import PdfDocument from './PdfDocument';
 import { ChevronDown, Download, LoaderCircle } from 'lucide-react';
 
-// This utility function remains unchanged as its logic is sound.
 const generateYearlyPayPeriods = (practice, year, entries) => {
     if (!practice) return [];
     const periods = [];
-    const yearEntries = entries.filter(e => {
-        const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
-        if (!dateStr) return false;
-        return new Date(`${dateStr}T00:00:00Z`).getUTCFullYear() === year;
-    });
 
     for (let month = 0; month < 12; month++) {
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        let monthPeriods = [];
-        switch (practice.payCycle) {
-            case 'monthly':
-                monthPeriods.push({ start: new Date(Date.UTC(year, month, 1)), end: new Date(Date.UTC(year, month, daysInMonth)) });
-                break;
-            case 'bi-weekly':
-                monthPeriods.push({ start: new Date(Date.UTC(year, month, 1)), end: new Date(Date.UTC(year, month, 15)) });
-                monthPeriods.push({ start: new Date(Date.UTC(year, month, 16)), end: new Date(Date.UTC(year, month, daysInMonth)) });
-                break;
-            default: break;
-        }
-
-        const periodsWithEntries = monthPeriods.filter(period => {
-            return yearEntries.some(e => {
-                if (e.practiceId !== practice.id) return false;
-                const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
-                if (!dateStr) return false;
-                const entryDate = new Date(`${dateStr}T00:00:00Z`);
-                
-                if (e.entryType === 'periodSummary') {
-                     const entryEndDate = new Date(`${e.periodEndDate}T00:00:00Z`);
-                     return entryDate <= period.end && entryEndDate >= period.start;
-                }
-                return entryDate >= period.start && entryDate <= period.end;
-            });
+        // Get entries for this month
+        const entriesForMonth = entries.filter(e => {
+            if (e.practiceId !== practice.id) return false;
+            const dateStr = e.entryType === 'periodSummary' ? e.periodStartDate : e.date;
+            if (!dateStr) return false;
+            const entryDate = new Date(`${dateStr}T00:00:00Z`);
+            return entryDate.getUTCFullYear() === year && entryDate.getUTCMonth() === month;
         });
+
+        // Use calculatePay to get the actual periods with the same logic
+        const monthCalcResult = calculatePay(practice, entriesForMonth, year, month);
+        
+        // Only show periods that have entries
+        const periodsWithEntries = monthCalcResult.payPeriods
+            .filter(p => p.hasEntries)
+            .map(p => ({ start: p.start, end: p.end }));
 
         if (periodsWithEntries.length > 0) {
             periods.push({ month: month, periods: periodsWithEntries });
@@ -53,7 +36,7 @@ const generateYearlyPayPeriods = (practice, year, entries) => {
 };
 
 const PdfSummaryGenerator = ({ onCancel }) => {
-    const { practices } = usePractices();
+    const { practices, practicesVersion } = usePractices();
     const { entries } = useEntries();
 
     const [selectedPracticeId, setSelectedPracticeId] = useState(practices?.[0]?.id || '');
@@ -65,7 +48,7 @@ const PdfSummaryGenerator = ({ onCancel }) => {
     const availablePeriodsByMonth = useMemo(() => {
         const practice = practices.find(p => p.id === selectedPracticeId);
         return generateYearlyPayPeriods(practice, selectedYear, entries);
-    }, [selectedPracticeId, selectedYear, practices, entries]);
+    }, [selectedPracticeId, selectedYear, practices, entries, practicesVersion]);
     
     useEffect(() => {
         setSelectedPeriods([]);
@@ -120,10 +103,18 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                 return entryDate.getUTCFullYear() === year && entryDate.getUTCMonth() === month;
             });
             const monthCalcResult = calculatePay(practice, entriesForMonth, year, month);
+            
+            // Find the matching period - should match exactly now
             const matchedPeriod = monthCalcResult.payPeriods.find(calculatedPeriod => 
-                calculatedPeriod.start.getTime() === period.start.getTime() &&
-                calculatedPeriod.end.getTime() === period.end.getTime()
+                calculatedPeriod.start.toISOString() === period.start.toISOString() &&
+                calculatedPeriod.end.toISOString() === period.end.toISOString()
             );
+            
+            if (!matchedPeriod) {
+                console.warn('No matching period found for:', period);
+                return null;
+            }
+            
             if (matchedPeriod) {
                 const entriesInThisExactPeriod = entries.filter(e => {
                     if (e.practiceId !== practice.id) return false;
@@ -144,6 +135,11 @@ const PdfSummaryGenerator = ({ onCancel }) => {
             }
             return null;
         }).filter(Boolean);
+        
+        if (periodData.length === 0) {
+            alert("No matching periods found. Please try different selections.");
+            return;
+        }
         
         setReportData({ practice, periods: periodData.sort((a, b) => a.period.start - b.period.start) });
     };
@@ -173,6 +169,12 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                             const day = String(d.getUTCDate()).padStart(2, '0');
                             return `${year}-${month}-${day}`;
                         }
+                        
+                        // Safety check for periods array
+                        if (!reportData.periods || reportData.periods.length === 0) {
+                            throw new Error("No periods found in report data");
+                        }
+                        
                         const overallStartDate = reportData.periods[0].period.start;
                         const overallEndDate = reportData.periods[reportData.periods.length - 1].period.end;
                         const suggestedName = `${reportData.practice.name}_Summary_${formatDateForFilename(overallStartDate)}_to_${formatDateForFilename(overallEndDate)}.pdf`;

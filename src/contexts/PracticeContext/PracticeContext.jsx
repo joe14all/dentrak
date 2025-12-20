@@ -1,11 +1,13 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { 
-  getAllPractices, 
+  getAllPractices,
+  getPracticeById,
   addPractice, 
   updatePractice, 
   deletePractice,
   populatePractices // Import the populator function
 } from '../../database/practices';
+import { deletePeriodSummariesForPractice } from '../../database/entries';
 
 // 1. Create the context
 const PracticeContext = createContext();
@@ -15,13 +17,17 @@ export const PracticeProvider = ({ children }) => {
   const [practices, setPractices] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Add a loading state
   const [selectedPractice, setSelectedPractice] = useState(null);
+  const [practicesVersion, setPracticesVersion] = useState(0); // Add version tracking
 
   // A function just for reloading the practices from the DB into state
   const refreshPractices = useCallback(async () => {
     setIsLoading(true);
     try {
       const practicesFromDB = await getAllPractices();
-      setPractices(practicesFromDB);
+      // Force a deep clone to ensure React detects changes
+      const clonedPractices = practicesFromDB.map(p => ({ ...p }));
+      setPractices(clonedPractices);
+      setPracticesVersion(v => v + 1); // Increment version to force re-render
     } catch (error) {
       console.error("Failed to refresh practices:", error);
     } finally {
@@ -59,6 +65,20 @@ export const PracticeProvider = ({ children }) => {
 
   const editPractice = async (id, updatedData) => {
     try {
+      // Fetch current practice from database to check if payCycle is changing
+      const currentPractice = await getPracticeById(id);
+      const isPayCycleChanged = currentPractice && 
+                                updatedData.payCycle && 
+                                currentPractice.payCycle !== updatedData.payCycle;
+      
+      if (isPayCycleChanged) {
+        console.log(`⚠️ Pay cycle changed for practice ${id} from ${currentPractice.payCycle} to ${updatedData.payCycle}`);
+        console.log('🗑️ Deleting old period summaries...');
+        // Delete all period summaries for this practice since they're now invalid
+        const deletedCount = await deletePeriodSummariesForPractice(id);
+        console.log(`✅ Deleted ${deletedCount} period summaries`);
+      }
+      
       await updatePractice(id, updatedData);
       await refreshPractices(); // Safely reload
     } catch (error) {
@@ -80,6 +100,7 @@ export const PracticeProvider = ({ children }) => {
     selectedPractice,
     setSelectedPractice,
     isLoading,
+    practicesVersion, // Expose version for components to track changes
     refreshPractices, // Expose the safe refresh function
     addNewPractice,
     editPractice,

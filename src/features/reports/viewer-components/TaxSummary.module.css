@@ -1,0 +1,208 @@
+.report {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  color: #1a1a1a;
+}
+
+.reportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--brand-primary);
+}
+
+.reportHeader h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.25rem 0;
+}
+
+.reportHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #666;
+  margin: 0;
+}
+
+.headerIcon {
+  color: var(--brand-primary);
+  opacity: 0.2;
+}
+
+.annualTotals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.totalCard {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.totalLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.totalValue {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.totalNote {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 2.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.practiceSection {
+  margin-bottom: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.practiceHeader {
+  background-color: #f8f9fa;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.practiceHeader h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.practiceTotal {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.quarterlyTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quarterlyTable th,
+.quarterlyTable td {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.quarterlyTable thead th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: white;
+}
+
+.quarterlyTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.numberCell {
+  text-align: right !important;
+}
+
+.quarterName {
+  font-weight: 500;
+  color: #666;
+}
+
+.totalRow {
+  background-color: #f8f9fa;
+  font-size: 1.05rem;
+}
+
+.totalRow td {
+  padding: 1rem 1.5rem;
+  border-top: 2px solid #1a1a1a;
+}
+
+.combinedSummary {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 3px solid var(--brand-primary);
+}
+
+.taxNotes {
+  background-color: #e7f3ff;
+  border-left: 4px solid #0066cc;
+  padding: 1.5rem;
+  margin: 2.5rem 0;
+  border-radius: 4px;
+}
+
+.taxNotes h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #0066cc;
+}
+
+.taxNotes ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.taxNotes li {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.taxNotes strong {
+  color: #0066cc;
+}
+
+.reportFooter {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.reportFooter p {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.disclaimer {
+  font-style: italic;
+  color: #999 !important;
+  font-weight: 500;
+}

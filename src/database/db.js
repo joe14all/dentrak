@@ -3,29 +3,13 @@ import Dexie from "dexie";
 
 export const db = new Dexie("DentrakDatabase");
 
-//Version 9: Adds indexes to 'payments' for linking to transaction types.
-db.version(8)
-  .stores({
-    practices: "++id, name, status, taxStatus",
-    entries: "++id, practiceId, date, entryType",
-    payments: "++id, practiceId, paymentDate",
-    directDeposits: "++id, practiceId, paymentDate",
-    eTransfers: "++id, practiceId, status, paymentDate",
-    scheduleBlocks: "++id, startDate, endDate",
-    reports: "++id, name, type, createdAt",
-    goals: "++id, type, timePeriod, year, month, practiceId, [year+month]",
-  })
-  .upgrade((tx) => {
-    console.log(
-      "Upgrading database to version 8, adding goals table with [year+month] index if it doesn't exist."
-    );
-  });
+// Version history must be in sequential order from oldest to newest
+// Define all versions in order
 
-db.version(9)
+db.version(11)
   .stores({
     practices: "++id, name, status, taxStatus",
     entries: "++id, practiceId, date, entryType",
-    // ADDED indexes for linkedChequeId, linkedDirectDepositId, linkedETransferId
     payments:
       "++id, practiceId, paymentDate, linkedChequeId, linkedDirectDepositId, linkedETransferId",
     cheques: "++id, practiceId, status, dateReceived",
@@ -34,36 +18,14 @@ db.version(9)
     scheduleBlocks: "++id, startDate, endDate",
     reports: "++id, name, type, createdAt",
     goals: "++id, type, timePeriod, year, month, practiceId, [year+month]",
+    entryTemplates: "++id, name, practiceId, createdAt",
+    expenses: "++id, date, category, practiceId, year, [year+category]",
   })
   .upgrade((tx) => {
     console.log(
-      "Upgrading database to version 9, adding indexes to payments table."
+      "Upgrading database to version 11, adding expenses table for tax tracking."
     );
   });
 
-// Apply previous versions migrations if necessary
-db.version(7).stores({
-  practices: "++id, name, status, taxStatus",
-  entries: "++id, practiceId, date, entryType",
-  payments: "++id, practiceId, paymentDate",
-  cheques: "++id, practiceId, status, dateReceived",
-  directDeposits: "++id, practiceId, paymentDate",
-  eTransfers: "++id, practiceId, status, paymentDate",
-  scheduleBlocks: "++id, startDate, endDate",
-  reports: "++id, name, type, createdAt", // Ensure reports is defined in previous versions too
-});
-
-db.version(6).stores({
-  practices: "++id, name, status, taxStatus",
-  entries: "++id, practiceId, date, entryType",
-  payments: "++id, practiceId, paymentDate",
-  cheques: "++id, practiceId, status, dateReceived",
-  directDeposits: "++id, practiceId, paymentDate",
-  eTransfers: "++id, practiceId, status, paymentDate",
-  // Removed 'preferences' table from previous schemas if upgrading from < v6
-});
-
-// Ensure DB is open
-db.open().catch((err) => {
-  console.error(`Failed to open db: ${err.stack || err}`);
-});
+// Don't call db.open() here - let Dexie open it lazily when first accessed
+// This prevents conflicts with multiple contexts trying to open simultaneously

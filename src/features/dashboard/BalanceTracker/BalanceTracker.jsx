@@ -99,7 +99,7 @@ const BalanceItem = ({ item, getStatusInfo, calculatePendingPayments }) => {
 // --- Main Component: BalanceTracker ---
 const BalanceTracker = () => {
     // Hooks (Unchanged)
-    const { practices } = usePractices();
+    const { practices, practicesVersion } = usePractices();
     const { entries } = useEntries();
     const { payments } = usePayments();
     const { cheques, directDeposits, eTransfers } = useTransactions();
@@ -110,7 +110,7 @@ const BalanceTracker = () => {
         return calculatePracticeBalances(
             practices, entries, payments, cheques, directDeposits, eTransfers
         );
-    }, [practices, entries, payments, cheques, directDeposits, eTransfers]);
+    }, [practices, entries, payments, cheques, directDeposits, eTransfers, practicesVersion]);
 
     // Calculate Total Owed (Unchanged)
     const totalOwed = useMemo(() => {

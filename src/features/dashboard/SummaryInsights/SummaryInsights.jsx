@@ -60,9 +60,9 @@ const PayBreakdownDetail = ({ breakdown }) => (
 
 
 const SummaryInsights = () => {
-    const { practices } = usePractices();
+    const { practices, practicesVersion } = usePractices();
     const { entries } = useEntries();
-    const { goals } = useGoals(); // Assuming useGoals context exists
+    const { goals } = useGoals();
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const { summary, chartData } = useMemo(() => {
@@ -154,7 +154,7 @@ const SummaryInsights = () => {
             },
             chartData,
         };
-    }, [practices, entries, goals, currentDate]);
+    }, [practices, entries, goals, currentDate, practicesVersion]);
 
     const handleMonthChange = (direction) => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));
     const handleYearChange = (direction) => setCurrentDate(new Date(currentDate.getFullYear() + direction, currentDate.getMonth(), 1));

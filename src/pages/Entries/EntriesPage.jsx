@@ -1,21 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useEntries } from '../../contexts/EntryContext/EntryContext';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
+import { useNavigation } from '../../contexts/NavigationContext/NavigationContext';
 import PageHeader from '../../features/entries/PageHeader';
-import PerformanceToolbar from '../../features/entries/PerformanceToolbar';
-import PerformanceSummary from '../../features/entries/PerformanceSummary'; // Import the new component
+import PerformanceToolbar from '../../features/entries/PerformanceToolbar'
+import PerformanceSummary from '../../features/entries/PerformanceSummary';
 import EntriesList from '../../features/entries/EntriesList';
 import AttendanceTracker from '../../features/entries/attendance/AttendanceTracker';
 import Modal from '../../components/common/Modal/Modal';
 import EntryForm from '../../features/entries/form-components/EntryForm';
 import DeleteConfirmation from '../../features/entries/DeleteConfirmation';
+import BulkEntryGenerator from '../../features/entries/BulkEntryGenerator';
 import styles from './EntriesPage.module.css';
 
 const EntriesPage = () => {
   const { entries, isLoading, addNewEntry, editEntry, removeEntry } = useEntries();
   const { practices } = usePractices();
+  const { navigationState, clearNavigationState } = useNavigation();
 
   const [activeView, setActiveView] = useState('performance');
+
+  // Handle navigation state to switch to attendance tab if requested
+  useEffect(() => {
+    if (navigationState?.openAttendance) {
+      setActiveView('attendance');
+      clearNavigationState();
+    }
+  }, [navigationState, clearNavigationState]);
   const [filters, setFilters] = useState({
     practiceId: 'all',
     entryTypes: [],
@@ -27,6 +38,7 @@ const EntriesPage = () => {
   const [entryToEdit, setEntryToEdit] = useState(null);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
+  const [isBulkGeneratorOpen, setBulkGeneratorOpen] = useState(false);
 
   const filteredPerformanceEntries = useMemo(() => {
     if (!entries) return [];
@@ -120,6 +132,7 @@ const EntriesPage = () => {
             activeFilters={filters}
             onFilterChange={setFilters}
             onAddEntry={handleOpenAddModal}
+            onBulkGenerate={() => setBulkGeneratorOpen(true)}
           />
           {/* Add the new summary component here */}
           <PerformanceSummary summaryData={performanceSummaryData} />
@@ -152,9 +165,12 @@ const EntriesPage = () => {
           onCancel={handleCloseModals}
         />
       </Modal>
-
       <Modal isOpen={isDeleteModalOpen} onClose={handleCloseModals} title="Confirm Deletion">
         <DeleteConfirmation onConfirm={handleConfirmDelete} onCancel={handleCloseModals} />
+      </Modal>
+
+      <Modal isOpen={isBulkGeneratorOpen} onClose={() => setBulkGeneratorOpen(false)} title="Bulk Entry Generator">
+        <BulkEntryGenerator onClose={() => setBulkGeneratorOpen(false)} />
       </Modal>
     </div>
   );

@@ -41,3 +41,18 @@ export const updateEntry = async (id, data) => {
 export const deleteEntry = async (id) => {
   return await db.entries.delete(id);
 };
+
+/**
+ * Deletes all period summary entries for a specific practice.
+ * Useful when changing a practice's pay cycle to invalidate old summaries.
+ */
+export const deletePeriodSummariesForPractice = async (practiceId) => {
+  const deleted = await db.entries
+    .where('practiceId')
+    .equals(practiceId)
+    .and(entry => entry.entryType === 'periodSummary')
+    .delete();
+  
+  console.log(`🗑️ Deleted ${deleted} period summaries for practice ${practiceId}`);
+  return deleted;
+};

@@ -82,6 +82,8 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
  * Generates an array of pay period start/end dates for a given month and cycle.
  */
 const getPayPeriods = (year, month, payCycle) => {
+  console.log('📅 getPayPeriods called:', { year, month, payCycle });
+  
   const periods = [];
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startDate = new Date(Date.UTC(year, month, 1));
@@ -127,6 +129,15 @@ const getPayPeriods = (year, month, payCycle) => {
  * The main exported function. Calculates pay for a practice over an entire month.
  */
 export const calculatePay = (practice, allEntriesForPractice, year, month) => {
+  console.log('💰 calculatePay called:', {
+    practiceId: practice?.id,
+    practiceName: practice?.name,
+    payCycle: practice?.payCycle,
+    year,
+    month,
+    entriesCount: allEntriesForPractice?.length
+  });
+
   if (!practice)
     return {
       calculatedPay: 0,
@@ -153,6 +164,18 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
   const periodSummaries = entriesInMonth.filter(
     (e) => e.entryType === "periodSummary"
   );
+
+  console.log('📋 Entry analysis:', {
+    practiceId: practice.id,
+    totalEntries: entriesInMonth.length,
+    periodSummaries: periodSummaries.length,
+    periodSummaryDetails: periodSummaries.map(ps => ({
+      id: ps.id,
+      start: ps.periodStartDate,
+      end: ps.periodEndDate,
+      production: ps.production
+    }))
+  });
 
   // Determine which entries to use for the overall month's production total
   let financialEntriesForMonth;
@@ -181,59 +204,64 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
   let payStructure = "";
   let periodDetails = [];
 
-  // This logic is now mutually exclusive and prioritizes Period Summaries for pay calculation.
-  if (periodSummaries.length > 0) {
-    payStructure = `(Sum of ${periodSummaries.length} Period Summaries)`;
-    periodDetails = periodSummaries.map((summaryEntry) => {
-      const summaryStart = new Date(
-        `${summaryEntry.periodStartDate}T00:00:00Z`
-      );
-      const summaryEnd = new Date(`${summaryEntry.periodEndDate}T00:00:00Z`);
-      const attendanceForThisSummary = entriesInMonth.filter((e) => {
-        if (e.entryType !== "attendanceRecord" || !e.date) return false;
-        const date = new Date(`${e.date}T00:00:00Z`);
-        return date >= summaryStart && date <= summaryEnd;
-      });
-      const calculationEntries = [summaryEntry, ...attendanceForThisSummary];
-      const { calculatedPay, basePayOwed, productionPayComponent } =
-        calculateSinglePeriod(practice, calculationEntries);
-      totalCalculatedPay += calculatedPay;
-      totalBasePayOwed += basePayOwed;
-      totalProductionPayComponent += productionPayComponent;
-      return {
-        start: summaryStart,
-        end: summaryEnd,
-        base: basePayOwed,
-        prod: productionPayComponent,
-        final: calculatedPay,
-        hasEntries: true,
-      };
-    });
-  } else if (dailyAndAttendanceEntries.length > 0) {
-    const payPeriods = getPayPeriods(year, month, practice.payCycle);
-    periodDetails = payPeriods.map((period) => {
-      const entriesInPeriod = dailyAndAttendanceEntries.filter((e) => {
+  // ALWAYS generate periods based on practice payCycle, regardless of entry types
+  // This ensures bi-weekly practices always show 2 periods, monthly shows 1, etc.
+  console.log('🟢 Generating periods based on payCycle:', practice.payCycle);
+  const payPeriods = getPayPeriods(year, month, practice.payCycle);
+  console.log('📊 Generated pay periods:', {
+    practiceId: practice.id,
+    payCycle: practice.payCycle,
+    periodsCount: payPeriods.length,
+    periods: payPeriods.map(p => ({
+      start: p.start.toISOString(),
+      end: p.end.toISOString()
+    }))
+  });
+
+  periodDetails = payPeriods.map((period) => {
+    // Find ALL entries (period summaries + daily) that fall within this period
+    const entriesInPeriod = entriesInMonth.filter((e) => {
+      let entryDate;
+      
+      if (e.entryType === 'periodSummary') {
+        // For period summaries, check if they overlap with this period
+        const summaryStart = new Date(`${e.periodStartDate}T00:00:00Z`);
+        const summaryEnd = new Date(`${e.periodEndDate}T00:00:00Z`);
+        // Include if there's any overlap
+        return summaryStart <= period.end && summaryEnd >= period.start;
+      } else {
+        // For daily entries, check if the date falls within the period
         if (!e.date) return false;
-        const date = new Date(`${e.date}T00:00:00Z`);
-        return date >= period.start && date <= period.end;
-      });
-      const { calculatedPay, basePayOwed, productionPayComponent } =
-        calculateSinglePeriod(practice, entriesInPeriod);
-      totalCalculatedPay += calculatedPay;
-      totalBasePayOwed += basePayOwed;
-      totalProductionPayComponent += productionPayComponent;
-      return {
-        start: period.start,
-        end: period.end,
-        base: basePayOwed,
-        prod: productionPayComponent,
-        final: calculatedPay,
-        hasEntries: entriesInPeriod.length > 0,
-      };
+        entryDate = new Date(`${e.date}T00:00:00Z`);
+        return entryDate >= period.start && entryDate <= period.end;
+      }
     });
-    const relevantPeriods = periodDetails.filter((p) => p.hasEntries);
-    payStructure = `(Sum of ${relevantPeriods.length} ${practice.payCycle} periods)`;
-  }
+
+    console.log('📝 Entries in period:', {
+      periodStart: period.start.toISOString(),
+      periodEnd: period.end.toISOString(),
+      entriesCount: entriesInPeriod.length,
+      entryTypes: entriesInPeriod.map(e => e.entryType)
+    });
+
+    const { calculatedPay, basePayOwed, productionPayComponent } =
+      calculateSinglePeriod(practice, entriesInPeriod);
+    
+    totalCalculatedPay += calculatedPay;
+    totalBasePayOwed += basePayOwed;
+    totalProductionPayComponent += productionPayComponent;
+    
+    return {
+      start: period.start,
+      end: period.end,
+      base: basePayOwed,
+      prod: productionPayComponent,
+      final: calculatedPay,
+      hasEntries: entriesInPeriod.length > 0,
+    };
+  });
+
+  payStructure = `(${practice.payCycle} - ${payPeriods.length} periods)`;
 
   const finalReturn = {
     calculatedPay: totalCalculatedPay,

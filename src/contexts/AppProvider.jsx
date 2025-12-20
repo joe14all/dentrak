@@ -10,7 +10,9 @@ import { ReportProvider } from './ReportContext/ReportContext';
 import { ThemeProvider } from './ThemeContext/ThemeContext';
 import { NavigationProvider } from './NavigationContext/NavigationContext';
 import { ScheduleBlockProvider } from './ScheduleBlockContext/ScheduleBlockContext';
-import { GoalProvider } from './GoalContext/GoalContext'; // 1. Import the new provider
+import { GoalProvider } from './GoalContext/GoalContext';
+import { EntryTemplateProvider } from './EntryTemplateContext/EntryTemplateContext';
+import { ExpenseProvider } from './ExpenseContext/ExpenseContext';
 
 
 export const AppProvider = ({ children }) => {
@@ -18,21 +20,25 @@ export const AppProvider = ({ children }) => {
     <AuthProvider>
       <NavigationProvider>
         <PracticeProvider>
-         <GoalProvider> {/* 2. Wrap relevant providers */}
+         <GoalProvider>
           <ScheduleBlockProvider>
-            <EntryProvider>
-              <PaymentProvider>
-                <TransactionProvider>
-                    <ReportProvider>
-                      <ThemeProvider>
-                        {children}
-                      </ThemeProvider>
-                    </ReportProvider>
-                </TransactionProvider>
-              </PaymentProvider>
-            </EntryProvider>
+            <EntryTemplateProvider>
+              <ExpenseProvider>
+                <EntryProvider>
+                  <PaymentProvider>
+                    <TransactionProvider>
+                        <ReportProvider>
+                          <ThemeProvider>
+                            {children}
+                          </ThemeProvider>
+                        </ReportProvider>
+                    </TransactionProvider>
+                  </PaymentProvider>
+                </EntryProvider>
+              </ExpenseProvider>
+            </EntryTemplateProvider>
           </ScheduleBlockProvider>
-         </GoalProvider> {/* 2. Close the wrap */}
+         </GoalProvider>
         </PracticeProvider>
       </NavigationProvider>
     </AuthProvider>

@@ -2,25 +2,27 @@ import React from 'react';
 import styles from './ReportTypeSelector.module.css';
 
 const ReportTypeSelector = ({ selectedType, onChange }) => {
-  // All report types are now enabled
   const reportTypes = [
-    { label: "Pay Period", value: "payPeriodStatement" },
-    { label: "Annual", value: "annualSummary" },
-    { label: "Comparison", value: "practiceComparison" },
+    { label: "Pay Period Statement", value: "payPeriodStatement", description: "Detailed earnings for a specific period" },
+    { label: "Annual Summary", value: "annualSummary", description: "Full year financial overview" },
+    { label: "Practice Comparison", value: "practiceComparison", description: "Compare multiple practices" },
+    { label: "YTD Income Report", value: "ytdIncome", description: "Year-to-date income tracking" },
+    { label: "Tax Summary", value: "taxSummary", description: "Quarterly breakdown for tax filing" },
   ];
 
   return (
     <div className={styles.formGroup}>
       <label>Report Type</label>
-      <div className={styles.segmentedControl}>
+      <div className={styles.reportGrid}>
         {reportTypes.map(type => (
           <button
             key={type.value}
             type="button"
-            className={`${styles.segmentButton} ${selectedType === type.value ? styles.active : ''}`}
+            className={`${styles.reportCard} ${selectedType === type.value ? styles.active : ''}`}
             onClick={() => onChange(type.value)}
           >
-            {type.label}
+            <span className={styles.reportLabel}>{type.label}</span>
+            <span className={styles.reportDescription}>{type.description}</span>
           </button>
         ))}
       </div>

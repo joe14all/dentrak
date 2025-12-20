@@ -23,6 +23,36 @@
   color: var(--ui-text-secondary);
   margin: 0.5rem 0 0 0;
 }
+.periodRange {
+  font-size: 0.95rem;
+  color: var(--ui-text-tertiary);
+  margin: 0.5rem 0 0 0;
+}
+
+.practiceInfo {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--ui-background-tertiary);
+  border-radius: 8px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.infoItem span {
+  font-size: 0.8rem;
+  color: var(--ui-text-secondary);
+}
+
+.infoItem strong {
+  font-size: 1rem;
+  color: var(--ui-text-primary);
+}
 
 .sectionTitle {
   font-size: 1.25rem;

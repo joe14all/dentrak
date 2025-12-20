@@ -13,6 +13,9 @@ import QuickActions from '../../features/dashboard/QuickActions/QuickActions';
 import YtdAnalytics from '../../features/dashboard/YtdAnalytics/YtdAnalytics';
 import BalanceTracker from '../../features/dashboard/BalanceTracker/BalanceTracker';
 import SummaryInsights from '../../features/dashboard/SummaryInsights/SummaryInsights';
+import CashFlowForecast from '../../features/dashboard/CashFlowForecast/CashFlowForecast';
+import TaxPlanning from '../../features/dashboard/TaxPlanning/TaxPlanning';
+import PracticeComparison from '../../features/dashboard/PracticeComparison/PracticeComparison';
 
 // Import Modals and Forms for Quick Actions
 import Modal from '../../components/common/Modal/Modal';
@@ -24,13 +27,13 @@ const DashboardPage = () => {
   const { practices } = usePractices();
   const { addNewEntry } = useEntries();
   const { addNewPayment } = usePayments();
-  const { setActivePage } = useNavigation();
+  const { navigateToPage } = useNavigation();
   
   const [isEntryModalOpen, setEntryModalOpen] = useState(false);
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isPdfModalOpen, setPdfModalOpen] = useState(false);
   
-  const handleAddAttendance = () => setActivePage('Entries');
+  const handleAddAttendance = () => navigateToPage('Entries', { openAttendance: true });
   const handleSaveEntry = (formData) => {
     addNewEntry(formData);
     setEntryModalOpen(false);
@@ -68,6 +71,21 @@ const DashboardPage = () => {
             <div className={styles.sidebar}>
                 <YtdAnalytics />
                 <BalanceTracker />
+            </div>
+
+            {/* Cash Flow Forecast: Full-width forecast section */}
+            <div className={styles.forecast}>
+                <CashFlowForecast />
+            </div>
+
+            {/* Tax Planning: Full-width tax section */}
+            <div className={styles.taxPlanning}>
+                <TaxPlanning />
+            </div>
+
+            {/* Practice Comparison: Full-width comparison section */}
+            <div className={styles.practiceComparison}>
+                <PracticeComparison />
             </div>
         </div>
 

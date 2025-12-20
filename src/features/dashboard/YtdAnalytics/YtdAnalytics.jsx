@@ -49,7 +49,7 @@ const HighlightCard = ({ icon, title, value, subtext }) => (
 
 const YtdAnalytics = () => {
     const { entries } = useEntries();
-    const { practices } = usePractices();
+    const { practices, practicesVersion } = usePractices();
     const { goals } = useGoals(); 
     const [activeTab, setActiveTab] = useState('overview');
 
@@ -159,7 +159,7 @@ if (!entries || !practices || entries.length === 0 || practices.length === 0 || 
             annualIncomeGoalTarget: annualIncomeGoal?.targetAmount,
             annualIncomeGoalProgress: annualIncomeGoalProgress,
         };
-    }, [entries, practices, goals]);
+    }, [entries, practices, goals, practicesVersion]);
 
     const renderGoalProgress = (target, progress, label) => {
         if (target == null || progress == null) return null; // No goal set

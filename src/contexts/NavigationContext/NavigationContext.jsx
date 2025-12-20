@@ -4,10 +4,23 @@ const NavigationContext = createContext();
 
 export const NavigationProvider = ({ children }) => {
   const [activePage, setActivePage] = useState('Dashboard');
+  const [navigationState, setNavigationState] = useState(null);
+
+  const navigateToPage = (page, state = null) => {
+    setActivePage(page);
+    setNavigationState(state);
+  };
+
+  const clearNavigationState = () => {
+    setNavigationState(null);
+  };
 
   const value = {
     activePage,
     setActivePage,
+    navigationState,
+    navigateToPage,
+    clearNavigationState,
   };
 
   return (

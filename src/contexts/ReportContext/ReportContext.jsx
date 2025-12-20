@@ -11,6 +11,8 @@ import {
 import { usePractices } from '../PracticeContext/PracticeContext';
 import { useEntries } from '../EntryContext/EntryContext';
 import { usePayments } from '../PaymentContext/PaymentContext';
+import { calculatePay } from '../../utils/calculations';
+import { calculatePracticeMetrics } from '../../utils/practiceComparison';
 
 const ReportContext = createContext();
 
@@ -51,7 +53,7 @@ export const ReportProvider = ({ children }) => {
   /**
    * Generates a new report based on specified parameters without saving it.
    * @param {Object} params - The parameters for the report.
-   * @param {'payPeriodStatement' | 'annualSummary' | 'practiceComparison'} params.type
+   * @param {'payPeriodStatement' | 'annualSummary' | 'practiceComparison' | 'ytdIncome' | 'taxSummary'} params.type
    * @param {string} params.startDate
    * @param {string} params.endDate
    * @param {number[]} params.practiceIds
@@ -78,29 +80,19 @@ export const ReportProvider = ({ children }) => {
     // --- Logic for different report types ---
     switch(type) {
       case 'payPeriodStatement': {
-        // This can now generate a statement for each selected practice.
         return relevantPractices.map(practice => {
           const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
           const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
           
-          const grossProduction = practiceEntries.reduce((sum, e) => sum + (e.production || 0), 0);
-          const grossCollection = practiceEntries.reduce((sum, e) => sum + (e.collection || 0), 0);
-          const totalAdjustments = practiceEntries.flatMap(e => e.adjustments || []).reduce((sum, adj) => sum + adj.amount, 0);
+          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
           
-          // --- Complex Pay Calculation ---
-          let calculatedPay = 0;
-          if (practice.basePay > 0) { // Daily Rate / Employment Model
-              const daysWorked = new Set(practiceEntries.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
-              calculatedPay = daysWorked * practice.basePay;
-              // Add bonus logic if it exists
-          } else { // Percentage Model
-              const calculationBase = practice.calculationBase === 'collection' ? grossCollection : grossProduction;
-              // This is a simplified calculation. A real one would handle deductions timing.
-              const netBase = calculationBase - totalAdjustments;
-              calculatedPay = netBase * (practice.percentage / 100);
-          }
-
-          const totalPaymentsReceived = practicePayments.reduce((sum, p) => sum + p.amount, 0);
+          // Get period breakdown
+          const periodStartDate = new Date(startDate);
+          const periodEndDate = new Date(endDate);
+          const year = periodStartDate.getFullYear();
+          const month = periodStartDate.getMonth();
+          
+          const payCalc = calculatePay(practice, practiceEntries, year, month);
 
           return {
               name: `${practice.name} - Pay Period ${startDate} to ${endDate}`,
@@ -109,17 +101,29 @@ export const ReportProvider = ({ children }) => {
               parameters: {...params, practiceIds: [practice.id]},
               data: {
                   practiceName: practice.name,
+                  startDate,
+                  endDate,
+                  paymentType: practice.paymentType,
+                  percentage: practice.percentage,
+                  basePay: practice.basePay,
                   summary: { 
-                      grossProduction, 
-                      grossCollection,
-                      totalAdjustments,
-                      netProduction: grossProduction - totalAdjustments,
-                      calculatedPay,
-                      totalPaymentsReceived,
-                      balanceDue: calculatedPay - totalPaymentsReceived
+                      grossProduction: metrics.totalProduction, 
+                      grossCollection: metrics.totalCollection,
+                      totalAdjustments: practiceEntries.flatMap(e => e.adjustments || []).reduce((sum, adj) => sum + adj.amount, 0),
+                      netProduction: metrics.totalProduction - (practiceEntries.flatMap(e => e.adjustments || []).reduce((sum, adj) => sum + adj.amount, 0)),
+                      daysWorked: metrics.daysWorked,
+                      calculatedPay: metrics.totalCalculatedPay,
+                      totalPaymentsReceived: metrics.totalPaymentsReceived,
+                      balanceDue: metrics.outstandingBalance,
+                      avgProductionPerDay: metrics.avgProductionPerDay,
+                      avgPayPerDay: metrics.avgPayPerDay,
+                      effectiveRate: metrics.effectiveRate,
+                      collectionRate: metrics.collectionRate,
                   },
                   lineItems: practiceEntries,
                   paymentItems: practicePayments,
+                  payStructure: payCalc.payStructure,
+                  payPeriods: payCalc.payPeriods,
               }
           };
         });
@@ -129,20 +133,57 @@ export const ReportProvider = ({ children }) => {
         const year = new Date(startDate).getFullYear();
         const byPractice = relevantPractices.map(practice => {
             const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
-            const totalProduction = practiceEntries.reduce((sum, e) => sum + (e.production || 0), 0);
-            // Add more summary calculations here...
+            const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
+            const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+            
+            // Monthly breakdown
+            const monthlyData = Array.from({ length: 12 }, (_, monthIndex) => {
+              const monthEntries = practiceEntries.filter(e => {
+                const date = new Date(e.date || e.periodStartDate);
+                return date.getMonth() === monthIndex;
+              });
+              const monthPayments = practicePayments.filter(p => {
+                const date = new Date(p.paymentDate);
+                return date.getMonth() === monthIndex;
+              });
+              const monthMetrics = calculatePracticeMetrics(practice, monthEntries, monthPayments);
+              
+              return {
+                month: new Date(year, monthIndex).toLocaleString('default', { month: 'long' }),
+                production: monthMetrics.totalProduction,
+                collection: monthMetrics.totalCollection,
+                calculatedPay: monthMetrics.totalCalculatedPay,
+                paymentsReceived: monthMetrics.totalPaymentsReceived,
+                daysWorked: monthMetrics.daysWorked,
+              };
+            });
+            
             return {
                 practiceName: practice.name,
-                totalProduction,
-                totalCalculatedPay: 0, // Placeholder for complex annual pay calculation
+                paymentType: practice.paymentType,
+                totalProduction: metrics.totalProduction,
+                totalCollection: metrics.totalCollection,
+                totalCalculatedPay: metrics.totalCalculatedPay,
+                totalPaymentsReceived: metrics.totalPaymentsReceived,
+                outstandingBalance: metrics.outstandingBalance,
+                daysWorked: metrics.daysWorked,
+                avgProductionPerDay: metrics.avgProductionPerDay,
+                avgPayPerDay: metrics.avgPayPerDay,
+                effectiveRate: metrics.effectiveRate,
+                collectionRate: metrics.collectionRate,
+                monthlyData,
             };
         });
 
         const overallTotals = byPractice.reduce((acc, curr) => {
             acc.totalProduction += curr.totalProduction;
+            acc.totalCollection += curr.totalCollection;
             acc.totalCalculatedPay += curr.totalCalculatedPay;
+            acc.totalPaymentsReceived += curr.totalPaymentsReceived;
+            acc.outstandingBalance += curr.outstandingBalance;
+            acc.daysWorked += curr.daysWorked;
             return acc;
-        }, { totalProduction: 0, totalCalculatedPay: 0 });
+        }, { totalProduction: 0, totalCollection: 0, totalCalculatedPay: 0, totalPaymentsReceived: 0, outstandingBalance: 0, daysWorked: 0 });
 
         return [{
             name: `${year} Annual Financial Summary`,
@@ -156,25 +197,116 @@ export const ReportProvider = ({ children }) => {
       case 'practiceComparison': {
         const metrics = relevantPractices.map(practice => {
           const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
-          const attendance = practiceEntries.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary');
-          const daysWorked = new Set(attendance.map(e => e.date)).size;
-          const totalProduction = practiceEntries.reduce((sum, e) => sum + (e.production || 0), 0);
-          
-          return {
-              practiceName: practice.name,
-              totalProduction,
-              totalCollection: practiceEntries.reduce((sum, e) => sum + (e.collection || 0), 0),
-              daysWorked,
-              avgProductionPerDay: daysWorked > 0 ? totalProduction / daysWorked : 0,
-          };
+          const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
+          return calculatePracticeMetrics(practice, practiceEntries, practicePayments);
         });
+
+        const totals = metrics.reduce((acc, m) => ({
+          totalProduction: acc.totalProduction + m.totalProduction,
+          totalCollection: acc.totalCollection + m.totalCollection,
+          totalCalculatedPay: acc.totalCalculatedPay + m.totalCalculatedPay,
+          totalPaymentsReceived: acc.totalPaymentsReceived + m.totalPaymentsReceived,
+          daysWorked: acc.daysWorked + m.daysWorked,
+        }), { totalProduction: 0, totalCollection: 0, totalCalculatedPay: 0, totalPaymentsReceived: 0, daysWorked: 0 });
 
         return [{
             name: `Practice Comparison ${startDate} to ${endDate}`,
             type,
             createdAt: new Date().toISOString(),
             parameters: params,
-            data: { metrics }
+            data: { metrics, totals, startDate, endDate }
+        }];
+      }
+
+      case 'ytdIncome': {
+        const year = new Date(startDate).getFullYear();
+        const currentMonth = new Date().getMonth();
+        
+        const practiceData = relevantPractices.map(practice => {
+          const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
+          const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
+          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+          
+          return {
+            practiceName: practice.name,
+            totalCalculatedPay: metrics.totalCalculatedPay,
+            totalPaymentsReceived: metrics.totalPaymentsReceived,
+            outstandingBalance: metrics.outstandingBalance,
+            daysWorked: metrics.daysWorked,
+            avgPayPerDay: metrics.avgPayPerDay,
+          };
+        });
+
+        const totals = practiceData.reduce((acc, p) => ({
+          totalIncome: acc.totalIncome + p.totalCalculatedPay,
+          totalReceived: acc.totalReceived + p.totalPaymentsReceived,
+          totalOutstanding: acc.totalOutstanding + p.outstandingBalance,
+          daysWorked: acc.daysWorked + p.daysWorked,
+        }), { totalIncome: 0, totalReceived: 0, totalOutstanding: 0, daysWorked: 0 });
+
+        return [{
+          name: `YTD Income Report - ${year}`,
+          type,
+          createdAt: new Date().toISOString(),
+          parameters: params,
+          data: { year, currentMonth, practiceData, totals }
+        }];
+      }
+
+      case 'taxSummary': {
+        const year = new Date(startDate).getFullYear();
+        
+        const practiceData = relevantPractices.map(practice => {
+          const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
+          const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
+          
+          // Quarterly breakdown
+          const quarters = [
+            { name: 'Q1', months: [0, 1, 2] },
+            { name: 'Q2', months: [3, 4, 5] },
+            { name: 'Q3', months: [6, 7, 8] },
+            { name: 'Q4', months: [9, 10, 11] },
+          ];
+
+          const quarterlyData = quarters.map(q => {
+            const qEntries = practiceEntries.filter(e => {
+              const date = new Date(e.date || e.periodStartDate);
+              return q.months.includes(date.getMonth());
+            });
+            const qPayments = practicePayments.filter(p => {
+              const date = new Date(p.paymentDate);
+              return q.months.includes(date.getMonth());
+            });
+            const qMetrics = calculatePracticeMetrics(practice, qEntries, qPayments);
+            
+            return {
+              quarter: q.name,
+              income: qMetrics.totalCalculatedPay,
+              received: qMetrics.totalPaymentsReceived,
+            };
+          });
+
+          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+          
+          return {
+            practiceName: practice.name,
+            annualIncome: metrics.totalCalculatedPay,
+            annualPaymentsReceived: metrics.totalPaymentsReceived,
+            quarterlyData,
+          };
+        });
+
+        const totals = practiceData.reduce((acc, p) => ({
+          totalIncome: acc.totalIncome + p.annualIncome,
+          totalReceived: acc.totalReceived + p.annualPaymentsReceived,
+        }), { totalIncome: 0, totalReceived: 0 });
+
+        return [{
+          name: `Tax Summary - ${year}`,
+          type,
+          createdAt: new Date().toISOString(),
+          parameters: params,
+          data: { year, practiceData, totals }
         }];
       }
 

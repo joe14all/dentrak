@@ -1,0 +1,171 @@
+.report {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  color: #1a1a1a;
+}
+
+.reportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--brand-primary);
+}
+
+.reportHeader h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.25rem 0;
+}
+
+.reportHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #666;
+  margin: 0;
+}
+
+.headerIcon {
+  color: var(--brand-primary);
+  opacity: 0.2;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.summaryCard {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cardIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cardLabel {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.cardValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 2.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.practiceTable, .monthlyTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+
+.practiceTable thead, .monthlyTable thead {
+  background-color: #f8f9fa;
+}
+
+.practiceTable th,
+.practiceTable td,
+.monthlyTable th,
+.monthlyTable td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.practiceTable th,
+.monthlyTable th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.numberCell {
+  text-align: right !important;
+}
+
+.practiceName {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.outstanding {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.paidFull {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.totalRow {
+  background-color: #f8f9fa;
+  font-size: 1.05rem;
+}
+
+.totalRow td {
+  padding: 1rem;
+  border-top: 2px solid #1a1a1a;
+  border-bottom: 2px solid #1a1a1a;
+}
+
+.monthlySection {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 2px dashed #e0e0e0;
+}
+
+.monthlyTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.reportFooter {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.reportFooter p {
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  color: #666;
+}

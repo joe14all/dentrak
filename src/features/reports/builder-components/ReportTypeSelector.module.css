@@ -1,5 +1,57 @@
 .formGroup { display: flex; flex-direction: column; gap: 0.75rem; }
 .formGroup label { font-weight: 500; font-size: 0.9rem; color: var(--ui-text-primary); }
+
+.reportGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.reportCard {
+  padding: 1rem;
+  border: 2px solid var(--ui-border-secondary);
+  background: var(--ui-background-primary);
+  border-radius: 8px;
+  color: var(--ui-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.reportCard:hover {
+  border-color: var(--brand-primary);
+  background-color: var(--ui-background-secondary);
+}
+
+.reportCard.active {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.reportLabel {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.reportCard.active .reportLabel {
+  color: white;
+}
+
+.reportDescription {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.reportCard.active .reportDescription {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Keep old styles for backward compatibility */
 .segmentedControl {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

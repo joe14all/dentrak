@@ -15,6 +15,11 @@ export const getAllPractices = async () => {
   return await db.practices.toArray();
 };
 
+// Get a single practice by ID
+export const getPracticeById = async (id) => {
+  return await db.practices.get(id);
+};
+
 // Add a new practice
 export const addPractice = async (practice) => {
   return await db.practices.add(practice);
