@@ -147,6 +147,7 @@ export const mockPractices = [
  * @property {Adjustment[]} [adjustments]
  *
  * -- Attendance Fields (only for attendanceRecord) --
+ * @property {'full-day' | 'half-day'} [attendanceType] - Type of attendance (default: 'full-day').
  * @property {string} [checkInTime] - Optional time stamp (e.g., "08:30").
  * @property {string} [checkOutTime] - Optional time stamp (e.g., "17:00").
  *
@@ -164,6 +165,7 @@ export const mockEntries = [
     practiceId: 2, // City Center Dentistry
     entryType: "attendanceRecord",
     date: "2025-10-06",
+    attendanceType: "full-day",
     checkInTime: "08:55",
     checkOutTime: "17:05",
     notes: "Regular work day.",
@@ -173,6 +175,7 @@ export const mockEntries = [
     practiceId: 3, // Rural Community Clinic
     entryType: "attendanceRecord",
     date: "2025-10-07",
+    attendanceType: "half-day",
     notes: "Present for morning huddle and admin tasks. Left after lunch.",
   },
 

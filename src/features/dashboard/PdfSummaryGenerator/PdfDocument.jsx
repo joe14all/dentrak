@@ -5,10 +5,29 @@ import { ArrowRight } from 'lucide-react';
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
 const formatDate = (date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
-const MiniCalendar = ({ startDate, endDate, attendedDates }) => {
-  const attendedDayNumbers = new Set(
-    attendedDates.map(dateStr => new Date(`${dateStr}T00:00:00Z`).getUTCDate())
-  );
+const MiniCalendar = ({ startDate, endDate, attendedDates, attendanceEntries }) => {
+  // Create a map of day numbers to attendance types
+  const attendanceByDay = {};
+  
+  if (attendanceEntries && attendanceEntries.length > 0) {
+    attendanceEntries.forEach(entry => {
+      if (entry.date) {
+        const entryDate = new Date(`${entry.date}T00:00:00Z`);
+        const dayNum = entryDate.getUTCDate();
+        const attendanceType = entry.attendanceType || 'full-day';
+        // If we have multiple entries for same day, take the max (full-day > half-day)
+        if (!attendanceByDay[dayNum] || attendanceType === 'full-day') {
+          attendanceByDay[dayNum] = attendanceType;
+        }
+      }
+    });
+  } else {
+    // Fallback: if no entries provided, use attendedDates as full days
+    attendedDates.forEach(dateStr => {
+      const dayNum = new Date(`${dateStr}T00:00:00Z`).getUTCDate();
+      attendanceByDay[dayNum] = 'full-day';
+    });
+  }
 
   const startDayOfMonth = startDate.getUTCDate(); // e.g., 1 or 16
   const endDayOfMonth = endDate.getUTCDate(); // e.g., 15 or 31
@@ -17,20 +36,29 @@ const MiniCalendar = ({ startDate, endDate, attendedDates }) => {
   const days = [];
 
   // 1. Add padding for the first week
-  for (let i = 0; i < startingWeekday; i++) { // <<< FIX: Added i++
+  for (let i = 0; i < startingWeekday; i++) {
     days.push(<td key={`pad-${i}`} className={styles.miniCalDay_pad}></td>);
   }
 
   // 2. Add the actual days of the period
-  for (let day = startDayOfMonth; day <= endDayOfMonth; day++) { // <<< FIX: Added day++
-    const isAttended = attendedDayNumbers.has(day);
-    const className = `${styles.miniCalDay} ${isAttended ? styles.miniCalDay_attended : ''}`;
-    days.push(<td key={day} className={className}>{day}</td>);
+  for (let day = startDayOfMonth; day <= endDayOfMonth; day++) {
+    const attendanceType = attendanceByDay[day];
+    const isAttended = !!attendanceType;
+    const isHalfDay = attendanceType === 'half-day';
+    
+    const className = `${styles.miniCalDay} ${
+      isAttended ? (isHalfDay ? styles.miniCalDay_halfDay : styles.miniCalDay_attended) : ''
+    }`;
+    
+    days.push(
+      <td key={day} className={className}>
+        {day}
+      </td>
+    );
   }
 
   // 3. Chunk days into weeks (rows)
   const weeks = [];
-  // --- THIS IS THE CORRECTED LOOP ---
   for (let i = 0; i < days.length; i += 7) { 
     weeks.push(days.slice(i, i + 7)); 
   }
@@ -57,6 +85,9 @@ const PeriodCard = ({ periodData, practice }) => {
     if (p.productionTotal <= 0 && p.basePayOwed <= 0) {
         return null;
     }
+    
+    // Format days worked to show decimal if needed
+    const daysDisplay = p.attendanceDays % 1 === 0 ? p.attendanceDays : p.attendanceDays.toFixed(1);
 
     return (
         <div className={styles.periodCard}>
@@ -64,7 +95,7 @@ const PeriodCard = ({ periodData, practice }) => {
                 {formatDate(p.period.start)}
                 <ArrowRight size={16} />
                 {formatDate(p.period.end)}
-                <span>({p.attendanceDays} Day{p.attendanceDays !== 1 ? 's' : ''})</span>
+                <span>({daysDisplay} Day{p.attendanceDays !== 1 ? 's' : ''})</span>
             </div>
             <div className={styles.periodContent}>
                 <div className={styles.detailGrid}>
@@ -88,7 +119,12 @@ const PeriodCard = ({ periodData, practice }) => {
                 </div>
             </div>
             {p.attendedDates && p.attendedDates.length > 0 && (
-                 <MiniCalendar startDate={p.period.start} endDate={p.period.end} attendedDates={p.attendedDates} />
+                 <MiniCalendar 
+                   startDate={p.period.start} 
+                   endDate={p.period.end} 
+                   attendedDates={p.attendedDates}
+                   attendanceEntries={p.attendanceEntries}
+                 />
            )}
              <div className={styles.explanation}>
                 <p>{explanation}</p>
@@ -109,6 +145,9 @@ const PdfDocument = ({ practice, periods }) => {
     const totalBase = periods.reduce((sum, p) => sum + p.basePayOwed, 0);
     const totalProdComponent = periods.reduce((sum, p) => sum + p.productionPayComponent, 0);
     const totalDaysWorked = periods.reduce((sum,p) => sum + p.attendanceDays, 0);
+    
+    // Format total days worked to show decimal if needed
+    const totalDaysDisplay = totalDaysWorked % 1 === 0 ? totalDaysWorked : totalDaysWorked.toFixed(1);
 
     const overallStartDate = periods.length > 0 ? periods[0].period.start : new Date();
     const overallEndDate = periods.length > 0 ? periods[periods.length - 1].period.end : new Date();
@@ -142,7 +181,7 @@ const PdfDocument = ({ practice, periods }) => {
                         <div className={styles.summaryItem}><span>Base / Guarantee (Per Day)</span><span>{formatCurrency(practice.basePay || practice.dailyGuarantee)}</span></div>
                         <div className={styles.summaryItem}><span>Total Base Earned</span><span>{formatCurrency(totalBase)}</span></div>
                         <div className={styles.summaryItem}><span>Total Production Pay</span><span>{formatCurrency(totalProdComponent)}</span></div>
-                        <div className={styles.summaryItem}><span>Days Worked</span><span>{totalDaysWorked}</span></div>
+                        <div className={styles.summaryItem}><span>Days Worked</span><span>{totalDaysDisplay}</span></div>
                     </div>
                     <div className={styles.totalPay}>
                         <span>Total Calculated Pay</span>

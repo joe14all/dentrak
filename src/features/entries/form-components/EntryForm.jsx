@@ -18,6 +18,7 @@ const getInitialState = (initialType = 'dailySummary') => ({
     notes: '',
     checkInTime: '',
     checkOutTime: '',
+    attendanceType: 'full-day', // Default to full-day attendance
 });
 
 // Reusable Segmented Control
@@ -180,11 +181,27 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
                         <div className={styles.formGroup}><label>End Date</label><input type="date" name="periodEndDate" value={formData.periodEndDate} onChange={handleChange} /></div>
                     </div>
                  ) : (
-                    <div className={styles.formRow}>
-                        <div className={styles.formGroup}><label>Date</label><input type="date" name="date" value={formData.date} onChange={handleChange} required /></div>
-                        {isAttendance && <div className={styles.formGroup}><label>Check In</label><input type="time" name="checkInTime" value={formData.checkInTime || ''} onChange={handleChange} /></div>}
-                        {isAttendance && <div className={styles.formGroup}><label>Check Out</label><input type="time" name="checkOutTime" value={formData.checkOutTime || ''} onChange={handleChange} /></div>}
-                    </div>
+                    <>
+                        <div className={styles.formRow}>
+                            <div className={styles.formGroup}><label>Date</label><input type="date" name="date" value={formData.date} onChange={handleChange} required /></div>
+                            {isAttendance && <div className={styles.formGroup}><label>Check In</label><input type="time" name="checkInTime" value={formData.checkInTime || ''} onChange={handleChange} /></div>}
+                            {isAttendance && <div className={styles.formGroup}><label>Check Out</label><input type="time" name="checkOutTime" value={formData.checkOutTime || ''} onChange={handleChange} /></div>}
+                        </div>
+                        {isAttendance && (
+                            <div className={styles.formGroup}>
+                                <label>Attendance Type</label>
+                                <SegmentedControl
+                                    name="attendanceType"
+                                    selectedValue={formData.attendanceType || 'full-day'}
+                                    onChange={handleChange}
+                                    options={[
+                                        { label: "Full Day", value: "full-day" },
+                                        { label: "Half Day", value: "half-day" },
+                                    ]}
+                                />
+                            </div>
+                        )}
+                    </>
                  )}
             </div>
 

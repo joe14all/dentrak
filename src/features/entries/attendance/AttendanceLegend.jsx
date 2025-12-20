@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import styles from './AttendanceLegend.module.css';
-import { CalendarDays, DollarSign } from 'lucide-react';
+import { CalendarDays, DollarSign, Info } from 'lucide-react';
 
 const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate, pendingChanges }) => {
   
@@ -30,23 +30,32 @@ const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate,
     return practices.map(practice => {
       const baseRate = practice.basePay || practice.dailyGuarantee || 0;
 
-      // 1. Count existing entries using the robust date check
+      // 1. Count existing entries using the robust date check, accounting for half-days
       const entriesInMonth = attendanceEntries.filter(e => 
         e.practiceId === practice.id && isDateInCurrentMonth(e.date)
       );
+      
+      const existingDayCount = entriesInMonth.reduce((total, entry) => {
+        // Check if this entry has a pending update
+        const pendingUpdate = pendingChanges.updates && pendingChanges.updates[entry.id];
+        const attendanceType = pendingUpdate?.attendanceType || entry.attendanceType || 'full-day';
+        
+        // Check if entry is staged for removal
+        if (pendingChanges.removals.has(entry.id)) {
+          return total; // Don't count if being removed
+        }
+        
+        return total + (attendanceType === 'half-day' ? 0.5 : 1);
+      }, 0);
 
-      // 2. Count staged additions using the robust date check
-      const additionsInMonth = Object.values(pendingChanges.additions).filter(add => 
-        add.practiceId === practice.id && isDateInCurrentMonth(add.date)
-      ).length;
+      // 2. Count staged additions using the robust date check, accounting for half-days
+      const additionsDayCount = Object.values(pendingChanges.additions)
+        .filter(add => add.practiceId === practice.id && isDateInCurrentMonth(add.date))
+        .reduce((total, add) => {
+          return total + (add.attendanceType === 'half-day' ? 0.5 : 1);
+        }, 0);
 
-      // 3. Count staged removals using the robust date check
-      const removalsInMonth = Array.from(pendingChanges.removals).filter(removalId => {
-          const entry = attendanceEntries.find(e => e.id === removalId);
-          return entry && entry.practiceId === practice.id && isDateInCurrentMonth(entry.date);
-      }).length;
-
-      const finalDayCount = entriesInMonth.length + additionsInMonth - removalsInMonth;
+      const finalDayCount = existingDayCount + additionsDayCount;
       const estimatedPay = finalDayCount * baseRate;
 
       return {
@@ -60,6 +69,35 @@ const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate,
   return (
     <div className={styles.legendContainer}>
       <h4 className={styles.title}>Monthly Summary</h4>
+      
+      {/* Usage Guide */}
+      <div className={styles.usageGuide}>
+        <div className={styles.guideHeader}>
+          <Info size={14} />
+          <span>How to track attendance:</span>
+        </div>
+        <div className={styles.guideContent}>
+          <div className={styles.guideItem}>
+            <div className={styles.guideIndicator}>
+              <div className={styles.emptyDot}></div>
+            </div>
+            <span>Click once: Add full day</span>
+          </div>
+          <div className={styles.guideItem}>
+            <div className={styles.guideIndicator}>
+              <div className={styles.halfDayDot}>½</div>
+            </div>
+            <span>Click twice: Change to half day</span>
+          </div>
+          <div className={styles.guideItem}>
+            <div className={styles.guideIndicator}>
+              <div className={styles.emptyDot}></div>
+            </div>
+            <span>Click third time: Remove</span>
+          </div>
+        </div>
+      </div>
+      
       <div className={styles.legendItems}>
         {(legendData || []).map(practice => (
           <div key={practice.id} className={styles.legendItem}>
@@ -73,7 +111,7 @@ const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate,
             <div className={styles.itemStats}>
               <div className={styles.stat}>
                 <CalendarDays size={14} />
-                <span>{practice.dayCount} day{practice.dayCount !== 1 ? 's' : ''} attended</span>
+                <span>{practice.dayCount % 1 === 0 ? practice.dayCount : practice.dayCount.toFixed(1)} day{practice.dayCount !== 1 ? 's' : ''} attended</span>
               </div>
               <div className={styles.stat}>
                 <DollarSign size={14} />

@@ -11,6 +11,9 @@ const BulkEditPanel = ({ practices, currentDate, onApply, onCancel, mode }) => {
   const [targetPracticeId, setTargetPracticeId] = useState(
       mode === 'attendance' && practices.length > 0 ? practices[0].id : ''
   );
+  
+  // Add attendance type state for attendance mode
+  const [attendanceType, setAttendanceType] = useState('full-day');
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -55,7 +58,8 @@ const BulkEditPanel = ({ practices, currentDate, onApply, onCancel, mode }) => {
         targetPracticeId: mode === 'attendance' ? targetPracticeId : undefined, // Only relevant for attendance
         startDate,
         endDate,
-        daysOfWeek: selectedDays
+        daysOfWeek: selectedDays,
+        attendanceType: mode === 'attendance' && action === 'select' ? attendanceType : undefined // Only for attendance selection
     });
   };
 
@@ -83,15 +87,37 @@ const BulkEditPanel = ({ practices, currentDate, onApply, onCancel, mode }) => {
 
         {/* Step 2: Target Practice (Conditional) */}
         {mode === 'attendance' && (
-            <div className={styles.section}>
-            <label htmlFor="targetPractice" className={styles.sectionLabel}>2. For Practice</label>
-            <div className={styles.selectWrapper}>
-                <select id="targetPractice" value={targetPracticeId} onChange={e => setTargetPracticeId(parseInt(e.target.value))}>
-                {practices.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                <ChevronDown size={20} className={styles.selectIcon} />
-            </div>
-            </div>
+            <>
+                <div className={styles.section}>
+                    <label htmlFor="targetPractice" className={styles.sectionLabel}>2. For Practice</label>
+                    <div className={styles.selectWrapper}>
+                        <select id="targetPractice" value={targetPracticeId} onChange={e => setTargetPracticeId(parseInt(e.target.value))}>
+                        {practices.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                        <ChevronDown size={20} className={styles.selectIcon} />
+                    </div>
+                </div>
+                
+                {action === 'select' && (
+                    <div className={styles.section}>
+                        <label className={styles.sectionLabel}>2b. Attendance Type</label>
+                        <div className={styles.segmentedControl}>
+                            <button 
+                                onClick={() => setAttendanceType('full-day')} 
+                                className={attendanceType === 'full-day' ? styles.active : ''}
+                            >
+                                Full Day
+                            </button>
+                            <button 
+                                onClick={() => setAttendanceType('half-day')} 
+                                className={attendanceType === 'half-day' ? styles.active : ''}
+                            >
+                                Half Day
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </>
         )}
 
         {/* Step 3 & 4: Date Range & Days (Keep as is, labels are generic) */}

@@ -16,6 +16,69 @@
   border-bottom: 1px solid var(--ui-border-secondary);
 }
 
+.usageGuide {
+  background-color: var(--ui-background-secondary);
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  padding: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.guideHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ui-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.guideContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.guideItem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.8rem;
+  color: var(--ui-text-secondary);
+}
+
+.guideIndicator {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.emptyDot {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--ui-border-primary);
+  border-radius: 3px;
+  background-color: var(--ui-background-primary);
+}
+
+.halfDayDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #3B82F6 50%, rgba(59, 130, 246, 0.2) 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
 .legendItems {
   display: flex;
   flex-direction: column;

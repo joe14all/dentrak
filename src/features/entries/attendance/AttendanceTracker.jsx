@@ -23,7 +23,7 @@ const generateColorMap = (practices) => {
 
 const AttendanceTracker = ({ entries, practices }) => {
   // --- State ---
-  const { addNewEntry, removeEntry } = useEntries();
+  const { addNewEntry, removeEntry, updateEntry } = useEntries();
   const { scheduleBlocks, addNewBlock, removeBlock, isDateBlocked: isDateBlockedFromContext } = useScheduleBlocks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isBulkEditOpen, setBulkEditOpen] = useState(false);
@@ -51,7 +51,8 @@ const AttendanceTracker = ({ entries, practices }) => {
   } = useAttendanceEditor(
     attendanceEntries,
     addNewEntry,
-    removeEntry
+    removeEntry,
+    updateEntry
   );
 
   const {

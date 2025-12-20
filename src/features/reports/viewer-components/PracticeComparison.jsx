@@ -28,7 +28,7 @@ const PracticeComparison = ({ data }) => {
               <td>{item.practiceName}</td>
               <td className={styles.currencyCell}>{formatCurrency(item.totalProduction)}</td>
               <td className={styles.currencyCell}>{formatCurrency(item.totalCollection)}</td>
-              <td className={styles.currencyCell}>{item.daysWorked}</td>
+              <td className={styles.currencyCell}>{item.daysWorked % 1 === 0 ? item.daysWorked : item.daysWorked.toFixed(1)}</td>
               <td className={styles.currencyCell}>{formatCurrency(item.avgProductionPerDay)}</td>
             </tr>
           ))}

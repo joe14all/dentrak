@@ -87,7 +87,19 @@ if (!entries || !practices || entries.length === 0 || practices.length === 0 || 
             const financialEntries = monthEntries.filter(e => e.entryType !== 'attendanceRecord');
             const monthProduction = financialEntries.reduce((sum, e) => sum + (e.production || 0), 0);
             
-            const daysWorked = new Set(monthEntries.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
+            // Calculate days worked accounting for half-days
+            const attendanceByDate = {};
+            monthEntries
+                .filter(e => (e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary') && e.date)
+                .forEach(entry => {
+                    const date = entry.date;
+                    let dayValue = 1;
+                    if (entry.entryType === 'attendanceRecord' && entry.attendanceType === 'half-day') {
+                        dayValue = 0.5;
+                    }
+                    attendanceByDate[date] = Math.max(attendanceByDate[date] || 0, dayValue);
+                });
+            const daysWorked = Object.values(attendanceByDate).reduce((sum, val) => sum + val, 0);
             
             const monthCalculatedPay = practices.reduce((sum, p) => {
                 const practiceEntries = monthEntries.filter(e => e.practiceId === p.id);

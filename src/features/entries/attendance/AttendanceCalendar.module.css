@@ -119,6 +119,27 @@
     background-color: var(--practice-color);
     border-radius: 3px;
     opacity: 0.5;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Half-day indicator - show as half-filled with "½" text */
+.halfDay .filledDot,
+.halfDayFilled {
+    background: linear-gradient(to right, var(--practice-color) 50%, rgba(var(--practice-color-rgb, 59, 130, 246), 0.15) 50%);
+    opacity: 0.7;
+}
+
+.halfDay .filledDot::after,
+.halfDayFilled::after {
+    content: '½';
+    position: absolute;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
 .dot.stagedAdd {
@@ -127,10 +148,40 @@
     border-color: #16a34a;
 }
 
+.dot.stagedAdd.halfDay {
+    background: linear-gradient(to right, #16a34a 50%, rgba(22, 163, 74, 0.2) 50%);
+    border-color: #16a34a;
+}
+
 .dot.stagedRemove {
     background-color: #fee2e2;
     color: #dc2626;
     border-color: #dc2626;
+}
+
+.dot.stagedUpdate {
+    background-color: #fef3c7;
+    color: #d97706;
+    border-color: #d97706;
+}
+
+.dot.stagedUpdate.halfDay {
+    background: linear-gradient(to right, #d97706 50%, rgba(217, 119, 6, 0.2) 50%);
+    border-color: #d97706;
+}
+
+.stagedIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.halfDaySymbol {
+    font-size: 11px;
+    font-weight: bold;
+    color: #16a34a;
 }
 
 .dot.stagedRemove .filledDot {

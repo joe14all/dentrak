@@ -161,3 +161,10 @@ margin-left: 0.75rem; /* ADDED to align with card padding */
   border-radius: 50%;
 }
 
+.miniCalDay_halfDay {
+  background: linear-gradient(to right, #3B82F6 50%, rgba(59, 130, 246, 0.3) 50%);
+  color: #1e40af;
+  font-weight: bold;
+  border-radius: 50%;
+}
+

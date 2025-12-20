@@ -127,10 +127,17 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                      }
                     return entryDate >= matchedPeriod.start && entryDate <= matchedPeriod.end;
                 });
+                
+                // Get attendance entries for this period (for half-day support in calendar)
+                const attendanceEntriesInPeriod = entriesInThisExactPeriod.filter(e => 
+                    e.entryType === 'attendanceRecord' && e.date
+                );
+                
                 const singlePeriodCalc = calculateSinglePeriod(practice, entriesInThisExactPeriod);
                 return {
                     period: { start: matchedPeriod.start, end: matchedPeriod.end },
-                    ...singlePeriodCalc
+                    ...singlePeriodCalc,
+                    attendanceEntries: attendanceEntriesInPeriod // Add this for the mini calendar
                 };
             }
             return null;

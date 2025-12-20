@@ -115,32 +115,60 @@ const AttendanceCalendar = ({
           {(practices || []).map(practice => {
             const entry = entriesForDay.find(e => e.practiceId === practice.id);
             const isStagedForRemoval = entry && pendingAttendanceChanges.removals.has(entry.id);
-            const isStagedForAddition = pendingAttendanceChanges.additions[`${dateStr}-${practice.id}`];
+            const stagedAddition = pendingAttendanceChanges.additions[`${dateStr}-${practice.id}`];
+            const isStagedForAddition = !!stagedAddition;
+            
+            // Determine the attendance type (considering pending updates)
+            const pendingUpdate = entry && pendingAttendanceChanges.updates && pendingAttendanceChanges.updates[entry.id];
+            const attendanceType = pendingUpdate?.attendanceType || 
+                                   (entry?.attendanceType) || 
+                                   (stagedAddition?.attendanceType) || 
+                                   'full-day';
+            const isHalfDay = attendanceType === 'half-day';
 
             let stateClass = '';
             if (isStagedForAddition) stateClass = styles.stagedAdd;
             if (isStagedForRemoval) stateClass = styles.stagedRemove;
+            if (pendingUpdate) stateClass = styles.stagedUpdate;
 
             // Determine if clicking this dot should be allowed (in attendance mode and not blocked)
             const allowAttendanceClick = editMode === 'attendance' && !isEffectivelyBlocked && !isStagedForBlocking;
 
+            const tooltipText = !allowAttendanceClick && editMode === 'attendance' 
+              ? "Day is blocked" 
+              : isStagedForAddition
+                ? isHalfDay 
+                  ? `${practice.name} - Adding Half Day (Click to remove)` 
+                  : `${practice.name} - Adding Full Day (Click for half day)`
+              : isHalfDay 
+                ? `${practice.name} - Half Day (Click to remove)` 
+                : entry && !isStagedForRemoval
+                  ? `${practice.name} - Full Day (Click for half day)`
+                  : `${practice.name} - Click to add attendance`;
 
             return (
               <div
                 key={practice.id}
-                className={`${styles.dot} ${stateClass} ${!allowAttendanceClick ? styles.dotDisabled : ''}`} // Add disabled style
-                style={{ '--practice-color': colorMap[practice.id] }}
+                className={`${styles.dot} ${stateClass} ${isHalfDay ? styles.halfDay : ''} ${!allowAttendanceClick ? styles.dotDisabled : ''}`}
+                style={{ 
+                  '--practice-color': colorMap[practice.id],
+                  '--practice-color-rgb': colorMap[practice.id] ? colorMap[practice.id].match(/\d+/g)?.join(', ') : '59, 130, 246'
+                }}
                 onClick={(e) => {
                     e.stopPropagation(); // Prevent triggering the cell's block click handler
                     if (allowAttendanceClick) {
                         onDayClick(dateStr, practice.id); // Call handler only if allowed
                     }
                 }}
-                title={!allowAttendanceClick && editMode === 'attendance' ? "Day is blocked" : ""} // Add tooltip
+                title={tooltipText}
               >
                 {/* Visual indicators for attendance state */}
-                {entry && !isStagedForRemoval && <div className={styles.filledDot}></div>}
-                {isStagedForAddition && <Plus size={12} />}
+                {entry && !isStagedForRemoval && <div className={`${styles.filledDot} ${isHalfDay ? styles.halfDayFilled : ''}`}></div>}
+                {isStagedForAddition && (
+                  <div className={styles.stagedIcon}>
+                    {isHalfDay ? <span className={styles.halfDaySymbol}>½</span> : <Plus size={12} />}
+                  </div>
+                )}
                 {isStagedForRemoval && <Minus size={12} />}
               </div>
             );

@@ -48,7 +48,7 @@ const AnnualSummary = ({ data }) => {
           </div>
           <div className={styles.cardContent}>
             <span className={styles.cardLabel}>Days Worked</span>
-            <span className={styles.cardValue}>{data.overallTotals.daysWorked}</span>
+            <span className={styles.cardValue}>{data.overallTotals.daysWorked % 1 === 0 ? data.overallTotals.daysWorked : data.overallTotals.daysWorked.toFixed(1)}</span>
           </div>
         </div>
         <div className={styles.summaryCard}>
@@ -83,7 +83,7 @@ const AnnualSummary = ({ data }) => {
             <tr key={idx}>
               <td className={styles.practiceName}>{practice.practiceName}</td>
               <td>{practice.paymentType}</td>
-              <td className={styles.numberCell}>{practice.daysWorked}</td>
+              <td className={styles.numberCell}>{practice.daysWorked % 1 === 0 ? practice.daysWorked : practice.daysWorked.toFixed(1)}</td>
               <td className={styles.numberCell}>{formatCurrency(practice.totalProduction)}</td>
               <td className={styles.numberCell}>{formatCurrency(practice.totalCollection)}</td>
               <td className={styles.numberCell}>{formatCurrency(practice.totalCalculatedPay)}</td>
@@ -103,7 +103,7 @@ const AnnualSummary = ({ data }) => {
           <tr className={styles.totalRow}>
             <td><strong>Total</strong></td>
             <td>—</td>
-            <td className={styles.numberCell}><strong>{data.overallTotals.daysWorked}</strong></td>
+            <td className={styles.numberCell}><strong>{data.overallTotals.daysWorked % 1 === 0 ? data.overallTotals.daysWorked : data.overallTotals.daysWorked.toFixed(1)}</strong></td>
             <td className={styles.numberCell}><strong>{formatCurrency(data.overallTotals.totalProduction)}</strong></td>
             <td className={styles.numberCell}><strong>{formatCurrency(data.overallTotals.totalCollection)}</strong></td>
             <td className={styles.numberCell}><strong>{formatCurrency(data.overallTotals.totalCalculatedPay)}</strong></td>
@@ -133,7 +133,7 @@ const AnnualSummary = ({ data }) => {
               {practice.monthlyData.filter(m => m.production > 0 || m.daysWorked > 0).map((month, mIdx) => (
                 <tr key={mIdx}>
                   <td>{month.month}</td>
-                  <td className={styles.numberCell}>{month.daysWorked}</td>
+                  <td className={styles.numberCell}>{month.daysWorked % 1 === 0 ? month.daysWorked : month.daysWorked.toFixed(1)}</td>
                   <td className={styles.numberCell}>{formatCurrency(month.production)}</td>
                   <td className={styles.numberCell}>{formatCurrency(month.collection)}</td>
                   <td className={styles.numberCell}>{formatCurrency(month.calculatedPay)}</td>

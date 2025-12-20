@@ -8,6 +8,40 @@
 import { calculatePay } from "./calculations";
 
 /**
+ * Calculate total days worked accounting for half-day attendance
+ * @param {Array} entries - Entries to count days from
+ * @returns {number} - Total days worked (can include decimals for half-days)
+ */
+function calculateDaysWorked(entries) {
+  const attendanceByDate = {};
+
+  entries
+    .filter(
+      (e) =>
+        (e.entryType === "attendanceRecord" ||
+          e.entryType === "dailySummary") &&
+        e.date
+    )
+    .forEach((entry) => {
+      const date = entry.date;
+      let dayValue = 1; // Default: full day
+
+      // If it's an attendance record with half-day type, count as 0.5
+      if (
+        entry.entryType === "attendanceRecord" &&
+        entry.attendanceType === "half-day"
+      ) {
+        dayValue = 0.5;
+      }
+
+      // Take the maximum value for each date (dailySummary or full-day attendance takes precedence)
+      attendanceByDate[date] = Math.max(attendanceByDate[date] || 0, dayValue);
+    });
+
+  return Object.values(attendanceByDate).reduce((sum, val) => sum + val, 0);
+}
+
+/**
  * Calculate comprehensive metrics for a single practice over a time period
  * @param {Object} practice - Practice object
  * @param {Array} entries - All entries for this practice in the period
@@ -20,16 +54,8 @@ export function calculatePracticeMetrics(practice, entries, payments) {
     (e) => e.entryType !== "attendanceRecord"
   );
 
-  // Get all unique dates worked (including attendance records)
-  const datesWorked = new Set(
-    entries
-      .filter(
-        (e) =>
-          e.entryType === "attendanceRecord" || e.entryType === "dailySummary"
-      )
-      .map((e) => e.date)
-  );
-  const daysWorked = datesWorked.size;
+  // Calculate days worked accounting for half-days
+  const daysWorked = calculateDaysWorked(entries);
 
   // Calculate totals
   const totalProduction = financialEntries.reduce(

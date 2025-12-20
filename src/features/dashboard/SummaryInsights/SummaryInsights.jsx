@@ -82,18 +82,40 @@ const SummaryInsights = () => {
 
         const entriesInCurrentMonth = getEntriesInPeriod(year, month);
         let totalProduction = 0, totalEstimatedPay = 0;
-        const daysWorked = new Set(entriesInCurrentMonth.filter(e => e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary').map(e => e.date)).size;
+        
+        // Calculate days worked accounting for half-days
+        const attendanceByDate = {};
+        entriesInCurrentMonth
+            .filter(e => (e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary') && e.date)
+            .forEach(entry => {
+                const date = entry.date;
+                let dayValue = 1;
+                if (entry.entryType === 'attendanceRecord' && entry.attendanceType === 'half-day') {
+                    dayValue = 0.5;
+                }
+                attendanceByDate[date] = Math.max(attendanceByDate[date] || 0, dayValue);
+            });
+        const daysWorked = Object.values(attendanceByDate).reduce((sum, val) => sum + val, 0);
+        
         const practiceBreakdown = practices.map(practice => {
             const practiceEntries = entriesInCurrentMonth.filter(e => e.practiceId === practice.id);
             const calcResult = calculatePay(practice, practiceEntries, year, month);
             totalProduction += calcResult.productionTotal;
             totalEstimatedPay += calcResult.calculatedPay;
-            // Calculate days worked only from entries with date field (attendance and daily summaries)
-            const practiceWorkDays = new Set(
-                practiceEntries
-                    .filter(e => (e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary') && e.date)
-                    .map(e => e.date)
-            ).size;
+            
+            // Calculate days worked accounting for half-days
+            const practiceAttendanceByDate = {};
+            practiceEntries
+                .filter(e => (e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary') && e.date)
+                .forEach(entry => {
+                    const date = entry.date;
+                    let dayValue = 1;
+                    if (entry.entryType === 'attendanceRecord' && entry.attendanceType === 'half-day') {
+                        dayValue = 0.5;
+                    }
+                    practiceAttendanceByDate[date] = Math.max(practiceAttendanceByDate[date] || 0, dayValue);
+                });
+            const practiceWorkDays = Object.values(practiceAttendanceByDate).reduce((sum, val) => sum + val, 0);
             return { 
                 practiceName: practice.name, 
                 production: calcResult.productionTotal, 

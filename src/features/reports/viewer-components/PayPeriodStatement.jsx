@@ -48,7 +48,7 @@ const PayPeriodStatement = ({ data }) => {
         <div className={styles.summaryItem}><span>Gross Collection</span><span>{formatCurrency(data.summary.grossCollection)}</span></div>
         <div className={styles.summaryItem}><span>Collection Rate</span><span>{formatPercent(data.summary.collectionRate)}</span></div>
         <div className={styles.summaryItem}><span>Total Adjustments</span><span>-{formatCurrency(data.summary.totalAdjustments)}</span></div>
-        <div className={styles.summaryItem}><span>Days Worked</span><span>{data.summary.daysWorked}</span></div>
+        <div className={styles.summaryItem}><span>Days Worked</span><span>{data.summary.daysWorked % 1 === 0 ? data.summary.daysWorked : data.summary.daysWorked.toFixed(1)}</span></div>
         <div className={styles.summaryItem}><span>Avg. Production / Day</span><span>{formatCurrency(data.summary.avgProductionPerDay)}</span></div>
         <div className={styles.summaryItem}><span>Calculated Pay</span><span>{formatCurrency(data.summary.calculatedPay)}</span></div>
         <div className={styles.summaryItem}><span>Avg. Pay / Day</span><span>{formatCurrency(data.summary.avgPayPerDay)}</span></div>

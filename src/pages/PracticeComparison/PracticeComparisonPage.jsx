@@ -402,7 +402,8 @@ const PracticeComparisonPage = () => {
           } else if (key === 'byEffectiveRate') {
             valueText = `${(practice.effectiveRate || 0).toFixed(1)}%`;
           } else if (key === 'byDaysWorked') {
-            valueText = `${practice.daysWorked || 0} days`;
+            const daysDisplay = (practice.daysWorked || 0) % 1 === 0 ? (practice.daysWorked || 0) : (practice.daysWorked || 0).toFixed(1);
+            valueText = `${daysDisplay} days`;
           }
 
           doc.setFillColor(idx < 3 ? 249 : 255, idx < 3 ? 250 : 255, idx < 3 ? 251 : 255);
@@ -558,7 +559,7 @@ const PracticeComparisonPage = () => {
           </div>
           <div className={styles.summaryContent}>
             <span className={styles.summaryLabel}>Total Days Worked</span>
-            <span className={styles.summaryValue}>{safeTotals.totalDays}</span>
+            <span className={styles.summaryValue}>{safeTotals.totalDays % 1 === 0 ? safeTotals.totalDays : safeTotals.totalDays.toFixed(1)}</span>
           </div>
         </div>
 
@@ -690,7 +691,7 @@ const PracticeComparisonPage = () => {
               {metrics.map((m) => (
                 <tr key={m.practiceId}>
                   <td className={styles.practiceName}>{m.practiceName}</td>
-                  <td>{m.daysWorked || 0}</td>
+                  <td>{(m.daysWorked || 0) % 1 === 0 ? (m.daysWorked || 0) : (m.daysWorked || 0).toFixed(1)}</td>
                   <td className={styles.currency}>
                     ${(m.totalCalculatedPay || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
@@ -796,7 +797,7 @@ const PracticeComparisonPage = () => {
               {(rankings.byDaysWorked || []).map(practice => (
                 <li key={practice.practiceId}>
                   <span>{practice.practiceName}</span>
-                  <span>{practice.daysWorked || 0} days</span>
+                  <span>{((practice.daysWorked || 0) % 1 === 0 ? (practice.daysWorked || 0) : (practice.daysWorked || 0).toFixed(1))} days</span>
                 </li>
               ))}
             </ol>

@@ -46,7 +46,7 @@ const YtdIncomeReport = ({ data }) => {
           </div>
           <div className={styles.cardContent}>
             <span className={styles.cardLabel}>Total Days Worked</span>
-            <span className={styles.cardValue}>{data.totals.daysWorked}</span>
+            <span className={styles.cardValue}>{data.totals.daysWorked % 1 === 0 ? data.totals.daysWorked : data.totals.daysWorked.toFixed(1)}</span>
           </div>
         </div>
         <div className={styles.summaryCard}>
@@ -88,7 +88,7 @@ const YtdIncomeReport = ({ data }) => {
           {data.practiceData.map((practice, idx) => (
             <tr key={idx}>
               <td className={styles.practiceName}>{practice.practiceName}</td>
-              <td className={styles.numberCell}>{practice.daysWorked}</td>
+              <td className={styles.numberCell}>{practice.daysWorked % 1 === 0 ? practice.daysWorked : practice.daysWorked.toFixed(1)}</td>
               <td className={styles.numberCell}>{formatCurrency(practice.totalCalculatedPay)}</td>
               <td className={styles.numberCell}>{formatCurrency(practice.totalPaymentsReceived)}</td>
               <td className={styles.numberCell}>
@@ -105,7 +105,7 @@ const YtdIncomeReport = ({ data }) => {
         <tfoot>
           <tr className={styles.totalRow}>
             <td><strong>Total</strong></td>
-            <td className={styles.numberCell}><strong>{data.totals.daysWorked}</strong></td>
+            <td className={styles.numberCell}><strong>{data.totals.daysWorked % 1 === 0 ? data.totals.daysWorked : data.totals.daysWorked.toFixed(1)}</strong></td>
             <td className={styles.numberCell}><strong>{formatCurrency(data.totals.totalIncome)}</strong></td>
             <td className={styles.numberCell}><strong>{formatCurrency(data.totals.totalReceived)}</strong></td>
             <td className={styles.numberCell}><strong>{formatCurrency(data.totals.totalOutstanding)}</strong></td>
