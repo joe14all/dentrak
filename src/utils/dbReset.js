@@ -51,6 +51,7 @@ if (typeof window !== "undefined") {
   window.resetDatabase = resetDatabase;
   window.checkAndFixDatabase = checkAndFixDatabase;
 
-  // Auto-check on load
-  checkAndFixDatabase();
+  // Auto-check disabled to prevent accidental data loss
+  // Uncomment if you need to debug database issues:
+  // checkAndFixDatabase();
 }

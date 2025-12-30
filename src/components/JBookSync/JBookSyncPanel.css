@@ -1,0 +1,355 @@
+/**
+ * JBook Sync Panel Styles
+ */
+
+.jbook-sync-panel {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sync-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.sync-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-status.connected .status-dot {
+  background: #22c55e;
+}
+
+.connection-status.disconnected .status-dot {
+  background: #ef4444;
+  animation: none;
+}
+
+.connection-status.connected .status-text {
+  color: #22c55e;
+}
+
+.connection-status.disconnected .status-text {
+  color: #ef4444;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Error Display */
+.sync-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  flex-shrink: 0;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Sync Actions */
+.sync-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sync-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.sync-btn.primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  flex: 1;
+}
+
+.sync-btn.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+}
+
+.sync-btn.secondary {
+  background: var(--bg-secondary, #f3f4f6);
+  color: var(--text-primary, #374151);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.sync-btn.secondary:hover:not(:disabled) {
+  background: var(--bg-tertiary, #e5e7eb);
+}
+
+.sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Sync Result */
+.sync-result {
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sync-result h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.result-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 0.75rem;
+}
+
+.result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.stat-label {
+  color: var(--text-secondary, #6b7280);
+}
+
+.stat-value {
+  color: var(--text-primary, #1f2937);
+  font-weight: 500;
+}
+
+.sync-errors {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.sync-errors h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.sync-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.sync-errors li {
+  margin-bottom: 0.25rem;
+}
+
+/* Excluded Items Info */
+.sync-excluded {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.sync-excluded h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: #d97706;
+}
+
+.excluded-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.5;
+}
+
+.excluded-note small {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* Financial Summary */
+.financial-summary {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.financial-summary h4 {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.summary-item.income .summary-value {
+  color: #22c55e;
+}
+
+.summary-item.expenses .summary-value {
+  color: #ef4444;
+}
+
+.summary-item.profit .summary-value {
+  color: #3b82f6;
+}
+
+.refresh-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #0369a1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: #f0f9ff;
+}
+
+/* Info Section */
+.sync-info {
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.sync-info h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.sync-info ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.6;
+}
+
+.sync-info li {
+  margin-bottom: 0.25rem;
+}
+
+.sync-info strong {
+  color: var(--text-primary, #1f2937);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .jbook-sync-panel {
+    --card-bg: #1f2937;
+    --border-color: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --bg-secondary: #111827;
+    --bg-tertiary: #374151;
+  }
+
+  .sync-error {
+    background: #450a0a;
+    border-color: #7f1d1d;
+  }
+
+  .financial-summary {
+    background: linear-gradient(135deg, #1e3a5f, #1e40af30);
+  }
+}

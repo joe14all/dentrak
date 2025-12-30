@@ -6,7 +6,8 @@ import Modal from '../../components/common/Modal/Modal';
 import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
 import GoalsManager from '../../features/settings/GoalsManager';
 import TemplateManager from '../../features/entries/TemplateManager';
-import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy } from 'lucide-react'; 
+import { JBookSyncPanel } from '../../components/JBookSync';
+import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw } from 'lucide-react'; 
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const [isClearModalOpen, setClearModalOpen] = useState(false);
@@ -120,6 +121,15 @@ const SettingsPage = () => {
         <p className={styles.sectionDescription}>Create and manage templates for quick entry creation.</p>
         <div className={styles.card}>
            <TemplateManager /> 
+        </div>
+      </div>
+
+      {/* --- JBook Sync Section --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><RefreshCw size={20} /> JBook Sync</h3>
+        <p className={styles.sectionDescription}>Sync your Dentrak data with JBook for financial reporting and tax insights.</p>
+        <div className={styles.card}>
+           <JBookSyncPanel /> 
         </div>
       </div>
 

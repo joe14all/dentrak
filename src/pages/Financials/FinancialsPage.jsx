@@ -5,6 +5,7 @@ import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import { usePayments } from '../../contexts/PaymentContext/PaymentContext'; // Keep for potential cash payments
 import FinancialsToolbar from '../../features/financials/FinancialsToolbar';
 import FinancialsList from '../../features/financials/FinancialsList';
+import FinancialsSummary from '../../features/financials/FinancialsSummary';
 import Modal from '../../components/common/Modal/Modal';
 import TransactionForm from '../../features/transactions/form-components/TransactionForm'; // Reuse existing form
 import DeleteConfirmation from '../../features/transactions/DeleteConfirmation'; // Reuse existing confirmation
@@ -77,6 +78,36 @@ const FinancialsPage = () => {
     eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: allFinancialItems.filter(t => t.type === 'eTransfers') },
     cash: { label: 'Cash', icon: Wallet, data: allFinancialItems.filter(t => t.type === 'cash') },
   }), [allFinancialItems]);
+
+  // Calculate summary data based on the current filtered view
+  const summaryData = useMemo(() => {
+    const currentData = views[activeView]?.data || [];
+    
+    const totalAmount = currentData.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const itemCount = currentData.length;
+    
+    // Calculate completed vs pending amounts
+    // For cheques, check status; for others (deposits, transfers, cash), consider completed
+    const completedAmount = currentData.reduce((sum, item) => {
+      if (item.type === 'cheques') {
+        // Only count if status is 'Deposited' or 'Cleared'
+        return item.status === 'Deposited' || item.status === 'Cleared' 
+          ? sum + (item.amount || 0) 
+          : sum;
+      }
+      // All other types are considered completed
+      return sum + (item.amount || 0);
+    }, 0);
+    
+    const pendingAmount = totalAmount - completedAmount;
+    
+    return {
+      totalAmount,
+      itemCount,
+      completedAmount,
+      pendingAmount
+    };
+  }, [views, activeView]);
 
   // --- Modal Handlers (largely reusable from TransactionsPage) ---
   const handleOpenAddModal = () => { setTransactionToEdit(null); setFormModalOpen(true); };
@@ -214,6 +245,7 @@ const FinancialsPage = () => {
         onAddTransaction={handleOpenAddModal}
         onOpenImporter={() => setImportModalOpen(true)}
       />
+      <FinancialsSummary summaryData={summaryData} />
       <div className={styles.content}>
         <FinancialsList
           items={views[activeView]?.data || []} // Use optional chaining
