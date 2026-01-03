@@ -127,6 +127,14 @@ export async function syncAllToJBook({
         results.errors.push(...results.expenses.errors);
       }
     }
+
+    // Finalize the sync session in JBook to update lastSyncDate
+    try {
+      await sendRequest("POST", "/sync/complete");
+    } catch {
+      // Non-fatal: JBook may not have this endpoint in older versions
+      console.warn("Could not finalize sync session (JBook may need update)");
+    }
   } catch (error) {
     results.success = false;
     results.errors.push(error.message || "Unknown error during sync");
