@@ -3,9 +3,17 @@
  *
  * Enables Dentrak to communicate with JBook for data synchronization.
  * Uses HTTP fetch to communicate with JBook's local API server.
+ *
+ * Development Port Configuration:
+ * ┌─────────────────────────────────────────┐
+ * │  JBook API Server:  127.0.0.1:47832     │
+ * │  JBook Vite:        localhost:5173      │
+ * │  Dentrak Vite:      localhost:5174      │
+ * └─────────────────────────────────────────┘
  */
 
-const API_BASE = "http://127.0.0.1:47832";
+const API_PORT = 47832;
+const API_BASE = `http://127.0.0.1:${API_PORT}`;
 const API_TIMEOUT = 5000; // 5 seconds
 
 /**
@@ -21,7 +29,7 @@ export async function checkJBookConnection() {
   } catch {
     return {
       connected: false,
-      error: "JBook is not running or not accessible",
+      error: `JBook is not running on port ${API_PORT}. Please start JBook first.`,
     };
   }
 }

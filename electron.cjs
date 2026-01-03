@@ -11,6 +11,14 @@ const fs = require("fs");
 
 const isDev = process.env.ELECTRON_START_URL ? true : false;
 
+/**
+ * Development Port Configuration:
+ * - Dentrak Vite: 5174
+ * - JBook Vite: 5173
+ * - JBook API: 47832 (for Dentrak → JBook sync)
+ */
+const JBOOK_API_PORT = 47832;
+
 // --- Corrected Touch ID / Fingerprint Logic ---
 // This now uses the systemPreferences API which is compatible with your Electron version.
 ipcMain.handle("auth:touch-id", async () => {
