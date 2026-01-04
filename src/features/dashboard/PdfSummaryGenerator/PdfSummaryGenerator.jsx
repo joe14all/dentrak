@@ -4,7 +4,8 @@ import { usePractices } from '../../../contexts/PracticeContext/PracticeContext'
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { calculatePay, calculateSinglePeriod } from '../../../utils/calculations';
 import PdfDocument from './PdfDocument';
-import { ChevronDown, Download, LoaderCircle } from 'lucide-react';
+import { ChevronDown, Download, LoaderCircle, Send, CheckCircle2 } from 'lucide-react';
+import { checkJBookConnection, syncPeriodSummariesToJBook } from '../../../database/jbookClient';
 
 const generateYearlyPayPeriods = (practice, year, entries) => {
     if (!practice) return [];
@@ -44,6 +45,25 @@ const PdfSummaryGenerator = ({ onCancel }) => {
     const [selectedPeriods, setSelectedPeriods] = useState([]);
     const [reportData, setReportData] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    
+    // JBook sync state
+    const [syncToJBook, setSyncToJBook] = useState(true); // Default to auto-sync
+    const [jbookConnected, setJbookConnected] = useState(false);
+    const [syncStatus, setSyncStatus] = useState(null); // null, 'syncing', 'success', 'error'
+    const [syncMessage, setSyncMessage] = useState('');
+
+    // Check JBook connection on mount
+    useEffect(() => {
+        const checkConnection = async () => {
+            try {
+                const result = await checkJBookConnection();
+                setJbookConnected(result.connected);
+            } catch {
+                setJbookConnected(false);
+            }
+        };
+        checkConnection();
+    }, []);
 
     const availablePeriodsByMonth = useMemo(() => {
         const practice = practices.find(p => p.id === selectedPracticeId);
@@ -151,7 +171,63 @@ const PdfSummaryGenerator = ({ onCancel }) => {
         setReportData({ practice, periods: periodData.sort((a, b) => a.period.start - b.period.start) });
     };
 
-    // This PDF generation logic remains unchanged
+    /**
+     * Sync period summaries to JBook as draft invoices
+     * This converts the period data into the format JBook expects
+     */
+    const syncPeriodsToJBook = async (practice, periods) => {
+        if (!syncToJBook || !jbookConnected) return;
+        
+        setSyncStatus('syncing');
+        setSyncMessage('Creating draft invoices in JBook...');
+        
+        try {
+            // Convert periods to JBook format
+            const periodSummaries = periods.map(p => ({
+                practiceId: practice.id,
+                practiceName: practice.name,
+                periodStart: p.period.start.toISOString().split('T')[0],
+                periodEnd: p.period.end.toISOString().split('T')[0],
+                // Financial totals
+                grossProduction: p.productionTotal || 0,
+                grossCollection: p.collectionTotal || 0,
+                totalAdjustments: p.totalAdjustments || 0,
+                // Pay calculation details
+                basePayOwed: p.basePayOwed || 0,
+                productionPayComponent: p.productionPayComponent || 0,
+                calculatedPay: p.calculatedPay || 0,
+                // Work details
+                daysWorked: p.attendanceDays || 0,
+                // Practice pay structure
+                paymentType: practice.paymentType || 'percentage',
+                percentage: practice.percentage,
+                basePay: practice.basePay || practice.dailyGuarantee,
+                payCycle: practice.payCycle || 'monthly',
+            }));
+
+            const result = await syncPeriodSummariesToJBook(periodSummaries);
+            
+            if (result.created > 0) {
+                setSyncStatus('success');
+                setSyncMessage(`Created ${result.created} draft invoice${result.created > 1 ? 's' : ''} in JBook`);
+            } else if (result.skipped > 0) {
+                setSyncStatus('success');
+                setSyncMessage('Invoices already exist in JBook (skipped)');
+            } else if (result.errors?.length > 0) {
+                setSyncStatus('error');
+                setSyncMessage(result.errors[0]);
+            } else {
+                setSyncStatus('success');
+                setSyncMessage('Sync complete');
+            }
+        } catch (error) {
+            console.error("JBook sync failed:", error);
+            setSyncStatus('error');
+            setSyncMessage(error.message || 'Failed to sync with JBook');
+        }
+    };
+
+    // PDF generation and JBook sync
     useEffect(() => {
         if (reportData) {
             const generateAndSavePdf = async () => {
@@ -186,18 +262,27 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                         const overallEndDate = reportData.periods[reportData.periods.length - 1].period.end;
                         const suggestedName = `${reportData.practice.name}_Summary_${formatDateForFilename(overallStartDate)}_to_${formatDateForFilename(overallEndDate)}.pdf`;
                         await window.electronAPI.savePdf(pdfBase64, suggestedName);
+                        
+                        // After PDF is saved, sync to JBook if enabled
+                        await syncPeriodsToJBook(reportData.practice, reportData.periods);
+                        
                     } catch (error) {
                         console.error("PDF generation failed:", error);
                     } finally {
                         setIsGenerating(false);
                         setReportData(null);
-                        onCancel();
+                        // Delay closing to show sync status
+                        if (syncToJBook && jbookConnected) {
+                            setTimeout(() => onCancel(), 2000);
+                        } else {
+                            onCancel();
+                        }
                     }
                 }
             };
             generateAndSavePdf();
         }
-    }, [reportData, onCancel]);
+    }, [reportData, onCancel, syncToJBook, jbookConnected]);
 
     return (
         <div className={styles.modalContainer}>
@@ -254,6 +339,28 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                         </div>
                     )) : <p className={styles.noPeriods}>No work logged for this practice in {selectedYear}.</p>}
                 </div>
+            </div>
+
+            {/* JBook Sync Option */}
+            <div className={styles.syncOptions}>
+                <label className={`${styles.syncCheckbox} ${!jbookConnected ? styles.disabled : ''}`}>
+                    <input 
+                        type="checkbox" 
+                        checked={syncToJBook && jbookConnected} 
+                        onChange={(e) => setSyncToJBook(e.target.checked)}
+                        disabled={!jbookConnected}
+                    />
+                    <Send size={16} />
+                    <span>Create draft invoice in JBook</span>
+                    {!jbookConnected && <span className={styles.notConnected}>(JBook not running)</span>}
+                </label>
+                {syncStatus && (
+                    <div className={`${styles.syncStatus} ${styles[syncStatus]}`}>
+                        {syncStatus === 'syncing' && <LoaderCircle size={14} className={styles.spinner} />}
+                        {syncStatus === 'success' && <CheckCircle2 size={14} />}
+                        <span>{syncMessage}</span>
+                    </div>
+                )}
             </div>
 
             <div className={styles.actions}>

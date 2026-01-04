@@ -97,6 +97,44 @@ export async function queryJBookTransactions(filters = {}) {
 }
 
 /**
+ * Sync a single period summary to JBook (creates a draft invoice)
+ * @param {Object} periodSummary - Period summary data from Dentrak calculations
+ * @returns {Promise<{created: boolean, skipped: boolean, invoiceId?: number, error?: string}>}
+ */
+export async function syncPeriodSummaryToJBook(periodSummary) {
+  return sendRequest("POST", "/sync/period-summary", periodSummary);
+}
+
+/**
+ * Sync multiple period summaries to JBook at once
+ * @param {Array} periodSummaries - Array of period summary objects
+ * @returns {Promise<{created: number, skipped: number, errors: string[]}>}
+ */
+export async function syncPeriodSummariesToJBook(periodSummaries) {
+  if (!periodSummaries || periodSummaries.length === 0) {
+    return { created: 0, skipped: 0, errors: [] };
+  }
+  return sendRequest("POST", "/sync/period-summaries", periodSummaries);
+}
+
+/**
+ * Get JBook's invoice sync settings
+ * Returns whether JBook wants Dentrak to auto-sync period summaries as invoices
+ * @returns {Promise<{autoSyncInvoices: boolean, lastInvoiceSyncDate?: string}>}
+ */
+export async function getJBookInvoiceSyncSettings() {
+  return sendRequest("GET", "/sync/invoice-settings");
+}
+
+/**
+ * Notify JBook that invoice sync is complete
+ * @param {Object} result - The sync result
+ */
+export async function notifyInvoiceSyncComplete(result) {
+  return sendRequest("POST", "/sync/invoice-complete", result);
+}
+
+/**
  * Sync all data to JBook at once
  * @param {Object} data - Object containing payments, practices, and expenses arrays
  */
@@ -216,6 +254,10 @@ export default {
   getFinancialSummary,
   getJBookPractices,
   queryJBookTransactions,
+  syncPeriodSummaryToJBook,
+  syncPeriodSummariesToJBook,
+  getJBookInvoiceSyncSettings,
+  notifyInvoiceSyncComplete,
   syncAllToJBook,
   closeSyncConnection,
 };

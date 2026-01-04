@@ -13,6 +13,7 @@ import { ScheduleBlockProvider } from './ScheduleBlockContext/ScheduleBlockConte
 import { GoalProvider } from './GoalContext/GoalContext';
 import { EntryTemplateProvider } from './EntryTemplateContext/EntryTemplateContext';
 import { ExpenseProvider } from './ExpenseContext/ExpenseContext';
+import { JBookSyncProvider } from './JBookSyncContext/JBookSyncContext';
 
 
 export const AppProvider = ({ children }) => {
@@ -29,7 +30,9 @@ export const AppProvider = ({ children }) => {
                     <TransactionProvider>
                         <ReportProvider>
                           <ThemeProvider>
-                            {children}
+                            <JBookSyncProvider>
+                              {children}
+                            </JBookSyncProvider>
                           </ThemeProvider>
                         </ReportProvider>
                     </TransactionProvider>

@@ -5,7 +5,8 @@
  * Shows connection status, sync button, and results.
  */
 
-import { useJBookSync } from '../../hooks/useJBookSync';
+import { useState, useEffect } from 'react';
+import { useJBookSync } from '../../contexts/JBookSyncContext/JBookSyncContext';
 import './JBookSyncPanel.css';
 
 function JBookSyncPanel() {
@@ -13,13 +14,43 @@ function JBookSyncPanel() {
     isConnected,
     isChecking,
     isSyncing,
+    isSyncingInvoices,
     lastSyncResult,
+    lastInvoiceSyncResult,
     financialSummary,
     error,
     checkConnection,
     syncToJBook,
+    syncAllInvoices,
     refreshFinancialSummary,
+    selectedYears,
+    setSelectedYears,
+    getAvailableYears,
   } = useJBookSync();
+
+  const [availableYears, setAvailableYears] = useState([]);
+  const [isLoadingYears, setIsLoadingYears] = useState(false);
+
+  // Load available years on mount
+  useEffect(() => {
+    const loadYears = async () => {
+      setIsLoadingYears(true);
+      const years = await getAvailableYears();
+      setAvailableYears(years);
+      setIsLoadingYears(false);
+    };
+    loadYears();
+  }, [getAvailableYears]);
+
+  const toggleYear = (year) => {
+    setSelectedYears(prev => {
+      if (prev.includes(year)) {
+        return prev.filter(y => y !== year);
+      } else {
+        return [...prev, year].sort((a, b) => a - b);
+      }
+    });
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -57,7 +88,7 @@ function JBookSyncPanel() {
         <button
           className="sync-btn primary"
           onClick={syncToJBook}
-          disabled={isSyncing || !isConnected}
+          disabled={isSyncing || isSyncingInvoices || !isConnected}
         >
           {isSyncing ? (
             <>
@@ -67,7 +98,51 @@ function JBookSyncPanel() {
           ) : (
             <>
               <span>🔄</span>
-              Sync to JBook
+              Sync Data
+            </>
+          )}
+        </button>
+        
+        {/* Year Selection for Invoice Sync */}
+        <div className="year-selection">
+          <label className="year-selection-label">📅 Years to Import:</label>
+          <div className="year-chips">
+            {isLoadingYears ? (
+              <span className="loading-years">Loading...</span>
+            ) : availableYears.length > 0 ? (
+              availableYears.map(year => (
+                <button
+                  key={year}
+                  className={`year-chip ${selectedYears.includes(year) ? 'selected' : ''}`}
+                  onClick={() => toggleYear(year)}
+                  disabled={isSyncingInvoices}
+                >
+                  {year}
+                </button>
+              ))
+            ) : (
+              <span className="no-years">No data found</span>
+            )}
+          </div>
+          {selectedYears.length === 0 && (
+            <span className="year-warning">⚠️ Select at least one year</span>
+          )}
+        </div>
+        
+        <button
+          className="sync-btn invoice"
+          onClick={() => syncAllInvoices()}
+          disabled={isSyncingInvoices || isSyncing || !isConnected || selectedYears.length === 0}
+        >
+          {isSyncingInvoices ? (
+            <>
+              <span className="spinner"></span>
+              Creating Invoices...
+            </>
+          ) : (
+            <>
+              <span>📄</span>
+              Sync Invoices ({selectedYears.length} year{selectedYears.length !== 1 ? 's' : ''})
             </>
           )}
         </button>
@@ -80,6 +155,33 @@ function JBookSyncPanel() {
           {isChecking ? 'Checking...' : '🔌 Check Connection'}
         </button>
       </div>
+
+      {/* Invoice Sync Result */}
+      {lastInvoiceSyncResult && (
+        <div className={`invoice-sync-result ${lastInvoiceSyncResult.success ? 'success' : 'error'}`}>
+          <h4>📄 Invoice Sync</h4>
+          <div className="result-time">{formatDate(lastInvoiceSyncResult.timestamp)}</div>
+          <p className="result-message">{lastInvoiceSyncResult.message}</p>
+          
+          {lastInvoiceSyncResult.created > 0 && (
+            <div className="result-detail">
+              ✅ Created {lastInvoiceSyncResult.created} draft invoice{lastInvoiceSyncResult.created !== 1 ? 's' : ''}
+            </div>
+          )}
+          {lastInvoiceSyncResult.skipped > 0 && (
+            <div className="result-detail">
+              ⏭️ Skipped {lastInvoiceSyncResult.skipped} (already exist)
+            </div>
+          )}
+          {lastInvoiceSyncResult.errors?.length > 0 && (
+            <div className="result-errors">
+              {lastInvoiceSyncResult.errors.slice(0, 3).map((err, i) => (
+                <div key={i} className="error-item">⚠️ {err}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {lastSyncResult && (
         <div className="sync-result">
@@ -167,9 +269,9 @@ function JBookSyncPanel() {
         <h4>ℹ️ How it works</h4>
         <ul>
           <li>Start <strong>JBook</strong> first to enable sync</li>
-          <li>Click "Sync to JBook" to transfer your payments, practices, and expenses</li>
+          <li><strong>Sync Data:</strong> Transfers payments, practices, and expenses to JBook</li>
+          <li><strong>Sync Invoices:</strong> Automatically creates draft invoices for all completed pay periods</li>
           <li><strong>Only contractor practices</strong> are synced (employee data stays in Dentrak only)</li>
-          <li>JBook will create income transactions from your contractor payments</li>
           <li>Already synced items will be skipped (no duplicates)</li>
         </ul>
       </div>

@@ -87,8 +87,77 @@
 /* Sync Actions */
 .sync-actions {
   display: flex;
+  flex-direction: column;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+}
+
+.sync-actions > .sync-btn.primary {
+  width: 100%;
+}
+
+/* Year Selection */
+.year-selection {
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.year-selection-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 0.5rem;
+}
+
+.year-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.year-chip {
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--border-color, #e5e7eb);
+  background: var(--card-bg, #ffffff);
+  color: var(--text-secondary, #6b7280);
+}
+
+.year-chip:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.year-chip.selected {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-color: #2563eb;
+}
+
+.year-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-years,
+.no-years {
+  font-size: 0.8rem;
+  color: var(--text-muted, #9ca3af);
+  font-style: italic;
+}
+
+.year-warning {
+  display: block;
+  font-size: 0.75rem;
+  color: #f59e0b;
+  margin-top: 0.5rem;
 }
 
 .sync-btn {
@@ -124,6 +193,17 @@
 
 .sync-btn.secondary:hover:not(:disabled) {
   background: var(--bg-tertiary, #e5e7eb);
+}
+
+.sync-btn.invoice {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  width: 100%;
+}
+
+.sync-btn.invoice:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
 }
 
 .sync-btn:disabled {
@@ -331,6 +411,79 @@
 
 .sync-info strong {
   color: var(--text-primary, #1f2937);
+}
+
+/* Invoice Sync Button */
+.sync-btn.invoice {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  flex: 1;
+}
+
+.sync-btn.invoice:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  transform: translateY(-1px);
+}
+
+.sync-btn.invoice .spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+}
+
+/* Invoice Sync Result */
+.invoice-sync-result {
+  background: var(--bg-secondary, #f9fafb);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #8b5cf6;
+}
+
+.invoice-sync-result.success {
+  border-left-color: #22c55e;
+}
+
+.invoice-sync-result.error {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.invoice-sync-result h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.invoice-sync-result .result-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 0.5rem;
+}
+
+.invoice-sync-result .result-message {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.invoice-sync-result .result-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 0.25rem;
+}
+
+.invoice-sync-result .result-errors {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.invoice-sync-result .error-item {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-bottom: 0.25rem;
 }
 
 /* Dark mode support */

@@ -91,6 +91,7 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
     netBase,
     attendanceDays,
     attendedDates,
+    attendanceByDate, // Include full/half day info: { 'YYYY-MM-DD': 1 or 0.5 }
   };
   return result;
 };
