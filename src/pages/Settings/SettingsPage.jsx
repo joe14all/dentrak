@@ -7,7 +7,8 @@ import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
 import GoalsManager from '../../features/settings/GoalsManager';
 import TemplateManager from '../../features/entries/TemplateManager';
 import { JBookSyncPanel } from '../../components/JBookSync';
-import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw } from 'lucide-react'; 
+import { BankSyncPanel, BankSyncSettings } from '../../components/BankSync';
+import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw, Landmark, Settings } from 'lucide-react'; 
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const [isClearModalOpen, setClearModalOpen] = useState(false);
@@ -130,6 +131,24 @@ const SettingsPage = () => {
         <p className={styles.sectionDescription}>Sync your Dentrak data with JBook for financial reporting and tax insights.</p>
         <div className={styles.card}>
            <JBookSyncPanel /> 
+        </div>
+      </div>
+
+      {/* --- Bank Integration Section --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><Landmark size={20} /> Bank Integration</h3>
+        <p className={styles.sectionDescription}>Connect your bank accounts to automatically import income transactions.</p>
+        <div className={styles.card}>
+           <BankSyncPanel /> 
+        </div>
+      </div>
+
+      {/* --- Bank Sync Settings Section --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><Settings size={20} /> Bank Sync Settings</h3>
+        <p className={styles.sectionDescription}>Configure practice auto-linking patterns and sync preferences.</p>
+        <div className={styles.card}>
+           <BankSyncSettings /> 
         </div>
       </div>
 

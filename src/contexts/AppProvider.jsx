@@ -14,6 +14,7 @@ import { GoalProvider } from './GoalContext/GoalContext';
 import { EntryTemplateProvider } from './EntryTemplateContext/EntryTemplateContext';
 import { ExpenseProvider } from './ExpenseContext/ExpenseContext';
 import { JBookSyncProvider } from './JBookSyncContext/JBookSyncContext';
+import { BankSyncProvider } from './BankSyncContext';
 
 
 export const AppProvider = ({ children }) => {
@@ -28,6 +29,7 @@ export const AppProvider = ({ children }) => {
                 <EntryProvider>
                   <PaymentProvider>
                     <TransactionProvider>
+                      <BankSyncProvider>
                         <ReportProvider>
                           <ThemeProvider>
                             <JBookSyncProvider>
@@ -35,6 +37,7 @@ export const AppProvider = ({ children }) => {
                             </JBookSyncProvider>
                           </ThemeProvider>
                         </ReportProvider>
+                      </BankSyncProvider>
                     </TransactionProvider>
                   </PaymentProvider>
                 </EntryProvider>

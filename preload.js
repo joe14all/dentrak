@@ -11,3 +11,43 @@ contextBridge.exposeInMainWorld("electronAPI", {
   savePdf: (pdfData, suggestedName) =>
     ipcRenderer.invoke("save-pdf", pdfData, suggestedName),
 });
+
+// Expose Teller API for bank integration
+// These calls go through the main process to avoid CORS issues
+contextBridge.exposeInMainWorld("tellerApi", {
+  // Get accounts for a connected bank
+  getAccounts: async (accessToken) => {
+    const result = await ipcRenderer.invoke("teller:get-accounts", accessToken);
+    if (result.success) {
+      return result.data;
+    }
+    throw new Error(result.error || "Failed to get accounts");
+  },
+
+  // Get transactions for an account
+  getTransactions: async (accessToken, accountId, count = 100) => {
+    const result = await ipcRenderer.invoke(
+      "teller:get-transactions",
+      accessToken,
+      accountId,
+      count
+    );
+    if (result.success) {
+      return result.data;
+    }
+    throw new Error(result.error || "Failed to get transactions");
+  },
+
+  // Get account balance
+  getBalance: async (accessToken, accountId) => {
+    const result = await ipcRenderer.invoke(
+      "teller:get-balance",
+      accessToken,
+      accountId
+    );
+    if (result.success) {
+      return result.data;
+    }
+    throw new Error(result.error || "Failed to get balance");
+  },
+});

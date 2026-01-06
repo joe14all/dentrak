@@ -24,30 +24,25 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
     );
   }
 
-  // Attendance is always calculated from all relevant entries in the given period.
+  // Attendance is always calculated from attendanceRecord entries only.
+  // dailySummary entries are for production/collection data, not attendance tracking.
   // We need to group by date and take the maximum value per date (in case of overlaps)
   const attendanceByDate = {};
 
   entriesInPeriod
     .filter(
-      (e) =>
-        (e.entryType === "attendanceRecord" ||
-          e.entryType === "dailySummary") &&
-        e.date // Ensure date exists
+      (e) => e.entryType === "attendanceRecord" && e.date // Ensure date exists
     )
     .forEach((entry) => {
       const date = entry.date;
       let dayValue = 1; // Default: full day
 
       // If it's an attendance record with half-day type, count as 0.5
-      if (
-        entry.entryType === "attendanceRecord" &&
-        entry.attendanceType === "half-day"
-      ) {
+      if (entry.attendanceType === "half-day") {
         dayValue = 0.5;
       }
 
-      // Take the maximum value for each date (dailySummary or full-day attendance takes precedence)
+      // Take the maximum value for each date
       attendanceByDate[date] = Math.max(attendanceByDate[date] || 0, dayValue);
     });
 
