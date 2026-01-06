@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Bank Sync Service for Dentrak
  *
