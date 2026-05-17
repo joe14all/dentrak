@@ -43,7 +43,13 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     rejectTransaction,
     bulkApprove,
     bulkReject,
+    clearAllPending,
+    syncAccount,
+    connections,
+    isSyncing,
   } = useBankSync();
+
+  console.log('📋 [PENDING TRANSACTIONS] Showing', pendingTransactions?.length || 0, 'pending transactions');
 
   const { practices } = usePractices();
 
@@ -60,6 +66,8 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
   const [rejectReason, setRejectReason] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [filterPractice, setFilterPractice] = useState('all');
+  const [showUnlinkedSenders, setShowUnlinkedSenders] = useState(true);
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState('all'); // all, income, expense
 
   // Active contractor practices for selection
   const activePractices = useMemo(() => {
@@ -71,6 +79,20 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     // Include both 'pending' and 'auto-matched' transactions for review
     let filtered = pendingTransactions.filter(t => t.status === 'pending' || t.status === 'auto-matched');
     
+    // MAIN FILTER: Show only linked sender transactions by default
+    if (!showUnlinkedSenders) {
+      // Only show transactions that have a suggested practice (linked senders)
+      filtered = filtered.filter(t => t.suggestedPracticeId);
+    }
+    
+    // Apply transaction type filter (income vs expense)
+    if (transactionTypeFilter === 'income') {
+      filtered = filtered.filter(t => t.type === 'income');
+    } else if (transactionTypeFilter === 'expense') {
+      filtered = filtered.filter(t => t.type === 'expense');
+    }
+    
+    // Apply practice-specific filter if selected
     if (filterPractice !== 'all') {
       filtered = filtered.filter(t => 
         t.suggestedPracticeId === parseInt(filterPractice) ||
@@ -79,7 +101,7 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     }
     
     return filtered;
-  }, [pendingTransactions, filterPractice]);
+  }, [pendingTransactions, filterPractice, showUnlinkedSenders, transactionTypeFilter]);
 
   // Count by match status
   const counts = useMemo(() => {
@@ -88,6 +110,9 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
       total: pending.length,
       matched: pending.filter(t => t.suggestedPracticeId).length,
       unmatched: pending.filter(t => !t.suggestedPracticeId).length,
+      linked: pending.filter(t => t.suggestedPracticeId).length, // Transactions from linked senders
+      income: pending.filter(t => t.type === 'income').length,
+      expense: pending.filter(t => t.type === 'expense').length,
     };
   }, [pendingTransactions]);
 
@@ -210,49 +235,240 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     );
   }
 
-  if (counts.total === 0) {
+  // Render empty state for no transactions at all
+  const renderNoTransactionsState = () => (
+    <div className={styles.emptyState}>
+      <CheckCircle2 size={48} className={styles.emptyIcon} />
+      <h4>No Pending Transactions</h4>
+      <p>All imported transactions have been reviewed. Sync your bank accounts to import new transactions.</p>
+    </div>
+  );
+
+  // Render empty state for filtered results
+  const renderFilteredEmptyState = () => {
+    if (!showUnlinkedSenders) {
+      return (
+        <div className={styles.emptyState}>
+          <Sparkles size={48} className={styles.emptyIcon} />
+          <h4>No Transactions from Linked Senders</h4>
+          <p>
+            There are {counts.total} pending transaction(s), but none from your linked senders.
+            {counts.unmatched > 0 && ` Check "Show unlinked senders" above to review ${counts.unmatched} unlinked transaction(s).`}
+          </p>
+          <div className={styles.helpBox}>
+            <AlertCircle size={16} />
+            <div>
+              <strong>Looking for missing transactions?</strong>
+              <p>Go to Bank Sync Settings and use "Custom date range" to fetch older transactions from all your accounts.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className={styles.emptyState}>
         <CheckCircle2 size={48} className={styles.emptyIcon} />
-        <h4>No Pending Transactions</h4>
-        <p>All imported transactions have been reviewed. Sync your bank accounts to import new transactions.</p>
+        <h4>All Filtered Transactions Reviewed</h4>
+        <p>No pending transactions match your current filters.</p>
       </div>
     );
+  };
+
+  // If no transactions at all, show simple empty state
+  if (counts.total === 0) {
+    return renderNoTransactionsState();
   }
 
+  // Always render container with filters visible
   return (
     <div className={styles.container}>
-      {/* Header with stats */}
+      {/* Critical Action Banner - for mis-classified transactions */}
+      {counts.total > 0 && (
+        <div style={{
+          backgroundColor: '#fef3c7',
+          border: '2px solid #f59e0b',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'start',
+          gap: '12px'
+        }}>
+          <AlertCircle size={24} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#92400e', fontSize: '16px' }}>
+              🔄 Need to Re-classify Transactions?
+            </h4>
+            <p style={{ margin: '0 0 12px 0', color: '#78350f', lineHeight: '1.5' }}>
+              If your pending transactions are showing reversed labels (income marked as expense or vice versa), 
+              you can clear all pending transactions and re-sync your accounts to fix the classification.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={async () => {
+                  if (window.confirm(`Clear all ${counts.total} pending transactions? This cannot be undone. You can re-sync your accounts after to import them with correct classification.`)) {
+                    await clearAllPending();
+                  }
+                }}
+                disabled={isSyncing}
+                style={{
+                  backgroundColor: '#f59e0b',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  cursor: isSyncing ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  opacity: isSyncing ? 0.6 : 1
+                }}
+              >
+                <Trash2 size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                Clear All Pending Transactions
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header with stats - always visible */}
       <div className={styles.header}>
         <div className={styles.stats}>
-          <div className={styles.stat}>
-            <Clock size={18} />
-            <span>{counts.total} pending</span>
-          </div>
-          <div className={`${styles.stat} ${styles.matched}`}>
+          <div className={styles.stat} style={{ color: '#10b981' }}>
             <Sparkles size={18} />
-            <span>{counts.matched} auto-matched</span>
+            <span>{counts.income} income</span>
           </div>
-          <div className={`${styles.stat} ${styles.unmatched}`}>
-            <AlertCircle size={18} />
-            <span>{counts.unmatched} need review</span>
-          </div>
+          {counts.expense > 0 && (
+            <div className={`${styles.stat}`} style={{ color: '#ef4444', fontWeight: 'bold' }}>
+              <AlertCircle size={18} />
+              <span>{counts.expense} expenses (should reject)</span>
+            </div>
+          )}
+          {counts.unmatched > 0 && (
+            <div className={`${styles.stat} ${styles.unmatched}`}>
+              <AlertCircle size={18} />
+              <span>{counts.unmatched} unlinked</span>
+            </div>
+          )}
         </div>
 
-        {/* Filter */}
+        {/* Simplified Filters - always visible */}
         <div className={styles.filters}>
+          {/* Transaction Type Filter */}
           <select
-            value={filterPractice}
-            onChange={(e) => setFilterPractice(e.target.value)}
+            value={transactionTypeFilter}
+            onChange={(e) => setTransactionTypeFilter(e.target.value)}
+            className={styles.typeFilter}
+            style={{ fontWeight: transactionTypeFilter !== 'all' ? 'bold' : 'normal' }}
           >
-            <option value="all">All Transactions</option>
-            <option value="unmatched">Unmatched Only</option>
-            {activePractices.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
+            <option value="all">All Types ({counts.total})</option>
+            <option value="income">✓ Income Only ({counts.income})</option>
+            <option value="expense">✗ Expenses Only ({counts.expense})</option>
           </select>
+          
+          {/* Toggle for showing unlinked transactions */}
+          <label className={styles.toggleLabel}>
+            <input
+              type="checkbox"
+              checked={showUnlinkedSenders}
+              onChange={(e) => {
+                setShowUnlinkedSenders(e.target.checked);
+                if (!e.target.checked) setFilterPractice('all');
+              }}
+            />
+            <span>Show unlinked senders</span>
+          </label>
+          
+          {/* Practice filter - only show when relevant */}
+          {(showUnlinkedSenders || activePractices.length > 1) && (
+            <select
+              value={filterPractice}
+              onChange={(e) => setFilterPractice(e.target.value)}
+              className={styles.practiceFilter}
+            >
+              <option value="all">All Practices</option>
+              {showUnlinkedSenders && <option value="unmatched">Unlinked Only</option>}
+              {activePractices.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
+
+      {/* Show empty state if no filtered transactions, otherwise show list */}
+      {filteredTransactions.length === 0 ? (
+        renderFilteredEmptyState()
+      ) : (
+        <>
+      {/* Warning about expense transactions */}
+      {counts.expense > 0 && transactionTypeFilter !== 'income' && (
+        <div style={{
+          backgroundColor: '#fef2f2',
+          border: '2px solid #ef4444',
+          borderRadius: '8px',
+          padding: '16px',
+          margin: '16px 0',
+          display: 'flex',
+          alignItems: 'start',
+          gap: '12px'
+        }}>
+          <AlertCircle size={24} style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#991b1b', fontSize: '16px' }}>
+              ⚠️ Expense Transactions Detected
+            </h4>
+            <p style={{ margin: '0 0 12px 0', color: '#7f1d1d', lineHeight: '1.5' }}>
+              You have <strong>{counts.expense} expense transaction(s)</strong> (money going out). 
+              Dentrak is designed to track <strong>income only</strong> (money received from practices). 
+              These expense transactions should be rejected.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setTransactionTypeFilter('expense')}
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                View Expenses Only
+              </button>
+              <button
+                onClick={async () => {
+                  if (window.confirm(`Reject all ${counts.expense} expense transactions? This cannot be undone.`)) {
+                    const expenseTxs = pendingTransactions.filter(t => 
+                      (t.status === 'pending' || t.status === 'auto-matched') && t.type === 'expense'
+                    );
+                    await bulkReject(expenseTxs.map(t => t.id), 'Bulk rejected - expense transactions not tracked in Dentrak');
+                  }
+                }}
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <XCircle size={16} />
+                Reject All Expenses
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bulk Actions */}
       {selectedIds.size > 0 && (
@@ -305,7 +521,37 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
               {/* Transaction Info */}
               <div className={styles.transactionInfo}>
                 <div className={styles.transactionHeader}>
-                  <span className={styles.description}>{transaction.description}</span>
+                  <span className={styles.description}>
+                    {transaction.type === 'expense' && (
+                      <span style={{ 
+                        display: 'inline-block',
+                        backgroundColor: '#ef4444', 
+                        color: 'white', 
+                        padding: '2px 8px', 
+                        borderRadius: '4px', 
+                        fontSize: '11px', 
+                        fontWeight: 'bold',
+                        marginRight: '8px'
+                      }}>
+                        EXPENSE
+                      </span>
+                    )}
+                    {transaction.type === 'income' && (
+                      <span style={{ 
+                        display: 'inline-block',
+                        backgroundColor: '#10b981', 
+                        color: 'white', 
+                        padding: '2px 8px', 
+                        borderRadius: '4px', 
+                        fontSize: '11px', 
+                        fontWeight: 'bold',
+                        marginRight: '8px'
+                      }}>
+                        INCOME
+                      </span>
+                    )}
+                    {transaction.description}
+                  </span>
                   <span className={styles.amount}>{formatCurrency(transaction.amount)}</span>
                 </div>
                 <div className={styles.transactionMeta}>
@@ -402,6 +648,8 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
           </div>
         ))}
       </div>
+        </>
+      )}
 
       {/* Approve Modal */}
       <Modal

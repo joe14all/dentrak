@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './PerformanceToolbar.module.css';
-import { X, PlusCircle, Copy } from 'lucide-react';
+import { X, PlusCircle, Copy, FileUp } from 'lucide-react';
 
-const PerformanceToolbar = ({ practices, activeFilters, onFilterChange, onAddEntry, onBulkGenerate }) => {
+const PerformanceToolbar = ({ practices, activeFilters, onFilterChange, onAddEntry, onBulkGenerate, onImportReport }) => {
 
   const handleFilterChange = (field, value) => {
     onFilterChange(prev => ({ ...prev, [field]: value }));
@@ -82,6 +82,12 @@ const PerformanceToolbar = ({ practices, activeFilters, onFilterChange, onAddEnt
         )}
       </div>
       <div className={styles.actionButtons}>
+        {onImportReport && (
+          <button className={styles.importButton} onClick={onImportReport}>
+            <FileUp size={16} />
+            <span>Import Report</span>
+          </button>
+        )}
         {onBulkGenerate && (
           <button className={styles.bulkButton} onClick={onBulkGenerate}>
             <Copy size={16} />

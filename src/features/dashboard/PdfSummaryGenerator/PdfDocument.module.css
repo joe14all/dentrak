@@ -168,3 +168,77 @@ margin-left: 0.75rem; /* ADDED to align with card padding */
   border-radius: 50%;
 }
 
+/* --- Procedure Details Table --- */
+.procedureTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 1rem;
+}
+
+.procedureTable thead {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.procedureTable th {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.procedureTable tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.procedureTable tbody tr:last-child {
+  border-bottom: none;
+}
+
+.procedureTable tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.procedureTable td {
+  padding: 0.75rem 0.5rem;
+  color: #475569;
+}
+
+.procedureTable .currency {
+  text-align: right;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-weight: 500;
+}
+
+.procedureTable .notes {
+  font-size: 11px;
+  color: #64748b;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.procedureTable tfoot {
+  border-top: 2px solid #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.procedureTable tfoot tr {
+  font-weight: 600;
+}
+
+.procedureTable tfoot td {
+  padding: 0.75rem 0.5rem;
+}
+
+.procedureTable .totalLabel {
+  font-size: 13px;
+  color: #1e293b;
+  text-align: right;
+}
+

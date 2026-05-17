@@ -80,6 +80,13 @@
   max-width: 320px;
 }
 
+.incomeNote {
+  font-size: 0.85rem;
+  color: var(--state-info-text, #0369a1) !important;
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
 .connectBtn {
   display: flex;
   align-items: center;

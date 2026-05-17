@@ -231,6 +231,7 @@ export const TransactionProvider = ({ children }) => {
     addNewCheque, editCheque, removeCheque,
     addNewDirectDeposit, editDirectDeposit, removeDirectDeposit,
     addNewETransfer, editETransfer, removeETransfer,
+    refreshTransactions, // Export refresh function for manual refreshes
   };
 
   return (

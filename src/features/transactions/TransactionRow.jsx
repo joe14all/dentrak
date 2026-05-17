@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './TransactionRow.module.css';
 import { useNavigation } from '../../contexts/NavigationContext/NavigationContext';
-import { Edit, Trash2, ArrowUpRight, Landmark, MousePointerClick, CreditCard, Wallet } from 'lucide-react';
+import { Edit, Trash2, ArrowUpRight, Landmark, MousePointerClick, CreditCard, Wallet, Building2 } from 'lucide-react';
 
 const TransactionRow = ({ transaction, practice, onEdit, onDelete, onView }) => {
   const { setActivePage } = useNavigation();
@@ -24,7 +24,10 @@ const TransactionRow = ({ transaction, practice, onEdit, onDelete, onView }) => 
   };
 
   // --- Robust Dynamic Data Extraction ---
-  const { type, amount, status } = transaction;
+  const { type, amount, status, externalId } = transaction;
+  
+  // Check if this was imported from bank sync
+  const isBankImported = externalId && externalId.startsWith('teller_');
   
   // This robustly finds the correct date field regardless of type.
   const date = transaction.dateReceived || transaction.paymentDate;
@@ -54,6 +57,14 @@ const TransactionRow = ({ transaction, practice, onEdit, onDelete, onView }) => 
                 <span className={`${styles.tag} ${styles[method]}`}>
                   {getMethodIcon(method)} {method.replace(/([A-Z])/g, ' $1')}
                 </span>
+                {isBankImported && (
+                  <>
+                    <span className={styles.separator}>•</span>
+                    <span className={styles.bankImportTag} title="Imported from bank sync">
+                      <Building2 size={12} /> Bank
+                    </span>
+                  </>
+                )}
                 {status && <><span className={styles.separator}>•</span><span className={styles.statusTag}>{status}</span></>}
             </div>
         </div>

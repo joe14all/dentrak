@@ -5,6 +5,26 @@ import { ArrowRight } from 'lucide-react';
 const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
 const formatDate = (date) => date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
+/**
+ * Convert a patient name or ID to initials for HIPAA compliance
+ * Examples: "John Doe" -> "JD", "Jane Smith-Jones" -> "JSJ", "123456" -> "123456"
+ */
+const getInitials = (patientId) => {
+  if (!patientId || patientId === 'N/A') return 'N/A';
+  
+  // If it's purely numeric (patient ID number), return as is
+  if (/^\d+$/.test(patientId.trim())) return patientId;
+  
+  // Extract initials from name
+  const words = patientId.trim().split(/[\s-]+/); // Split by spaces or hyphens
+  const initials = words
+    .filter(word => word.length > 0)
+    .map(word => word[0].toUpperCase())
+    .join('');
+  
+  return initials || patientId;
+};
+
 const MiniCalendar = ({ startDate, endDate, attendedDates, attendanceEntries }) => {
   // Create a map of day numbers to attendance types
   const attendanceByDay = {};
@@ -138,7 +158,7 @@ const PeriodCard = ({ periodData, practice }) => {
 };
 
 
-const PdfDocument = ({ practice, periods }) => {
+const PdfDocument = ({ practice, periods, procedureEntries = [], hipaaCompliant = true }) => {
     // Calculate overall totals
     const totalPay = periods.reduce((sum, p) => sum + p.calculatedPay, 0);
     const totalProduction = periods.reduce((sum, p) => sum + p.productionTotal, 0);
@@ -163,7 +183,7 @@ const PdfDocument = ({ practice, periods }) => {
     return (
         <div id="pdf-document" className={styles.document}>
             {/* --- Page 1 --- */}
-            <div className={styles.page}>
+            <div className={styles.page} data-pdf-page="1">
                 <header className={styles.header}>
                     <h1>Pay Period Summary</h1>
                     <h2>{practice.name}</h2>
@@ -201,7 +221,7 @@ const PdfDocument = ({ practice, periods }) => {
 
             {/* --- Subsequent Pages --- */}
             {subsequentPages.map((pagePeriods, pageIndex) => (
-                <div key={`page-${pageIndex + 2}`} className={styles.page}>
+                <div key={`page-${pageIndex + 2}`} className={styles.page} data-pdf-page={pageIndex + 2}>
                      <header className={styles.header}>
                         <h2>{practice.name} - Detailed Breakdown (Cont.)</h2>
                          <p>Page {pageIndex + 2}</p>
@@ -215,6 +235,74 @@ const PdfDocument = ({ practice, periods }) => {
                     </section>
                 </div>
             ))}
+            
+            {/* --- Procedure Details Pages (Paginated) --- */}
+            {procedureEntries.length > 0 && (() => {
+                // Paginate procedures: 15 rows per page
+                const PROCEDURES_PER_PAGE = 15;
+                const procedurePages = [];
+                for (let i = 0; i < procedureEntries.length; i += PROCEDURES_PER_PAGE) {
+                    procedurePages.push(procedureEntries.slice(i, i + PROCEDURES_PER_PAGE));
+                }
+                
+                const totalProcedureProduction = procedureEntries.reduce((sum, e) => sum + (e.production || 0), 0);
+                const basePageNumber = subsequentPages.length + 2;
+                
+                return procedurePages.map((pageProcedures, pageIndex) => {
+                    const isLastPage = pageIndex === procedurePages.length - 1;
+                    const pageNumber = basePageNumber + pageIndex;
+                    const startIndex = pageIndex * PROCEDURES_PER_PAGE + 1;
+                    const endIndex = Math.min((pageIndex + 1) * PROCEDURES_PER_PAGE, procedureEntries.length);
+                    
+                    return (
+                        <div key={`procedures-page-${pageIndex}`} className={styles.page} data-pdf-page={pageNumber}>
+                            <header className={styles.header}>
+                                <h2>{practice.name} - Procedure Details {procedurePages.length > 1 ? `(Page ${pageIndex + 1} of ${procedurePages.length})` : ''}</h2>
+                                <p>Page {pageNumber}</p>
+                            </header>
+                            <section>
+                                <h3 className={styles.sectionTitle}>
+                                    Individual Procedures ({procedureEntries.length} Total)
+                                    {procedurePages.length > 1 && ` - Showing ${startIndex}-${endIndex}`}
+                                </h3>
+                                <table className={styles.procedureTable}>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Procedure Code</th>
+                                            <th>Patient {hipaaCompliant ? 'Initials' : 'ID'}</th>
+                                            <th>Production</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {pageProcedures.map((entry, index) => (
+                                            <tr key={index}>
+                                                <td>{formatDate(new Date(`${entry.date}T00:00:00Z`))}</td>
+                                                <td>{entry.procedureCode || 'N/A'}</td>
+                                                <td>{hipaaCompliant ? getInitials(entry.patientId) : (entry.patientId || 'N/A')}</td>
+                                                <td className={styles.currency}>{formatCurrency(entry.production)}</td>
+                                                <td className={styles.notes}>{entry.notes || '-'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    {isLastPage && (
+                                        <tfoot>
+                                            <tr>
+                                                <td colSpan="3" className={styles.totalLabel}>Total Procedure Production</td>
+                                                <td className={styles.currency}>
+                                                    <strong>{formatCurrency(totalProcedureProduction)}</strong>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    )}
+                                </table>
+                            </section>
+                        </div>
+                    );
+                });
+            })()}
         </div>
     );
 };

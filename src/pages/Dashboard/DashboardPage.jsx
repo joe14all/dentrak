@@ -15,6 +15,7 @@ import BalanceTracker from '../../features/dashboard/BalanceTracker/BalanceTrack
 import SummaryInsights from '../../features/dashboard/SummaryInsights/SummaryInsights';
 import CashFlowForecast from '../../features/dashboard/CashFlowForecast/CashFlowForecast';
 import TaxPlanning from '../../features/dashboard/TaxPlanning/TaxPlanning';
+import VacationCalculator from '../../features/dashboard/VacationCalculator/VacationCalculator';
 import PracticeComparison from '../../features/dashboard/PracticeComparison/PracticeComparison';
 
 // Import Modals and Forms for Quick Actions
@@ -81,6 +82,11 @@ const DashboardPage = () => {
             {/* Tax Planning: Full-width tax section */}
             <div className={styles.taxPlanning}>
                 <TaxPlanning />
+            </div>
+
+            {/* Vacation Calculator: Full-width vacation income loss calculator */}
+            <div className={styles.vacationCalculator}>
+                <VacationCalculator />
             </div>
 
             {/* Practice Comparison: Full-width comparison section */}

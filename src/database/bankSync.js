@@ -101,6 +101,16 @@ export const getPendingTransactionsForReview = async () => {
 };
 
 /**
+ * Get approved transactions (bank import history)
+ */
+export const getApprovedBankTransactions = async () => {
+  const all = await db.pendingBankTransactions.toArray();
+  return all
+    .filter((t) => t.status === "approved")
+    .sort((a, b) => new Date(b.approvedAt || b.date) - new Date(a.approvedAt || a.date));
+};
+
+/**
  * Check if transaction already exists by external ID
  */
 export const checkTransactionExists = async (externalId) => {

@@ -1,0 +1,433 @@
+.container {
+  background: var(--ui-background-secondary);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icon {
+  color: var(--brand-primary);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--ui-text-secondary);
+  margin: 0;
+}
+
+/* Controls Section */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--ui-background-tertiary);
+  border-radius: 8px;
+}
+
+.dateInputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.inputGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+}
+
+.dateInput {
+  padding: 0.625rem;
+  border: 1px solid var(--ui-border-primary);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  color: var(--ui-text-primary);
+  background: var(--ui-background-secondary);
+  transition: all 0.2s ease;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.daysDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: var(--ui-background-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--ui-border-secondary);
+}
+
+.daysLabel {
+  font-size: 0.75rem;
+  color: var(--ui-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.daysValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+/* Mode Toggle */
+.modeToggle {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.modeButton {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--ui-border-primary);
+  border-radius: 6px;
+  background: var(--ui-background-secondary);
+  color: var(--ui-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modeButton:hover {
+  border-color: var(--brand-primary);
+  background: var(--ui-background-primary);
+}
+
+.modeButton.active {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+
+/* Practice Filter */
+.practiceFilter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.practiceFilter label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+}
+
+.practiceCheckboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ui-text-primary);
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Total Loss Display */
+.totalLoss {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid var(--state-danger);
+  border-radius: 8px;
+}
+
+.lossIcon {
+  color: var(--state-danger);
+  flex-shrink: 0;
+}
+
+.totalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.totalLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--state-danger-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.totalValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--state-danger);
+}
+
+/* Breakdown Section */
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.breakdownTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+}
+
+.practiceList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.practiceCard {
+  background: var(--ui-background-tertiary);
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.practiceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.practiceName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.practiceTag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.625rem;
+  background: var(--brand-secondary);
+  color: var(--brand-primary);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.workingDaysPattern {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--ui-background-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--ui-border-secondary);
+}
+
+.patternLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dayTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.dayTag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+  border-radius: 4px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dayCount {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.noDays {
+  font-size: 0.75rem;
+  color: var(--ui-text-tertiary);
+  font-style: italic;
+}
+
+.practiceMetrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.metricLabel {
+  color: var(--ui-text-secondary);
+}
+
+.metricValue {
+  font-weight: 600;
+  color: var(--ui-text-primary);
+}
+
+.practiceLoss {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ui-border-secondary);
+}
+
+.lossLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+}
+
+.lossValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--state-danger);
+}
+
+/* Info Note */
+.infoNote {
+  padding: 1rem;
+  background: var(--state-success-bg);
+  border-left: 4px solid var(--state-success);
+  border-radius: 4px;
+}
+
+.infoNote p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ui-text-secondary);
+  line-height: 1.5;
+}
+
+.infoNote strong {
+  color: var(--ui-text-primary);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--ui-text-tertiary);
+  opacity: 0.5;
+}
+
+.emptyState p {
+  color: var(--ui-text-secondary);
+  margin: 0;
+}
+
+.emptyHint {
+  font-size: 0.875rem;
+  color: var(--ui-text-tertiary);
+  margin-top: 0.5rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .dateInputs {
+    flex-direction: column;
+  }
+
+  .modeToggle {
+    flex-direction: column;
+  }
+
+  .modeButton {
+    min-width: 100%;
+  }
+
+  .totalValue {
+    font-size: 1.5rem;
+  }
+
+  .practiceList {
+    grid-template-columns: 1fr;
+  }
+}

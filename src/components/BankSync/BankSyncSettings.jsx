@@ -8,6 +8,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useBankSync } from '../../contexts/BankSyncContext';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import { getUniqueBankSenders } from '../../database/bankSync';
+import Modal from '../common/Modal/Modal';
 import styles from './BankSyncSettings.module.css';
 import {
   Plus,
@@ -21,6 +22,7 @@ import {
   Building2,
   Download,
   Landmark,
+  Calendar,
 } from 'lucide-react';
 
 const BankSyncSettings = () => {
@@ -51,6 +53,13 @@ const BankSyncSettings = () => {
   const [selectedSender, setSelectedSender] = useState('');
   const [selectedPractice, setSelectedPractice] = useState('');
   const [fetchingTransactions, setFetchingTransactions] = useState(false);
+
+  // Custom date range for fetching transactions
+  const [showDateRangeModal, setShowDateRangeModal] = useState(false);
+  const [customDateRange, setCustomDateRange] = useState({
+    dateRange: 'last-6-months',
+    includeRejected: false,
+  });
 
   // All active practices (both contractor and employment)
   const activePractices = practices.filter(p => p.status === 'active');
@@ -90,6 +99,33 @@ const BankSyncSettings = () => {
         await syncAccount(connection, {
           transactionTypes: { income: true, expense: false },
           dateRange: 'last-6-months',
+          statusFilter: 'posted',
+          destination: 'pending-review',
+        });
+      }
+      // Reload senders after sync
+      await loadSenders();
+    } catch (err) {
+      console.error('Failed to fetch transactions:', err);
+    } finally {
+      setFetchingTransactions(false);
+    }
+  };
+
+  // Fetch transactions with custom date range
+  const handleFetchWithDateRange = async () => {
+    if (connections.length === 0) return;
+    
+    setFetchingTransactions(true);
+    setShowDateRangeModal(false);
+    
+    try {
+      // If includeRejected, we need to temporarily clear rejected transactions
+      // or fetch all without duplicate check
+      for (const connection of connections) {
+        await syncAccount(connection, {
+          transactionTypes: { income: true, expense: false },
+          dateRange: customDateRange.dateRange,
           statusFilter: 'posted',
           destination: 'pending-review',
         });
@@ -272,13 +308,25 @@ const BankSyncSettings = () => {
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitle}>
             <Link2 size={20} />
-            <h4>Sender → Practice Links</h4>
+            <h4>Income Sender → Practice Links</h4>
           </div>
           <p className={styles.sectionDescription}>
-            Link transaction senders to practices. When new transactions arrive from a linked sender, 
-            they will be automatically assigned to the corresponding practice.
+            Link income transaction senders to your practices. Only transactions from linked senders will appear in Pending Transactions for quick approval.
+            <strong> Note: This system tracks income only, not expenses.</strong>
           </p>
         </div>
+
+        {/* Info box about multiple senders */}
+        {practicePatterns.length > 0 && (
+          <div className={styles.infoBox}>
+            <AlertCircle size={16} />
+            <div>
+              <strong>Multiple senders for one practice?</strong> That's perfectly fine! 
+              Link each sender (different check writers, payment processors, etc.) to the same practice. 
+              All transactions from any linked sender will show in Pending Transactions.
+            </div>
+          </div>
+        )}
 
         {/* Existing Links */}
         {practicePatterns.length > 0 && (
@@ -340,22 +388,31 @@ const BankSyncSettings = () => {
             <div className={styles.fetchTransactionsPrompt}>
               <Download size={24} />
               <p>Fetch transactions from your connected bank to see senders</p>
-              <button 
-                onClick={handleFetchTransactions} 
-                className={styles.fetchBtn}
-                disabled={fetchingTransactions || isSyncing}
-              >
-                {fetchingTransactions || isSyncing ? (
-                  <>
-                    <RefreshCw size={16} className={styles.spinIcon} />
-                    Fetching...
-                  </>
-                ) : (
-                  <>
-                    <Download size={16} /> Fetch Transactions
-                  </>
-                )}
-              </button>
+              <div className={styles.fetchButtons}>
+                <button 
+                  onClick={handleFetchTransactions} 
+                  className={styles.fetchBtn}
+                  disabled={fetchingTransactions || isSyncing}
+                >
+                  {fetchingTransactions || isSyncing ? (
+                    <>
+                      <RefreshCw size={16} className={styles.spinIcon} />
+                      Fetching...
+                    </>
+                  ) : (
+                    <>
+                      <Download size={16} /> Fetch Last 6 Months
+                    </>
+                  )}
+                </button>
+                <button 
+                  onClick={() => setShowDateRangeModal(true)} 
+                  className={styles.fetchCustomBtn}
+                  disabled={fetchingTransactions || isSyncing}
+                >
+                  Custom Date Range
+                </button>
+              </div>
             </div>
           ) : unlinkedSenders.length === 0 ? (
             <div className={styles.allLinkedState}>
@@ -416,7 +473,15 @@ const BankSyncSettings = () => {
                   disabled={fetchingTransactions || isSyncing}
                 >
                   <RefreshCw size={14} className={fetchingTransactions || isSyncing ? styles.spinIcon : ''} />
-                  {fetchingTransactions || isSyncing ? 'Fetching...' : 'Fetch new transactions'}
+                  {fetchingTransactions || isSyncing ? 'Fetching...' : 'Fetch last 6 months'}
+                </button>
+                <button 
+                  onClick={() => setShowDateRangeModal(true)} 
+                  className={styles.customRangeBtn}
+                  disabled={fetchingTransactions || isSyncing}
+                >
+                  <Calendar size={14} />
+                  Custom date range
                 </button>
               </div>
             </>
@@ -427,8 +492,9 @@ const BankSyncSettings = () => {
         <div className={styles.helpText}>
           <Sparkles size={16} />
           <div>
-            <p><strong>How it works:</strong> When you sync transactions from your bank, the system checks each transaction&apos;s sender against your links.</p>
-            <p>Matched transactions will have the practice pre-selected when you review them, saving you time.</p>
+            <p><strong>How it works:</strong> When you sync income from your bank, only transactions from linked senders will appear in Pending Transactions.</p>
+            <p>This keeps your review process focused and eliminates clutter from unrelated transactions.</p>
+            <p><em>Tip: If you&apos;re missing expected income, enable &quot;Show unlinked senders&quot; in Pending Transactions to find and link new senders.</em></p>
           </div>
         </div>
       </div>
@@ -497,6 +563,61 @@ const BankSyncSettings = () => {
           </button>
         </div>
       )}
+
+      {/* Custom Date Range Modal */}
+      <Modal
+        isOpen={showDateRangeModal}
+        onClose={() => setShowDateRangeModal(false)}
+        title="Fetch Transactions - Custom Date Range"
+      >
+        <div className={styles.dateRangeModal}>
+          <p className={styles.modalDescription}>
+            Select how far back to fetch transactions from all connected accounts.
+            This will help you find any missed income transactions.
+          </p>
+
+          <div className={styles.modalField}>
+            <label>Date Range</label>
+            <select
+              value={customDateRange.dateRange}
+              onChange={(e) => setCustomDateRange({ ...customDateRange, dateRange: e.target.value })}
+              className={styles.modalSelect}
+            >
+              <option value="last-7-days">Last 7 Days</option>
+              <option value="last-30-days">Last 30 Days</option>
+              <option value="last-90-days">Last 90 Days</option>
+              <option value="last-6-months">Last 6 Months</option>
+              <option value="this-year">This Year</option>
+              <option value="all">All Available (up to 2 years)</option>
+            </select>
+          </div>
+
+          <div className={styles.modalInfo}>
+            <AlertCircle size={16} />
+            <div>
+              <strong>Note:</strong> This will only fetch transactions that haven't been imported yet.
+              If you previously rejected transactions, use "Clear & Re-sync" instead.
+            </div>
+          </div>
+
+          <div className={styles.modalActions}>
+            <button
+              onClick={() => setShowDateRangeModal(false)}
+              className={styles.cancelBtn}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleFetchWithDateRange}
+              className={styles.fetchModalBtn}
+              disabled={fetchingTransactions}
+            >
+              <Download size={16} />
+              {fetchingTransactions ? 'Fetching...' : 'Fetch Transactions'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

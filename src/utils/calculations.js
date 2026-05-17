@@ -95,8 +95,6 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
  * Generates an array of pay period start/end dates for a given month and cycle.
  */
 const getPayPeriods = (year, month, payCycle) => {
-  console.log("📅 getPayPeriods called:", { year, month, payCycle });
-
   const periods = [];
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startDate = new Date(Date.UTC(year, month, 1));
@@ -142,15 +140,6 @@ const getPayPeriods = (year, month, payCycle) => {
  * The main exported function. Calculates pay for a practice over an entire month.
  */
 export const calculatePay = (practice, allEntriesForPractice, year, month) => {
-  console.log("💰 calculatePay called:", {
-    practiceId: practice?.id,
-    practiceName: practice?.name,
-    payCycle: practice?.payCycle,
-    year,
-    month,
-    entriesCount: allEntriesForPractice?.length,
-  });
-
   if (!practice)
     return {
       calculatedPay: 0,
@@ -177,18 +166,6 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
   const periodSummaries = entriesInMonth.filter(
     (e) => e.entryType === "periodSummary"
   );
-
-  console.log("📋 Entry analysis:", {
-    practiceId: practice.id,
-    totalEntries: entriesInMonth.length,
-    periodSummaries: periodSummaries.length,
-    periodSummaryDetails: periodSummaries.map((ps) => ({
-      id: ps.id,
-      start: ps.periodStartDate,
-      end: ps.periodEndDate,
-      production: ps.production,
-    })),
-  });
 
   // Determine which entries to use for the overall month's production total
   let financialEntriesForMonth;
@@ -219,17 +196,7 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
 
   // ALWAYS generate periods based on practice payCycle, regardless of entry types
   // This ensures bi-weekly practices always show 2 periods, monthly shows 1, etc.
-  console.log("🟢 Generating periods based on payCycle:", practice.payCycle);
   const payPeriods = getPayPeriods(year, month, practice.payCycle);
-  console.log("📊 Generated pay periods:", {
-    practiceId: practice.id,
-    payCycle: practice.payCycle,
-    periodsCount: payPeriods.length,
-    periods: payPeriods.map((p) => ({
-      start: p.start.toISOString(),
-      end: p.end.toISOString(),
-    })),
-  });
 
   periodDetails = payPeriods.map((period) => {
     // Find ALL entries (period summaries + daily) that fall within this period
@@ -248,13 +215,6 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
         entryDate = new Date(`${e.date}T00:00:00Z`);
         return entryDate >= period.start && entryDate <= period.end;
       }
-    });
-
-    console.log("📝 Entries in period:", {
-      periodStart: period.start.toISOString(),
-      periodEnd: period.end.toISOString(),
-      entriesCount: entriesInPeriod.length,
-      entryTypes: entriesInPeriod.map((e) => e.entryType),
     });
 
     const { calculatedPay, basePayOwed, productionPayComponent } =

@@ -1,0 +1,327 @@
+.confirmationContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+}
+
+.warningIcon {
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+}
+
+.subtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.summary {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  background: var(--background-secondary, #f9fafb);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summaryLabel {
+  font-size: 0.85rem;
+  color: var(--text-tertiary, #9ca3af);
+  font-weight: 500;
+}
+
+.summaryValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+}
+
+.tableContainer {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+}
+
+.entriesTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.entriesTable thead {
+  position: sticky;
+  top: 0;
+  background: var(--background-secondary, #f9fafb);
+  z-index: 10;
+}
+
+.entriesTable th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.entriesTable tbody tr {
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  transition: background-color 0.2s;
+}
+
+.entriesTable tbody tr:hover {
+  background: var(--background-hover, #f9fafb);
+}
+
+.entriesTable td {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+.markedForRemoval {
+  opacity: 0.4;
+  background: #fef2f2 !important;
+}
+
+.markedForRemoval td {
+  text-decoration: line-through;
+}
+
+.dateInput,
+.textInput,
+.numberInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: white;
+}
+
+.dateInput:focus,
+.textInput:focus,
+.numberInput:focus {
+  outline: none;
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.dateInput:disabled,
+.textInput:disabled,
+.numberInput:disabled {
+  background: var(--background-secondary, #f3f4f6);
+  cursor: not-allowed;
+}
+
+.dateInput {
+  max-width: 140px;
+}
+
+.numberInput {
+  max-width: 100px;
+  text-align: right;
+}
+
+.procedureCell {
+  max-width: 250px;
+}
+
+.procedureCodes {
+  font-size: 0.85rem;
+  color: var(--text-primary, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.procedureCount {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #9ca3af);
+  font-style: italic;
+}
+
+.removeButton,
+.restoreButton {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.removeButton {
+  background: transparent;
+  color: #dc2626;
+}
+
+.removeButton:hover {
+  background: #fef2f2;
+}
+
+.restoreButton {
+  background: transparent;
+  color: #16a34a;
+}
+
+.restoreButton:hover {
+  background: #f0fdf4;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.cancelButton,
+.confirmButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cancelButton {
+  background: var(--background-secondary, #f3f4f6);
+  color: var(--text-secondary, #6b7280);
+}
+
+.cancelButton:hover {
+  background: var(--background-hover, #e5e7eb);
+}
+
+.confirmButton {
+  background: var(--primary-color, #3b82f6);
+  color: white;
+}
+
+.confirmButton:hover:not(:disabled) {
+  background: var(--primary-hover, #2563eb);
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading overlay and progress styles */
+.importingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 12px;
+}
+
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  min-width: 300px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary-color, #3b82f6);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressText {
+  text-align: center;
+}
+
+.progressText strong {
+  display: block;
+  font-size: 1.25rem;
+  color: var(--text-primary, #111827);
+  margin-bottom: 0.5rem;
+}
+
+.progressText p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: var(--background-secondary, #e5e7eb);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color, #3b82f6), var(--primary-hover, #2563eb));
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.progressPercentage {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color, #3b82f6);
+}
+
+.buttonSpinner {
+  animation: spin 1s linear infinite;
+}

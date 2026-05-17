@@ -1,18 +1,35 @@
 import React, { useState, useRef } from 'react';
 import styles from './SettingsPage.module.css';
 import { useTheme } from '../../contexts/ThemeContext/ThemeContext';
+import { useTransactions } from '../../contexts/TransactionContext/TransactionContext';
+import { usePayments } from '../../contexts/PaymentContext/PaymentContext';
 import { db } from '../../database/db';
 import Modal from '../../components/common/Modal/Modal';
 import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
 import GoalsManager from '../../features/settings/GoalsManager';
 import TemplateManager from '../../features/entries/TemplateManager';
 import { JBookSyncPanel } from '../../components/JBookSync';
-import { BankSyncPanel, BankSyncSettings, PendingTransactionsPanel } from '../../components/BankSync';
-import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw, Landmark, Settings, ClipboardCheck } from 'lucide-react'; 
+import { BankSyncPanel, BankSyncSettings, PendingTransactionsPanel, ApprovedTransactionsPanel } from '../../components/BankSync';
+import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw, Landmark, Settings, ClipboardCheck, History } from 'lucide-react'; 
+
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
+  const { refreshTransactions } = useTransactions();
+  const { refreshPayments } = usePayments();
   const [isClearModalOpen, setClearModalOpen] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Handler to refresh data after transaction approval
+  const handleTransactionApproved = async () => {
+    await Promise.all([
+      refreshTransactions(),
+      refreshPayments(),
+    ]);
+    // Trigger a re-render by updating a state key
+    setApprovedTransactionsKey(prev => prev + 1);
+  };
+
+  const [approvedTransactionsKey, setApprovedTransactionsKey] = useState(0);
 
   const handleExportData = async () => {
     try {
@@ -148,7 +165,16 @@ const SettingsPage = () => {
         <h3 className={styles.sectionTitle}><ClipboardCheck size={20} /> Pending Transactions</h3>
         <p className={styles.sectionDescription}>Review and approve imported bank transactions before they are added to your records.</p>
         <div className={styles.card}>
-           <PendingTransactionsPanel /> 
+           <PendingTransactionsPanel onTransactionApproved={handleTransactionApproved} /> 
+        </div>
+      </div>
+
+      {/* --- Approved Transactions History Section --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><History size={20} /> Approved Transactions</h3>
+        <p className={styles.sectionDescription}>View history of all approved bank transactions, grouped by practice for easy review and verification.</p>
+        <div className={styles.card}>
+           <ApprovedTransactionsPanel key={approvedTransactionsKey} /> 
         </div>
       </div>
 

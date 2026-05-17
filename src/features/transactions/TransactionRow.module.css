@@ -5,6 +5,21 @@
     font-size: 0.85rem;
 }
 
+/* Bank import indicator */
+.bankImportTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background-color: var(--brand-secondary, #dbeafe);
+    color: var(--brand-primary, #3b82f6);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
 /* Most other styles from your previous version remain correct. */
 /* This is a summary of the key styles */
 .tableRow {

@@ -11,6 +11,7 @@ import Modal from '../../components/common/Modal/Modal';
 import EntryForm from '../../features/entries/form-components/EntryForm';
 import DeleteConfirmation from '../../features/entries/DeleteConfirmation';
 import BulkEntryGenerator from '../../features/entries/BulkEntryGenerator';
+import ReportImporter from '../../features/entries/ReportImporter';
 import styles from './EntriesPage.module.css';
 
 const EntriesPage = () => {
@@ -39,6 +40,9 @@ const EntriesPage = () => {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [isBulkGeneratorOpen, setBulkGeneratorOpen] = useState(false);
+  const [isReportImporterOpen, setReportImporterOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
 
   const filteredPerformanceEntries = useMemo(() => {
     if (!entries) return [];
@@ -115,6 +119,31 @@ const EntriesPage = () => {
     }
     handleCloseModals();
   };
+  const handleBulkImport = async (entriesToImport) => {
+    setIsImporting(true);
+    setImportProgress({ current: 0, total: entriesToImport.length });
+    
+    try {
+      // Import entries one by one with progress updates
+      for (let i = 0; i < entriesToImport.length; i++) {
+        await addNewEntry(entriesToImport[i]);
+        setImportProgress({ current: i + 1, total: entriesToImport.length });
+      }
+      
+      // Give a brief moment to show 100% before closing
+      setTimeout(() => {
+        setReportImporterOpen(false);
+        setIsImporting(false);
+        setImportProgress({ current: 0, total: 0 });
+      }, 500);
+    } catch (error) {
+      console.error('Error importing entries:', error);
+      alert('Failed to import some entries. Please check the console for details.');
+      setIsImporting(false);
+      setImportProgress({ current: 0, total: 0 });
+    }
+  };
+
 
 
   return (
@@ -133,6 +162,7 @@ const EntriesPage = () => {
             onFilterChange={setFilters}
             onAddEntry={handleOpenAddModal}
             onBulkGenerate={() => setBulkGeneratorOpen(true)}
+            onImportReport={() => setReportImporterOpen(true)}
           />
           {/* Add the new summary component here */}
           <PerformanceSummary summaryData={performanceSummaryData} />
@@ -171,6 +201,16 @@ const EntriesPage = () => {
 
       <Modal isOpen={isBulkGeneratorOpen} onClose={() => setBulkGeneratorOpen(false)} title="Bulk Entry Generator">
         <BulkEntryGenerator onClose={() => setBulkGeneratorOpen(false)} />
+      </Modal>
+
+      <Modal isOpen={isReportImporterOpen} onClose={() => setReportImporterOpen(false)} title="Import Day Sheet Report" size="large">
+        <ReportImporter 
+          practices={practices}
+          onImport={handleBulkImport}
+          onClose={() => setReportImporterOpen(false)}
+          isImporting={isImporting}
+          importProgress={importProgress}
+        />
       </Modal>
     </div>
   );

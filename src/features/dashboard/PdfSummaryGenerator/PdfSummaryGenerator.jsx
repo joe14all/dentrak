@@ -46,6 +46,9 @@ const PdfSummaryGenerator = ({ onCancel }) => {
     const [reportData, setReportData] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
     
+    // HIPAA compliance state
+    const [hipaaCompliant, setHipaaCompliant] = useState(true); // Default to HIPAA compliant
+    
     // JBook sync state
     const [syncToJBook, setSyncToJBook] = useState(true); // Default to auto-sync
     const [jbookConnected, setJbookConnected] = useState(false);
@@ -168,7 +171,31 @@ const PdfSummaryGenerator = ({ onCancel }) => {
             return;
         }
         
-        setReportData({ practice, periods: periodData.sort((a, b) => a.period.start - b.period.start) });
+        // Collect all procedure entries from all selected periods
+        const allProcedureEntries = [];
+        selectedPeriods.forEach(period => {
+            const procedureEntries = entries.filter(e => {
+                if (e.practiceId !== practice.id) return false;
+                if (e.entryType !== 'individualProcedure') return false;
+                if (!e.date) return false;
+                const entryDate = new Date(`${e.date}T00:00:00Z`);
+                return entryDate >= period.start && entryDate <= period.end;
+            });
+            allProcedureEntries.push(...procedureEntries);
+        });
+        
+        // Sort procedures by date
+        allProcedureEntries.sort((a, b) => {
+            const dateA = new Date(`${a.date}T00:00:00Z`);
+            const dateB = new Date(`${b.date}T00:00:00Z`);
+            return dateA - dateB;
+        });
+        
+        setReportData({ 
+            practice, 
+            periods: periodData.sort((a, b) => a.period.start - b.period.start),
+            procedureEntries: allProcedureEntries
+        });
     };
 
     /**
@@ -237,13 +264,54 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                     try {
                         const { jsPDF } = window.jspdf;
                         const html2canvas = window.html2canvas;
-                        const canvas = await html2canvas(reportElement, { scale: 2 });
-                        const imgData = canvas.toDataURL('image/png');
+                        
+                        // Get all page elements
+                        const pageElements = reportElement.querySelectorAll('[data-pdf-page]');
+                        
+                        if (pageElements.length === 0) {
+                            throw new Error("No pages found in the report");
+                        }
+                        
                         const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4' });
                         const pdfWidth = pdf.internal.pageSize.getWidth();
-                        const canvasAspectRatio = canvas.width / canvas.height;
-                        const pdfHeight = pdfWidth / canvasAspectRatio;
-                        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                        const pdfHeight = pdf.internal.pageSize.getHeight();
+                        
+                        // Process each page separately
+                        for (let i = 0; i < pageElements.length; i++) {
+                            const pageElement = pageElements[i];
+                            
+                            // Render this page as a canvas
+                            const canvas = await html2canvas(pageElement, { 
+                                scale: 2,
+                                useCORS: true,
+                                logging: false,
+                                windowWidth: 794 // A4 width at 96 DPI
+                            });
+                            
+                            const imgData = canvas.toDataURL('image/png');
+                            
+                            // Calculate dimensions to fit the page
+                            const canvasAspectRatio = canvas.width / canvas.height;
+                            let imgWidth = pdfWidth;
+                            let imgHeight = pdfWidth / canvasAspectRatio;
+                            
+                            // If the image is taller than the page, scale it to fit height
+                            if (imgHeight > pdfHeight) {
+                                imgHeight = pdfHeight;
+                                imgWidth = pdfHeight * canvasAspectRatio;
+                            }
+                            
+                            // Add a new page for subsequent pages
+                            if (i > 0) {
+                                pdf.addPage();
+                            }
+                            
+                            // Add the image centered on the page
+                            const xOffset = (pdfWidth - imgWidth) / 2;
+                            const yOffset = 0;
+                            pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+                        }
+                        
                         const pdfBase64 = pdf.output('datauristring').split(',')[1];
                         const formatDateForFilename = (date) => {
                             const d = new Date(date);
@@ -341,6 +409,18 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                 </div>
             </div>
 
+            {/* HIPAA Compliance Option */}
+            <div className={styles.syncOptions}>
+                <label className={styles.syncCheckbox}>
+                    <input 
+                        type="checkbox" 
+                        checked={hipaaCompliant} 
+                        onChange={(e) => setHipaaCompliant(e.target.checked)}
+                    />
+                    <span>HIPAA Compliant (show initials only)</span>
+                </label>
+            </div>
+
             {/* JBook Sync Option */}
             <div className={styles.syncOptions}>
                 <label className={`${styles.syncCheckbox} ${!jbookConnected ? styles.disabled : ''}`}>
@@ -371,7 +451,7 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                 </button>
             </div>
 
-            {reportData && <div style={{ position: 'fixed', left: '-2000px', top: 0, zIndex: -1 }}><PdfDocument {...reportData} /></div>}
+            {reportData && <div style={{ position: 'fixed', left: '-2000px', top: 0, zIndex: -1 }}><PdfDocument {...reportData} hipaaCompliant={hipaaCompliant} /></div>}
         </div>
     );
 };

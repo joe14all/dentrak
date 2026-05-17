@@ -5,13 +5,14 @@
 .dashboardGrid {
     display: grid;
     grid-template-columns: 1fr 420px; 
-    grid-template-rows: min-content 1fr min-content min-content min-content;
+    grid-template-rows: min-content 1fr min-content min-content min-content min-content;
     gap: 1.5rem; /* This creates the 1.5rem gap between all rows and columns */
     grid-template-areas:
         "overview     actions"
         "main         sidebar"
         "forecast     forecast"
         "taxPlanning  taxPlanning"
+        "vacationCalculator vacationCalculator"
         "practiceComparison practiceComparison";
 }
 
@@ -39,6 +40,10 @@
 }
 .taxPlanning {
     grid-area: taxPlanning;
+}
+
+.vacationCalculator {
+    grid-area: vacationCalculator;
 }
 
 .practiceComparison {
