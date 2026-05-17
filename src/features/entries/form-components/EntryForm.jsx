@@ -1,7 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import styles from './EntryForm.module.css';
-import { PlusCircle, Trash2, ChevronDown, Copy } from 'lucide-react';
+import { PlusCircle, Trash2, ChevronDown, Copy, Calculator } from 'lucide-react';
 import { useEntryTemplates } from '../../../contexts/EntryTemplateContext/EntryTemplateContext';
+
+// Helper function to safely evaluate math expressions
+const evaluateMathExpression = (expression) => {
+    if (!expression || expression === '') return 0;
+    
+    // If it's already a number, return it
+    const numValue = parseFloat(expression);
+    if (!isNaN(numValue) && !/[+\-*/]/.test(expression.toString().slice(1))) {
+        return numValue;
+    }
+    
+    // Clean the expression - only allow numbers, operators, decimals, and parentheses
+    const cleanedExpr = expression.toString().replace(/[^0-9+\-*/.() ]/g, '').trim();
+    
+    if (!cleanedExpr) return 0;
+    
+    try {
+        // Use Function constructor to safely evaluate (safer than eval)
+        // Only allow basic math operations
+        const result = new Function(`return (${cleanedExpr})`)();
+        
+        // Validate result is a finite number
+        if (typeof result === 'number' && isFinite(result)) {
+            return Math.round(result * 100) / 100; // Round to 2 decimal places
+        }
+        return 0;
+    } catch (error) {
+        console.warn('Invalid math expression:', expression);
+        return parseFloat(expression) || 0;
+    }
+};
 
 // A more robust initial state that reflects the full data model
 const getInitialState = (initialType = 'dailySummary') => ({
@@ -41,6 +72,10 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
     const { getTemplatesForPractice, createFromTemplate } = useEntryTemplates();
     const [formData, setFormData] = useState(getInitialState(initialEntryType));
     const [availableTemplates, setAvailableTemplates] = useState([]);
+    
+    // Display values for calculator fields (what user types)
+    const [productionDisplay, setProductionDisplay] = useState('0');
+    const [collectionDisplay, setCollectionDisplay] = useState('0');
 
     useEffect(() => {
         if (entryToEdit) {
@@ -51,12 +86,17 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
                 periodStartDate: entryToEdit.periodStartDate ? new Date(entryToEdit.periodStartDate).toISOString().split('T')[0] : '',
                 periodEndDate: entryToEdit.periodEndDate ? new Date(entryToEdit.periodEndDate).toISOString().split('T')[0] : '',
             });
+            // Set display values when editing
+            setProductionDisplay(entryToEdit.production?.toString() || '0');
+            setCollectionDisplay(entryToEdit.collection?.toString() || '0');
         } else {
             const initialState = getInitialState(initialEntryType);
             if (practices && practices.length > 0) {
                 initialState.practiceId = practices[0].id;
             }
             setFormData(initialState);
+            setProductionDisplay('0');
+            setCollectionDisplay('0');
         }
     }, [entryToEdit, practices, initialEntryType]);
 
@@ -79,6 +119,28 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
         }
     };
 
+    // Handler for calculator input fields (production/collection)
+    const handleCalculatorChange = (field, value) => {
+        if (field === 'production') {
+            setProductionDisplay(value);
+        } else if (field === 'collection') {
+            setCollectionDisplay(value);
+        }
+    };
+
+    // Handler for when user leaves the calculator field - evaluate the expression
+    const handleCalculatorBlur = (field) => {
+        if (field === 'production') {
+            const result = evaluateMathExpression(productionDisplay);
+            setFormData(prev => ({ ...prev, production: result }));
+            setProductionDisplay(result.toString());
+        } else if (field === 'collection') {
+            const result = evaluateMathExpression(collectionDisplay);
+            setFormData(prev => ({ ...prev, collection: result }));
+            setCollectionDisplay(result.toString());
+        }
+    };
+
     const handleApplyTemplate = (e) => {
         const templateId = parseInt(e.target.value, 10);
         if (!templateId) return;
@@ -95,6 +157,10 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
             ...templateEntry,
             date: prev.date, // Keep the current date
         }));
+        
+        // Update display values from template
+        setProductionDisplay(templateEntry.production?.toString() || '0');
+        setCollectionDisplay(templateEntry.collection?.toString() || '0');
 
         // Reset the select
         e.target.value = '';
@@ -209,9 +275,30 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
               <>
                 <div className={styles.section}>
                     <label className={styles.sectionLabel}>Financials</label>
+                    <p className={styles.calculatorHint}><Calculator size={14} /> Tip: You can type math expressions (e.g., 1000+500, 2000*0.5)</p>
                     <div className={styles.formRow}>
-                        <div className={styles.formGroup}><label>Production ($)</label><input type="number" step="0.01" name="production" value={formData.production} onChange={handleChange} /></div>
-                        <div className={styles.formGroup}><label>Collection ($)</label><input type="number" step="0.01" name="collection" value={formData.collection} onChange={handleChange} /></div>
+                        <div className={styles.formGroup}>
+                            <label>Production ($)</label>
+                            <input 
+                                type="text" 
+                                name="production" 
+                                value={productionDisplay} 
+                                onChange={(e) => handleCalculatorChange('production', e.target.value)}
+                                onBlur={() => handleCalculatorBlur('production')}
+                                placeholder="e.g., 1000+500"
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Collection ($)</label>
+                            <input 
+                                type="text" 
+                                name="collection" 
+                                value={collectionDisplay} 
+                                onChange={(e) => handleCalculatorChange('collection', e.target.value)}
+                                onBlur={() => handleCalculatorBlur('collection')}
+                                placeholder="e.g., 2000-200"
+                            />
+                        </div>
                     </div>
                     {formData.entryType === 'individualProcedure' && (
                         <div className={styles.formRow}>

@@ -3,17 +3,15 @@ import styles from './FinancialsPage.module.css'; // Create this CSS file later
 import { useTransactions } from '../../contexts/TransactionContext/TransactionContext';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import { usePayments } from '../../contexts/PaymentContext/PaymentContext'; // Keep for potential cash payments
-import { useBankSync } from '../../contexts/BankSyncContext';
 import FinancialsToolbar from '../../features/financials/FinancialsToolbar';
 import FinancialsList from '../../features/financials/FinancialsList';
 import FinancialsSummary from '../../features/financials/FinancialsSummary';
-import { PendingTransactionsPanel } from '../../components/BankSync';
 import Modal from '../../components/common/Modal/Modal';
 import TransactionForm from '../../features/transactions/form-components/TransactionForm'; // Reuse existing form
 import DeleteConfirmation from '../../features/transactions/DeleteConfirmation'; // Reuse existing confirmation
 import TransactionViewCard from '../../features/transactions/TransactionViewCard'; // Reuse existing view card
 import GeminiImporter from '../../features/transactions/GeminiImporter'; // Reuse existing importer
-import { CreditCard, Landmark, MousePointerClick, Wallet, List, Clock } from 'lucide-react'; // Added Wallet for cash
+import { CreditCard, Landmark, MousePointerClick, Wallet, List } from 'lucide-react'; // Added Wallet for cash
 
 const FinancialsPage = () => {
   const {
@@ -25,9 +23,6 @@ const FinancialsPage = () => {
   const { practices } = usePractices();
   // Get payments context, primarily for cash and potentially future generic payments
   const { payments, isLoading: isPaymentsLoading, addNewPayment, editPayment, removePayment } = usePayments();
-  
-  // Get bank sync context for pending transactions
-  const { pendingTransactions, getPendingCount, refreshAll: refreshBankSync } = useBankSync();
 
   const [activeView, setActiveView] = useState('all'); // Filter state (all, cheque, deposit, etc.)
 
@@ -78,12 +73,11 @@ const FinancialsPage = () => {
   // Define views/filters for the toolbar and data filtering
   const views = useMemo(() => ({
     all: { label: 'All', icon: List, data: allFinancialItems },
-    pending: { label: `Pending (${getPendingCount()})`, icon: Clock, data: [] }, // Pending has its own panel
     cheques: { label: 'Cheques', icon: CreditCard, data: allFinancialItems.filter(t => t.type === 'cheques') },
     directDeposits: { label: 'Deposits', icon: Landmark, data: allFinancialItems.filter(t => t.type === 'directDeposits') },
     eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: allFinancialItems.filter(t => t.type === 'eTransfers') },
     cash: { label: 'Cash', icon: Wallet, data: allFinancialItems.filter(t => t.type === 'cash') },
-  }), [allFinancialItems, getPendingCount]);
+  }), [allFinancialItems]);
 
   // Calculate summary data based on the current filtered view
   const summaryData = useMemo(() => {
@@ -241,12 +235,6 @@ const FinancialsPage = () => {
     }
   };
 
-  // Handle transaction approved from pending
-  const handleTransactionApproved = () => {
-    // Refresh all transaction contexts after approval
-    refreshBankSync?.();
-  };
-
 
   return (
     <div className={styles.page}>
@@ -257,20 +245,16 @@ const FinancialsPage = () => {
         onAddTransaction={handleOpenAddModal}
         onOpenImporter={() => setImportModalOpen(true)}
       />
-      {activeView !== 'pending' && <FinancialsSummary summaryData={summaryData} />}
+      <FinancialsSummary summaryData={summaryData} />
       <div className={styles.content}>
-        {activeView === 'pending' ? (
-          <PendingTransactionsPanel onTransactionApproved={handleTransactionApproved} />
-        ) : (
-          <FinancialsList
-            items={views[activeView]?.data || []} // Use optional chaining
-            practices={practices}
-            isLoading={isTransactionsLoading || isPaymentsLoading}
-            onEdit={handleOpenEditModal}
-            onDelete={handleOpenDeleteModal}
-            onView={handleOpenViewModal}
-          />
-        )}
+        <FinancialsList
+          items={views[activeView]?.data || []} // Use optional chaining
+          practices={practices}
+          isLoading={isTransactionsLoading || isPaymentsLoading}
+          onEdit={handleOpenEditModal}
+          onDelete={handleOpenDeleteModal}
+          onView={handleOpenViewModal}
+        />
       </div>
 
       {/* --- Modals --- */}
@@ -278,7 +262,7 @@ const FinancialsPage = () => {
         <TransactionForm
           transactionToEdit={transactionToEdit}
           // Default to 'cheques' if adding from 'all' view, else use the active filter type
-          initialType={activeView !== 'all' && activeView !== 'pending' ? activeView : 'cheques'}
+          initialType={activeView !== 'all' ? activeView : 'cheques'}
           practices={practices}
           onSave={handleSave}
           onCancel={handleCloseModals}

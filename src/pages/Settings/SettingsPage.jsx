@@ -7,8 +7,8 @@ import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
 import GoalsManager from '../../features/settings/GoalsManager';
 import TemplateManager from '../../features/entries/TemplateManager';
 import { JBookSyncPanel } from '../../components/JBookSync';
-import { BankSyncPanel, BankSyncSettings } from '../../components/BankSync';
-import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw, Landmark, Settings } from 'lucide-react'; 
+import { BankSyncPanel, BankSyncSettings, PendingTransactionsPanel } from '../../components/BankSync';
+import { Sun, Moon, Laptop, Upload, Download, Trash2, Target, Copy, RefreshCw, Landmark, Settings, ClipboardCheck } from 'lucide-react'; 
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const [isClearModalOpen, setClearModalOpen] = useState(false);
@@ -140,6 +140,15 @@ const SettingsPage = () => {
         <p className={styles.sectionDescription}>Connect your bank accounts to automatically import income transactions.</p>
         <div className={styles.card}>
            <BankSyncPanel /> 
+        </div>
+      </div>
+
+      {/* --- Pending Transactions Review Section --- */}
+      <div className={styles.settingsSection}>
+        <h3 className={styles.sectionTitle}><ClipboardCheck size={20} /> Pending Transactions</h3>
+        <p className={styles.sectionDescription}>Review and approve imported bank transactions before they are added to your records.</p>
+        <div className={styles.card}>
+           <PendingTransactionsPanel /> 
         </div>
       </div>
 

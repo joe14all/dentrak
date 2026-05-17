@@ -76,6 +76,20 @@
   font-size: 1rem;
 }
 
+/* Calculator hint for math expression inputs */
+.calculatorHint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ui-text-tertiary);
+  margin: -0.5rem 0 0 0;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--ui-background-tertiary);
+  border-radius: 6px;
+  border: 1px dashed var(--ui-border-secondary);
+}
+
 .formRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

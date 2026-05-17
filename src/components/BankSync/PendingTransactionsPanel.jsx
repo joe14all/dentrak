@@ -68,7 +68,8 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
 
   // Filtered pending transactions
   const filteredTransactions = useMemo(() => {
-    let filtered = pendingTransactions.filter(t => t.status === 'pending');
+    // Include both 'pending' and 'auto-matched' transactions for review
+    let filtered = pendingTransactions.filter(t => t.status === 'pending' || t.status === 'auto-matched');
     
     if (filterPractice !== 'all') {
       filtered = filtered.filter(t => 
@@ -82,7 +83,7 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
 
   // Count by match status
   const counts = useMemo(() => {
-    const pending = pendingTransactions.filter(t => t.status === 'pending');
+    const pending = pendingTransactions.filter(t => t.status === 'pending' || t.status === 'auto-matched');
     return {
       total: pending.length,
       matched: pending.filter(t => t.suggestedPracticeId).length,
