@@ -54,6 +54,19 @@ const GeneralInfoSection = ({ formData, handleChange }) => {
             selectedValue={formData.status}
             onChange={handleChange}
           />
+          {formData.status === 'archived' && (
+            <div className={styles.archivedDateControl}>
+              <label htmlFor="archivedDate">Archived Date</label>
+              <input
+                type="date"
+                id="archivedDate"
+                name="archivedDate"
+                value={formData.archivedDate || ''}
+                onChange={handleChange}
+                className={styles.dateInput}
+              />
+            </div>
+          )}
         </div>
         <div className={styles.formGroup}>
           <label>Tax Status</label>

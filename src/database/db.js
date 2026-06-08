@@ -6,9 +6,9 @@ export const db = new Dexie("DentrakDatabase");
 // Version history must be in sequential order from oldest to newest
 // Define all versions in order
 
-db.version(12)
+db.version(13)
   .stores({
-    practices: "++id, name, status, taxStatus",
+    practices: "++id, name, status, taxStatus, archivedDate",
     entries: "++id, practiceId, date, entryType",
     payments:
       "++id, practiceId, paymentDate, linkedChequeId, linkedDirectDepositId, linkedETransferId, externalId",
@@ -28,7 +28,7 @@ db.version(12)
   })
   .upgrade((tx) => {
     console.log(
-      "Upgrading database to version 12, adding bank sync tables for Teller integration."
+      "Upgrading database to version 13, adding archivedDate field to practices table.",
     );
   });
 

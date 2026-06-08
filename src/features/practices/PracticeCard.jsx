@@ -4,6 +4,15 @@ import { Edit, Trash2, Building2, User, Percent, DollarSign, Archive } from 'luc
 
 const PracticeCard = ({ practice, onEdit, onDelete }) => {
   const isArchived = practice.status === 'archived';
+  
+  // Format archived date if available
+  const formatArchivedDate = (dateString) => {
+    if (!dateString) return null;
+    // If it's already in YYYY-MM-DD format, parse it carefully to avoid timezone shifts
+    const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
 
   return (
     <div className={`${styles.card} ${isArchived ? styles.archived : ''}`}>
@@ -23,7 +32,12 @@ const PracticeCard = ({ practice, onEdit, onDelete }) => {
           {practice.taxStatus === 'employee' ? <User size={12} /> : <Percent size={12} />}
           {practice.taxStatus}
         </span>
-        {isArchived && <span className={`${styles.tag} ${styles.archivedTag}`}><Archive size={12} /> Archived</span>}
+        {isArchived && (
+          <span className={`${styles.tag} ${styles.archivedTag}`}>
+            <Archive size={12} /> 
+            Archived{practice.archivedDate && ` - ${formatArchivedDate(practice.archivedDate)}`}
+          </span>
+        )}
       </div>
 
       <div className={styles.cardBody}>

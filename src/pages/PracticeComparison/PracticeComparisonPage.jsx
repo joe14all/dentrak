@@ -5,9 +5,62 @@ import { useEntries } from '../../contexts/EntryContext/EntryContext';
 import { usePayments } from '../../contexts/PaymentContext/PaymentContext';
 import { comparePractices } from '../../utils/practiceComparison';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ScatterChart, Scatter, ZAxis } from 'recharts';
-import { TrendingUp, Calendar, Download, Award, DollarSign, Activity, Target, Clock, Percent } from 'lucide-react';
+import { TrendingUp, Calendar, Download, Award, DollarSign, Activity, Target, Clock, Percent, Info } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+// Custom Tooltip Component for Radar Chart
+const RadarCustomTooltip = ({ active, payload }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const data = payload[0]?.payload;
+  if (!data) return null;
+
+  // Metric descriptions
+  const metricInfo = {
+    'Total Pay': {
+      label: 'Total Pay',
+      value: data['Total Pay'] ? `$${(data['Total Pay'] * 1000).toLocaleString()}` : 'N/A',
+      description: 'Total calculated pay earned across all periods',
+    },
+    'Days Worked': {
+      label: 'Days Worked',
+      value: data['Days Worked'] || 0,
+      description: 'Total number of days worked at this practice',
+    },
+    'Avg Pay/Day': {
+      label: 'Average Pay per Day',
+      value: data['Avg Pay/Day'] ? `$${(data['Avg Pay/Day'] * 100).toLocaleString()}` : 'N/A',
+      description: 'Average earnings per working day',
+    },
+    'Effective Rate': {
+      label: 'Effective Rate',
+      value: data['Effective Rate'] ? `${data['Effective Rate'].toFixed(1)}%` : 'N/A',
+      description: 'Percentage of production that converts to pay',
+    },
+  };
+
+  return (
+    <div className={styles.radarTooltip}>
+      <div className={styles.radarTooltipHeader}>
+        <strong>{data.practice}</strong>
+      </div>
+      <div className={styles.radarTooltipBody}>
+        {Object.keys(metricInfo).map((key) => {
+          const metric = metricInfo[key];
+          return (
+            <div key={key} className={styles.radarTooltipMetric}>
+              <div className={styles.radarTooltipLabel}>
+                {metric.label}: <span className={styles.radarTooltipValue}>{metric.value}</span>
+              </div>
+              <div className={styles.radarTooltipDescription}>{metric.description}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const PracticeComparisonPage = () => {
   const { practices } = usePractices();
@@ -580,22 +633,53 @@ const PracticeComparisonPage = () => {
       <div className={styles.insightsCard}>
         <h2><Award size={24} /> Key Insights</h2>
         <div className={styles.insightsList}>
-          {insights.map((insight, idx) => (
-            <div key={idx} className={styles.insightItem}>
-              <div className={styles.insightRank}>{idx + 1}</div>
-              <div className={styles.insightDetails}>
-                <span className={styles.insightTitle}>{insight.title}</span>
-                <span className={styles.insightPractice}>{insight.practice}</span>
-                {insight.value && (
-                  <span className={styles.insightValue}>
-                    {typeof insight.value === 'number' 
-                      ? `$${insight.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : insight.value}
-                  </span>
-                )}
+          {insights.map((insight, idx) => {
+            // Format value based on type
+            let formattedValue = '';
+            let tooltipText = '';
+            
+            if (insight.value !== undefined) {
+              if (insight.valueType === 'currency') {
+                formattedValue = `$${insight.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+              } else if (insight.valueType === 'percentage') {
+                formattedValue = `${insight.value.toFixed(1)}%`;
+              } else if (insight.valueType === 'days') {
+                formattedValue = `${insight.value % 1 === 0 ? insight.value : insight.value.toFixed(1)} days`;
+              } else {
+                formattedValue = insight.value;
+              }
+            }
+            
+            // Set tooltip text based on insight type
+            if (insight.type === 'top_earner') {
+              tooltipText = 'The practice with the highest total calculated pay during the selected period. This represents the total income earned from all appointments and procedures.';
+            } else if (insight.type === 'best_daily_rate') {
+              tooltipText = 'The practice with the highest average earnings per day worked. This metric helps identify which practice provides the best daily compensation rate.';
+            } else if (insight.type === 'most_efficient') {
+              tooltipText = 'The practice with the best effective rate - the percentage of production that converts to actual pay. A higher rate indicates more efficient conversion of work into income.';
+            } else if (insight.type === 'most_active') {
+              tooltipText = 'The practice where you worked the most days during the selected period. This helps identify your primary practice location based on time commitment.';
+            }
+            
+            return (
+              <div key={idx} className={styles.insightItem}>
+                <div className={styles.insightRank}>{idx + 1}</div>
+                <div className={styles.insightDetails}>
+                  <div className={styles.insightHeader}>
+                    <span className={styles.insightTitle}>{insight.title}</span>
+                    <div className={styles.insightTooltip}>
+                      <Info size={14} className={styles.infoIcon} />
+                      <div className={styles.tooltipText}>{tooltipText}</div>
+                    </div>
+                  </div>
+                  <span className={styles.insightPractice}>{insight.practice}</span>
+                  {formattedValue && (
+                    <span className={styles.insightValue}>{formattedValue}</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -641,6 +725,7 @@ const PracticeComparisonPage = () => {
               <PolarGrid />
               <PolarAngleAxis dataKey="practice" />
               <PolarRadiusAxis />
+              <Tooltip content={<RadarCustomTooltip />} />
               <Radar name="Performance" dataKey="Total Pay" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
             </RadarChart>
           </ResponsiveContainer>
@@ -677,62 +762,62 @@ const PracticeComparisonPage = () => {
             <thead>
               <tr>
                 <th>Practice</th>
-                <th>Days Worked</th>
-                <th>Total Pay</th>
-                <th>Avg Pay/Day</th>
-                <th>Total Production</th>
-                <th>Avg Prod/Day</th>
-                <th>Total Collection</th>
-                <th>Effective Rate</th>
-                <th>Income %</th>
+                <th className={styles.alignCenter}>Days Worked</th>
+                <th className={styles.alignRight}>Total Pay</th>
+                <th className={styles.alignRight}>Avg Pay/Day</th>
+                <th className={styles.alignRight}>Total Production</th>
+                <th className={styles.alignRight}>Avg Prod/Day</th>
+                <th className={styles.alignRight}>Total Collection</th>
+                <th className={styles.alignRight}>Effective Rate</th>
+                <th className={styles.alignRight}>Income %</th>
               </tr>
             </thead>
             <tbody>
               {metrics.map((m) => (
                 <tr key={m.practiceId}>
                   <td className={styles.practiceName}>{m.practiceName}</td>
-                  <td>{(m.daysWorked || 0) % 1 === 0 ? (m.daysWorked || 0) : (m.daysWorked || 0).toFixed(1)}</td>
-                  <td className={styles.currency}>
+                  <td className={styles.alignCenter}>{(m.daysWorked || 0) % 1 === 0 ? (m.daysWorked || 0) : (m.daysWorked || 0).toFixed(1)}</td>
+                  <td className={styles.alignRight}>
                     ${(m.totalCalculatedPay || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className={styles.currency}>
+                  <td className={styles.alignRight}>
                     ${(m.avgPayPerDay || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className={styles.currency}>
+                  <td className={styles.alignRight}>
                     ${(m.totalProduction || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className={styles.currency}>
+                  <td className={styles.alignRight}>
                     ${(m.avgProductionPerDay || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className={styles.currency}>
+                  <td className={styles.alignRight}>
                     ${(m.totalCollection || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className={styles.percentage}>{(m.effectiveRate || 0).toFixed(1)}%</td>
-                  <td className={styles.percentage}>{(m.incomeContribution || 0).toFixed(1)}%</td>
+                  <td className={styles.alignRight}>{(m.effectiveRate || 0).toFixed(1)}%</td>
+                  <td className={styles.alignRight}>{(m.incomeContribution || 0).toFixed(1)}%</td>
                 </tr>
               ))}
               <tr className={styles.totalRow}>
                 <td><strong>Total</strong></td>
-                <td><strong>{safeTotals.totalDays}</strong></td>
-                <td className={styles.currency}>
+                <td className={styles.alignCenter}><strong>{safeTotals.totalDays}</strong></td>
+                <td className={styles.alignRight}>
                   <strong>${safeTotals.totalPay.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </td>
-                <td className={styles.currency}>
+                <td className={styles.alignRight}>
                   <strong>${(safeTotals.totalPay / safeTotals.totalDays || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </td>
-                <td className={styles.currency}>
+                <td className={styles.alignRight}>
                   <strong>${safeTotals.totalProduction.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </td>
-                <td className={styles.currency}>
+                <td className={styles.alignRight}>
                   <strong>${(safeTotals.totalProduction / safeTotals.totalDays || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </td>
-                <td className={styles.currency}>
+                <td className={styles.alignRight}>
                   <strong>${(safeTotals.totalCollection || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                 </td>
-                <td className={styles.percentage}>
+                <td className={styles.alignRight}>
                   <strong>{(safeTotals.totalPay / safeTotals.totalProduction * 100 || 0).toFixed(1)}%</strong>
                 </td>
-                <td className={styles.percentage}><strong>100%</strong></td>
+                <td className={styles.alignRight}><strong>100%</strong></td>
               </tr>
             </tbody>
           </table>

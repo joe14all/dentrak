@@ -44,15 +44,6 @@ export const aggregateProcedures = (procedures, practiceId) => {
     (sum, e) => sum + (e.collection || 0),
     0,
   );
-  console.log("After aggregation - Entries:", entries.length);
-  console.log(
-    "After aggregation - Total Production:",
-    totalProduction.toFixed(2),
-  );
-  console.log(
-    "After aggregation - Total Collection:",
-    totalCollection.toFixed(2),
-  );
 
   return entries;
 };

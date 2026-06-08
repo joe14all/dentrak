@@ -4,6 +4,7 @@ import { usePractices } from '../../../contexts/PracticeContext/PracticeContext'
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { useGoals } from '../../../contexts/GoalContext/GoalContext'; 
 import { calculatePay } from '../../../utils/calculations';
+import { filterPracticesForMonth } from '../../../utils/practiceFilters';
 import { BarChart as BarChartIcon, Trophy, CalendarClock, Banknote, Activity, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -101,7 +102,10 @@ if (!entries || !practices || entries.length === 0 || practices.length === 0 || 
                 });
             const daysWorked = Object.values(attendanceByDate).reduce((sum, val) => sum + val, 0);
             
-            const monthCalculatedPay = practices.reduce((sum, p) => {
+            // Filter practices based on archived date for this month
+            const activePracticesForMonth = filterPracticesForMonth(practices, currentYear, i);
+            
+            const monthCalculatedPay = activePracticesForMonth.reduce((sum, p) => {
                 const practiceEntries = monthEntries.filter(e => e.practiceId === p.id);
                 if(practiceEntries.length === 0) return sum;
 

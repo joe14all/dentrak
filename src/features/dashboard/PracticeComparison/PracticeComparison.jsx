@@ -264,11 +264,11 @@ const PracticeComparison = () => {
               <thead>
                 <tr>
                   <th>Practice</th>
-                  <th>Days</th>
-                  <th>Total Pay</th>
-                  <th>Avg/Day</th>
-                  <th>Production</th>
-                  <th>Effective Rate</th>
+                  <th className={styles.alignCenter}>Days</th>
+                  <th className={styles.alignRight}>Total Pay</th>
+                  <th className={styles.alignRight}>Avg/Day</th>
+                  <th className={styles.alignRight}>Production</th>
+                  <th className={styles.alignRight}>Effective Rate</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,20 +277,20 @@ const PracticeComparison = () => {
                   .map((metric) => (
                     <tr key={metric.practiceId}>
                       <td className={styles.practiceName}>{metric.practiceName}</td>
-                      <td>{metric.daysWorked}</td>
-                      <td className={styles.currency}>{formatCurrency(metric.totalCalculatedPay)}</td>
-                      <td className={styles.currency}>{formatCurrency(metric.avgPayPerDay)}</td>
-                      <td className={styles.currency}>{formatCurrency(metric.totalProduction)}</td>
-                      <td className={styles.percentage}>{formatPercent(metric.effectiveRate)}</td>
+                      <td className={styles.alignCenter}>{metric.daysWorked}</td>
+                      <td className={styles.alignRight}>{formatCurrency(metric.totalCalculatedPay)}</td>
+                      <td className={styles.alignRight}>{formatCurrency(metric.avgPayPerDay)}</td>
+                      <td className={styles.alignRight}>{formatCurrency(metric.totalProduction)}</td>
+                      <td className={styles.alignRight}>{formatPercent(metric.effectiveRate)}</td>
                     </tr>
                   ))}
                 <tr className={styles.totalRow}>
                   <td>Total</td>
-                  <td>{comparison.totals.daysWorked}</td>
-                  <td className={styles.currency}>{formatCurrency(comparison.totals.totalCalculatedPay)}</td>
-                  <td>-</td>
-                  <td className={styles.currency}>{formatCurrency(comparison.totals.totalProduction)}</td>
-                  <td>-</td>
+                  <td className={styles.alignCenter}>{comparison.totals.daysWorked}</td>
+                  <td className={styles.alignRight}>{formatCurrency(comparison.totals.totalCalculatedPay)}</td>
+                  <td className={styles.alignCenter}>-</td>
+                  <td className={styles.alignRight}>{formatCurrency(comparison.totals.totalProduction)}</td>
+                  <td className={styles.alignCenter}>-</td>
                 </tr>
               </tbody>
             </table>

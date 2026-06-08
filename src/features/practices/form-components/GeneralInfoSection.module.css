@@ -85,6 +85,35 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
+.archivedDateControl {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.archivedDateControl label {
+  font-weight: 500;
+  color: var(--ui-text-secondary);
+  font-size: 0.85rem;
+}
+
+.dateInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-secondary);
+}
+
 
 /* --- Address Grid Layout --- */
 .addressGrid {

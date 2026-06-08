@@ -303,6 +303,13 @@
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
+  flex: 1;
+}
+
+.insightHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .insightTitle {
@@ -311,6 +318,61 @@
   color: var(--text-secondary, #6b7280);
   text-transform: uppercase;
   letter-spacing: 0.025em;
+}
+
+.insightTooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.infoIcon {
+  color: var(--text-tertiary, #9ca3af);
+  cursor: help;
+  transition: color 0.2s ease;
+}
+
+.infoIcon:hover {
+  color: var(--primary-color, #3b82f6);
+}
+
+.tooltipText {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  background: var(--text-primary, #1f2937);
+  color: white;
+  text-align: left;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: normal;
+  z-index: 1000;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.tooltipText::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--text-primary, #1f2937);
+}
+
+.insightTooltip:hover .tooltipText {
+  visibility: visible;
+  opacity: 1;
 }
 
 .insightPractice {
@@ -382,11 +444,14 @@
 
 .metricsTable th {
   padding: 0.75rem 1rem;
-  text-align: left;
   font-weight: 600;
   color: var(--text-secondary, #6b7280);
   border-bottom: 1px solid var(--ui-border-primary, #e5e7eb);
   white-space: nowrap;
+}
+
+.metricsTable th:first-child {
+  text-align: left;
 }
 
 .metricsTable td {
@@ -404,13 +469,19 @@
   color: var(--text-primary, #1f2937);
 }
 
-.currency {
-  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
   text-align: right;
 }
 
+.currency {
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
 .percentage {
-  text-align: right;
   color: var(--primary-color, #3b82f6);
   font-weight: 600;
 }
@@ -482,6 +553,59 @@
   font-weight: 600;
   color: var(--primary-color, #3b82f6);
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+/* Radar Chart Custom Tooltip */
+.radarTooltip {
+  background: var(--ui-background-primary, #ffffff);
+  border: 1px solid var(--ui-border-primary, #e5e7eb);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 320px;
+}
+
+.radarTooltipHeader {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-color, #3b82f6);
+}
+
+.radarTooltipBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radarTooltipMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.radarTooltipLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.radarTooltipValue {
+  font-weight: 700;
+  color: var(--primary-color, #3b82f6);
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+.radarTooltipDescription {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.4;
+  font-style: italic;
 }
 
 /* Responsive */

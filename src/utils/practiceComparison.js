@@ -6,6 +6,7 @@
  */
 
 import { calculatePay } from "./calculations";
+import { filterPracticesForDateRange } from "./practiceFilters";
 
 /**
  * Calculate total days worked accounting for half-day attendance
@@ -20,7 +21,7 @@ function calculateDaysWorked(entries) {
       (e) =>
         (e.entryType === "attendanceRecord" ||
           e.entryType === "dailySummary") &&
-        e.date
+        e.date,
     )
     .forEach((entry) => {
       const date = entry.date;
@@ -51,7 +52,7 @@ function calculateDaysWorked(entries) {
 export function calculatePracticeMetrics(practice, entries, payments) {
   // Financial entries only (exclude attendance records)
   const financialEntries = entries.filter(
-    (e) => e.entryType !== "attendanceRecord"
+    (e) => e.entryType !== "attendanceRecord",
   );
 
   // Calculate days worked accounting for half-days
@@ -60,11 +61,11 @@ export function calculatePracticeMetrics(practice, entries, payments) {
   // Calculate totals
   const totalProduction = financialEntries.reduce(
     (sum, e) => sum + (e.production || 0),
-    0
+    0,
   );
   const totalCollection = financialEntries.reduce(
     (sum, e) => sum + (e.collection || 0),
-    0
+    0,
   );
 
   // Calculate pay across all months
@@ -73,10 +74,10 @@ export function calculatePracticeMetrics(practice, entries, payments) {
     ...new Set(
       entries.map((e) => {
         const date = new Date(
-          e.entryType === "periodSummary" ? e.periodStartDate : e.date
+          e.entryType === "periodSummary" ? e.periodStartDate : e.date,
         );
         return `${date.getUTCFullYear()}-${date.getUTCMonth()}`;
-      })
+      }),
     ),
   ];
 
@@ -98,7 +99,7 @@ export function calculatePracticeMetrics(practice, entries, payments) {
   // Calculate payments received
   const totalPaymentsReceived = payments.reduce(
     (sum, p) => sum + (p.amount || 0),
-    0
+    0,
   );
 
   // Averages
@@ -150,7 +151,7 @@ export function comparePractices(
   practices,
   allEntries,
   allPayments,
-  options = {}
+  options = {},
 ) {
   const {
     startDate = null,
@@ -172,15 +173,18 @@ export function comparePractices(
     } else {
       // Filter to only selected practice IDs
       filteredPractices = filteredPractices.filter((p) =>
-        practiceIds.includes(p.id)
+        practiceIds.includes(p.id),
       );
     }
   }
 
-  // Filter by active status (only if we have practices to filter)
+  // Filter by active status and archived date
+  // This will exclude practices that were archived before the date range
   if (activeOnly && filteredPractices.length > 0) {
-    filteredPractices = filteredPractices.filter(
-      (p) => p.status === "active" || !p.status
+    filteredPractices = filterPracticesForDateRange(
+      filteredPractices,
+      startDate,
+      endDate,
     );
   }
 
@@ -188,40 +192,40 @@ export function comparePractices(
   const practiceMetrics = filteredPractices.map((practice) => {
     // Filter entries for this practice and date range
     let practiceEntries = allEntries.filter(
-      (e) => e.practiceId === practice.id
+      (e) => e.practiceId === practice.id,
     );
     let practicePayments = allPayments.filter(
-      (p) => p.practiceId === practice.id
+      (p) => p.practiceId === practice.id,
     );
 
     if (startDate) {
       practiceEntries = practiceEntries.filter((e) => {
         const entryDate = new Date(
-          e.entryType === "periodSummary" ? e.periodStartDate : e.date
+          e.entryType === "periodSummary" ? e.periodStartDate : e.date,
         );
         return entryDate >= new Date(startDate);
       });
       practicePayments = practicePayments.filter(
-        (p) => new Date(p.paymentDate) >= new Date(startDate)
+        (p) => new Date(p.paymentDate) >= new Date(startDate),
       );
     }
 
     if (endDate) {
       practiceEntries = practiceEntries.filter((e) => {
         const entryDate = new Date(
-          e.entryType === "periodSummary" ? e.periodStartDate : e.date
+          e.entryType === "periodSummary" ? e.periodStartDate : e.date,
         );
         return entryDate <= new Date(endDate);
       });
       practicePayments = practicePayments.filter(
-        (p) => new Date(p.paymentDate) <= new Date(endDate)
+        (p) => new Date(p.paymentDate) <= new Date(endDate),
       );
     }
 
     return calculatePracticeMetrics(
       practice,
       practiceEntries,
-      practicePayments
+      practicePayments,
     );
   });
 
@@ -233,42 +237,42 @@ export function comparePractices(
     daysWorked: activePracticeMetrics.reduce((sum, m) => sum + m.daysWorked, 0),
     totalProduction: activePracticeMetrics.reduce(
       (sum, m) => sum + m.totalProduction,
-      0
+      0,
     ),
     totalCollection: activePracticeMetrics.reduce(
       (sum, m) => sum + m.totalCollection,
-      0
+      0,
     ),
     totalCalculatedPay: activePracticeMetrics.reduce(
       (sum, m) => sum + m.totalCalculatedPay,
-      0
+      0,
     ),
     totalPaymentsReceived: activePracticeMetrics.reduce(
       (sum, m) => sum + m.totalPaymentsReceived,
-      0
+      0,
     ),
     outstandingBalance: activePracticeMetrics.reduce(
       (sum, m) => sum + m.outstandingBalance,
-      0
+      0,
     ),
   };
 
   // Rankings
   const rankings = {
     byTotalPay: [...activePracticeMetrics].sort(
-      (a, b) => b.totalCalculatedPay - a.totalCalculatedPay
+      (a, b) => b.totalCalculatedPay - a.totalCalculatedPay,
     ),
     byAvgPayPerDay: [...activePracticeMetrics].sort(
-      (a, b) => b.avgPayPerDay - a.avgPayPerDay
+      (a, b) => b.avgPayPerDay - a.avgPayPerDay,
     ),
     byProduction: [...activePracticeMetrics].sort(
-      (a, b) => b.totalProduction - a.totalProduction
+      (a, b) => b.totalProduction - a.totalProduction,
     ),
     byEffectiveRate: [...activePracticeMetrics].sort(
-      (a, b) => b.effectiveRate - a.effectiveRate
+      (a, b) => b.effectiveRate - a.effectiveRate,
     ),
     byDaysWorked: [...activePracticeMetrics].sort(
-      (a, b) => b.daysWorked - a.daysWorked
+      (a, b) => b.daysWorked - a.daysWorked,
     ),
   };
 
@@ -295,7 +299,7 @@ function generateInsights(metrics) {
 
   // Best performer by total pay
   const topEarner = metrics.reduce((best, current) =>
-    current.totalCalculatedPay > best.totalCalculatedPay ? current : best
+    current.totalCalculatedPay > best.totalCalculatedPay ? current : best,
   );
   insights.push({
     type: "top_earner",
@@ -303,11 +307,12 @@ function generateInsights(metrics) {
     practice: topEarner.practiceName,
     value: topEarner.totalCalculatedPay,
     metric: "Total Calculated Pay",
+    valueType: "currency",
   });
 
   // Best daily rate
   const bestDailyRate = metrics.reduce((best, current) =>
-    current.avgPayPerDay > best.avgPayPerDay ? current : best
+    current.avgPayPerDay > best.avgPayPerDay ? current : best,
   );
   insights.push({
     type: "best_daily_rate",
@@ -315,11 +320,12 @@ function generateInsights(metrics) {
     practice: bestDailyRate.practiceName,
     value: bestDailyRate.avgPayPerDay,
     metric: "Average Pay Per Day",
+    valueType: "currency",
   });
 
   // Most efficient (best effective rate)
   const mostEfficient = metrics.reduce((best, current) =>
-    current.effectiveRate > best.effectiveRate ? current : best
+    current.effectiveRate > best.effectiveRate ? current : best,
   );
   insights.push({
     type: "most_efficient",
@@ -327,12 +333,12 @@ function generateInsights(metrics) {
     practice: mostEfficient.practiceName,
     value: mostEfficient.effectiveRate,
     metric: "Effective Rate",
-    isPercentage: true,
+    valueType: "percentage",
   });
 
   // Most active (most days worked)
   const mostActive = metrics.reduce((best, current) =>
-    current.daysWorked > best.daysWorked ? current : best
+    current.daysWorked > best.daysWorked ? current : best,
   );
   insights.push({
     type: "most_active",
@@ -340,6 +346,7 @@ function generateInsights(metrics) {
     practice: mostActive.practiceName,
     value: mostActive.daysWorked,
     metric: "Days Worked",
+    valueType: "days",
   });
 
   // Check for practices with outstanding balances
@@ -351,7 +358,7 @@ function generateInsights(metrics) {
       count: practicesOwed.length,
       totalOwed: practicesOwed.reduce(
         (sum, m) => sum + m.outstandingBalance,
-        0
+        0,
       ),
     });
   }
@@ -368,7 +375,7 @@ export function calculateContributions(metrics) {
   const totalPay = metrics.reduce((sum, m) => sum + m.totalCalculatedPay, 0);
   const totalProduction = metrics.reduce(
     (sum, m) => sum + m.totalProduction,
-    0
+    0,
   );
 
   return metrics.map((m) => ({

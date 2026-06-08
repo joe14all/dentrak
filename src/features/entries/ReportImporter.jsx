@@ -124,7 +124,8 @@ const ReportImporter = ({ practices, onImport, onClose, isImporting, importProgr
 
   const handleConfirmImport = (entriesToImport) => {
     onImport(entriesToImport);
-    handleReset();
+    // Do NOT reset here — keep confirmation modal mounted so the
+    // importing overlay remains visible until EntriesPage finishes.
   };
 
   const handleReset = () => {
@@ -244,6 +245,7 @@ const ReportImporter = ({ practices, onImport, onClose, isImporting, importProgr
           practiceName={practices.find(p => p.id === parseInt(selectedPractice))?.name}
           onConfirm={handleConfirmImport}
           onCancel={() => {
+            if (isImporting) return;
             setShowConfirmation(false);
             setParsedEntries(null);
           }}

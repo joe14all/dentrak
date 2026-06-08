@@ -124,21 +124,18 @@ const EntriesPage = () => {
     setImportProgress({ current: 0, total: entriesToImport.length });
     
     try {
-      // Import entries one by one with progress updates
       for (let i = 0; i < entriesToImport.length; i++) {
         await addNewEntry(entriesToImport[i]);
         setImportProgress({ current: i + 1, total: entriesToImport.length });
       }
       
-      // Give a brief moment to show 100% before closing
+      // Brief pause to show 100% before closing
       setTimeout(() => {
         setReportImporterOpen(false);
         setIsImporting(false);
         setImportProgress({ current: 0, total: 0 });
-      }, 500);
+      }, 600);
     } catch (error) {
-      console.error('Error importing entries:', error);
-      alert('Failed to import some entries. Please check the console for details.');
       setIsImporting(false);
       setImportProgress({ current: 0, total: 0 });
     }
@@ -203,7 +200,7 @@ const EntriesPage = () => {
         <BulkEntryGenerator onClose={() => setBulkGeneratorOpen(false)} />
       </Modal>
 
-      <Modal isOpen={isReportImporterOpen} onClose={() => setReportImporterOpen(false)} title="Import Day Sheet Report" size="large">
+      <Modal isOpen={isReportImporterOpen} onClose={() => { if (!isImporting) setReportImporterOpen(false); }} title="Import Day Sheet Report" size="large">
         <ReportImporter 
           practices={practices}
           onImport={handleBulkImport}

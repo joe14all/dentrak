@@ -4,35 +4,64 @@
 
 .modalContainer {
     display: grid;
-    grid-template-columns: 280px 1fr; /* Fixed config panel, flexible periods panel */
+    grid-template-columns: 340px 1fr; /* Wider config panel, flexible periods panel */
     grid-template-rows: 1fr auto; /* Main content row, action row */
     gap: 2rem;
 
-    height: 550px;
+    min-height: 600px;
+    max-height: 75vh; /* Use more of available viewport height */
     background-color: var(--ui-background-primary);
-    padding: 1.5rem;
+    padding: 2rem;
+    overflow: hidden; /* Prevent outer scroll */
 }
 
 /* == Configuration Panel (Left) == */
 .configPanel {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.75rem;
     padding-right: 2rem;
     border-right: 1px solid var(--ui-border-secondary);
+    overflow-y: auto; /* Allow config panel to scroll if needed */
+}
+
+/* Custom scrollbar for config panel */
+.configPanel::-webkit-scrollbar {
+    width: 6px;
+}
+.configPanel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.configPanel::-webkit-scrollbar-thumb {
+    background-color: var(--ui-border-primary);
+    border-radius: 10px;
 }
 
 .title {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--ui-text-primary);
-    margin-bottom: -0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .subtitle {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--ui-text-secondary);
-    line-height: 1.5;
+    line-height: 1.4;
+}
+
+.selectionCounter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brand-primary);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    min-width: 24px;
+    margin-left: 0.5rem;
 }
 
 .formGroup {
@@ -85,15 +114,17 @@
     display: flex;
     flex-direction: column;
     min-height: 0; /* Necessary for flex child to scroll */
+    overflow: hidden;
 }
 
 .scrollContainer {
     overflow-y: auto;
-    padding-right: 0.5rem; /* Space for scrollbar */
+    padding-right: 0.75rem; /* Space for scrollbar */
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.75rem;
     height: 100%;
+    padding-top: 0.25rem;
 }
 
 /* Custom scrollbar for a refined look */
@@ -176,10 +207,24 @@
 .actions {
     grid-column: 1 / -1; /* Span both columns */
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     gap: 1rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--ui-border-secondary);
+}
+
+.actionsSyncStatus {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.actionsButtons {
+    display: flex;
+    gap: 1rem;
 }
 
 .cancelButton, .generateButton {
@@ -229,14 +274,22 @@
     to { transform: rotate(360deg); }
 }
 
-/* == JBook Sync Options == */
-.syncOptions {
-    grid-column: 1 / -1;
+/* == Options Section (in Config Panel) == */
+.optionsSection {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem 0;
+    gap: 1rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--ui-border-secondary);
+}
+
+.optionsTitle {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ui-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
 }
 
 .syncCheckbox {

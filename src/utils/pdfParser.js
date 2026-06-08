@@ -1,6 +1,9 @@
 /**
  * PDF Parser for Day Sheet Reports
- * Parses dental day sheet PDFs and extracts procedure data
+ * Uses column-position-based parsing for accurate extraction.
+ * Each text item's X coordinate is used to assign it to the correct
+ * table column (Date, Patient Name, Th, Code, Description, OS,
+ * Charges, Payments, BT, Prov, Phone #).
  */
 
 import * as pdfjsLib from "pdfjs-dist";
@@ -11,19 +14,14 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * Parse a Day Sheet PDF file and extract procedure data
+ * Parse a Day Sheet PDF file and extract procedure data.
  * @param {File} file - The PDF file to parse
  * @returns {Promise<Array>} Array of procedure objects
  */
 export const parseDaySheetPDF = async (file) => {
   try {
-    console.log("Starting PDF parse for:", file.name);
-
-    // Convert file to array buffer
     const arrayBuffer = await file.arrayBuffer();
-    console.log("File converted to ArrayBuffer, size:", arrayBuffer.byteLength);
 
-    // Load the PDF document
     const loadingTask = pdfjsLib.getDocument({
       data: arrayBuffer,
       useWorkerFetch: false,
@@ -32,58 +30,70 @@ export const parseDaySheetPDF = async (file) => {
     });
 
     const pdf = await loadingTask.promise;
-    console.log("PDF loaded successfully, pages:", pdf.numPages);
 
-    // Process each page separately to maintain context
-    let allProcedures = [];
+    // ── Step 1: Collect all text items across all pages ──────────────
+    const allItems = [];
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const viewport = page.getViewport({ scale: 1.0 });
+
+      for (const item of textContent.items) {
+        const text = item.str.trim();
+        if (text) {
+          allItems.push({
+            text,
+            x: item.transform[4],
+            // Convert PDF Y (bottom-up) to page-relative Y (top-down)
+            pageY: viewport.height - item.transform[5],
+            page: pageNum,
+          });
+        }
+      }
+    }
+
+    // ── Step 2: Group items into rows ─────────────────────────────────
+    const rows = groupIntoRows(allItems);
+
+    // ── Step 3: Find column header row ────────────────────────────────
+    const headerRowIndex = findHeaderRow(rows);
+    if (headerRowIndex === -1) {
+      throw new Error("Could not find column header row in PDF");
+    }
+
+    // ── Step 4: Parse grand totals for post-import verification ───────
+    const grandTotals = parseGrandTotals(rows);
+
+    // ── Step 5: Walk rows and build procedure records ─────────────────
+    const procedures = [];
     let currentDate = null;
     let currentPatient = null;
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      console.log(`\n=== Processing page ${pageNum} of ${pdf.numPages} ===`);
-      const page = await pdf.getPage(pageNum);
-      const textContent = await page.getTextContent();
+    for (let i = headerRowIndex + 1; i < rows.length; i++) {
+      const row = rows[i];
 
-      // Group text items by their Y position (rows)
-      const rows = groupTextByRows(textContent.items);
-      console.log(`Page ${pageNum}: ${rows.length} rows extracted`);
+      // Stop when we reach the grand totals section
+      if (isGrandTotalsRow(row)) break;
 
-      // Parse this page's rows with context from previous pages
-      const { procedures, lastDate, lastPatient } = parseDaySheetRows(
-        rows,
-        currentDate,
-        currentPatient,
-      );
-      console.log(`Page ${pageNum}: ${procedures.length} procedures parsed`);
+      // Skip repeated column-header rows (one per page)
+      if (isColumnHeaderRow(row)) continue;
 
-      allProcedures = allProcedures.concat(procedures);
+      // Skip page headers, footers, metadata
+      if (isSkippableRow(row)) {
+        continue;
+      }
 
-      // Update context for next page
-      if (lastDate) currentDate = lastDate;
-      if (lastPatient) currentPatient = lastPatient;
+      // Parse this row directly from its assembled text
+      const procedure = parseRowText(row.text, currentDate, currentPatient);
+
+      if (procedure) {
+        if (procedure.date) currentDate = procedure.date;
+        if (procedure.patientName) currentPatient = procedure.patientName;
+        procedures.push(procedure);
+      }
     }
 
-    console.log("\n=== Total procedures parsed:", allProcedures.length, "===");
-
-    // Verify totals
-    const totalCharges = allProcedures.reduce(
-      (sum, p) => sum + (p.charges || 0),
-      0,
-    );
-    const totalPayments = allProcedures.reduce(
-      (sum, p) => sum + (p.payments || 0),
-      0,
-    );
-    const nonZeroCharges = allProcedures.filter((p) => p.charges > 0).length;
-    console.log("Procedures with charges > 0:", nonZeroCharges);
-    console.log("Total Charges:", totalCharges.toFixed(2));
-    console.log("Total Payments:", totalPayments.toFixed(2));
-    console.log("Expected Charges: 26529.52");
-    console.log("Expected Payments: 2625.10");
-    console.log("Missing Charges:", (26529.52 - totalCharges).toFixed(2));
-
-    const procedures = allProcedures;
-
+    // ── Step 6: Return or throw ────────────────────────────────────
     if (procedures.length === 0) {
       throw new Error(
         "No procedure data found in PDF. The format may not match expected Day Sheet layout.",
@@ -92,309 +102,263 @@ export const parseDaySheetPDF = async (file) => {
 
     return procedures;
   } catch (error) {
-    console.error("Error parsing PDF:", error);
-    if (error.message.includes("No procedure data found")) {
-      throw error;
-    }
+    if (error.message.includes("No procedure data found")) throw error;
     throw new Error(`Failed to parse PDF file: ${error.message}`);
   }
 };
 
+// ─── Row Grouping ─────────────────────────────────────────────────────────────
+
 /**
- * Group text items by their Y position to form rows
- * @param {Array} textItems - Text items from PDF.js
- * @returns {Array} Array of rows, each containing text items
+ * Group flat list of positioned items into rows using Y-proximity per page.
  */
-const groupTextByRows = (textItems) => {
-  const rowMap = new Map();
-  const yTolerance = 2; // Pixels tolerance for same row
+const groupIntoRows = (items) => {
+  const Y_TOLERANCE = 3;
+  // Use a simple list instead of a Map to avoid key collisions across pages
+  const rowList = [];
 
-  textItems.forEach((item) => {
-    const y = Math.round(item.transform[5]);
-
-    // Find existing row within tolerance
-    let foundY = null;
-    for (const existingY of rowMap.keys()) {
-      if (Math.abs(existingY - y) <= yTolerance) {
-        foundY = existingY;
+  for (const item of items) {
+    let foundRow = null;
+    for (const row of rowList) {
+      if (
+        row.page === item.page &&
+        Math.abs(row.y - item.pageY) <= Y_TOLERANCE
+      ) {
+        foundRow = row;
         break;
       }
     }
 
-    const rowY = foundY !== null ? foundY : y;
-    if (!rowMap.has(rowY)) {
-      rowMap.set(rowY, []);
+    if (foundRow) {
+      foundRow.items.push(item);
+    } else {
+      rowList.push({ page: item.page, y: item.pageY, items: [item] });
     }
+  }
 
-    rowMap.get(rowY).push({
-      text: item.str.trim(),
-      x: item.transform[4],
-      y: item.transform[5],
-    });
+  // Sort rows: page ascending, then Y ascending (top → bottom)
+  rowList.sort((a, b) => {
+    if (a.page !== b.page) return a.page - b.page;
+    return a.y - b.y;
   });
 
-  // Convert map to sorted array and sort items within each row by X position
-  const rows = Array.from(rowMap.entries())
-    .map(([y, items]) => ({
-      y,
-      items: items.sort((a, b) => a.x - b.x),
-      text: items.map((i) => i.text).join(" "),
-    }))
-    .sort((a, b) => b.y - a.y); // Sort by Y descending (top to bottom)
+  // Sort items within each row left → right, then build text
+  for (const row of rowList) {
+    row.items.sort((a, b) => a.x - b.x);
+    row.text = row.items.map((i) => i.text).join(" ");
+  }
 
-  return rows;
+  return rowList;
 };
 
-/**
- * Parse structured rows into procedure objects
- * @param {Array} rows - Rows of text from PDF
- * @param {string} initialDate - Date context from previous page
- * @param {string} initialPatient - Patient context from previous page
- * @returns {Object} Object with procedures array and last date/patient
- */
-const parseDaySheetRows = (rows, initialDate = null, initialPatient = null) => {
-  const procedures = [];
-  let currentDate = initialDate;
-  let currentPatient = initialPatient;
+// ─── Header Detection ─────────────────────────────────────────────────────────
 
-  // Skip header rows - look for the first date
-  let dataStartIndex = 0;
+const findHeaderRow = (rows) => {
   for (let i = 0; i < rows.length; i++) {
-    if (/\d{2}\/\d{2}\/\d{4}/.test(rows[i].text)) {
-      dataStartIndex = i;
-      break;
-    }
-  }
-
-  console.log("Starting data parsing from row:", dataStartIndex);
-  if (rows.length > dataStartIndex + 20) {
-    console.log(
-      "Sample rows 0-5:",
-      rows
-        .slice(dataStartIndex, dataStartIndex + 5)
-        .map((r, i) => `${i}: ${r.text.substring(0, 100)}`),
-    );
-    console.log(
-      "Sample rows 15-20:",
-      rows
-        .slice(dataStartIndex + 15, dataStartIndex + 20)
-        .map((r, i) => `${i + 15}: ${r.text.substring(0, 100)}`),
-    );
-  }
-
-  for (let i = dataStartIndex; i < rows.length; i++) {
-    const row = rows[i];
-    const text = row.text;
-
-    // Skip obviously non-data rows
+    const t = rows[i].text;
     if (
-      !text.trim() ||
-      text.length < 10 ||
-      text.includes("Audit #") ||
-      text.includes("DAY SHEET") ||
-      text.includes("MARINA DENTAL") ||
-      text.includes("Provider SH01") ||
-      text.includes("Page:") ||
-      text.match(/Date\s+Patient Name/) ||
-      text.match(/Charges:\s+Payments:/) ||
-      text.includes("04/01/2026 - 04/30/2026") ||
-      text.includes("New Patients of Record") ||
-      text.includes("Patients Seen") ||
-      text.includes("Avg Prod per Patient") ||
-      text.includes("Avg Chg per Procedure") ||
-      text.includes("offsetting adjustments")
+      t.includes("Date") &&
+      (t.includes("Patient") || t.includes("Name")) &&
+      t.includes("Charges")
     ) {
-      continue; // Skip but don't stop
-    }
-
-    // Try to parse as a procedure line
-    let procedure = parseProcedureLineV2(text, currentDate, currentPatient);
-
-    // If parsing failed and there's a next line, try combining them
-    if (!procedure && i + 1 < rows.length) {
-      const nextRow = rows[i + 1];
-      const combinedText = text + " " + nextRow.text;
-      procedure = parseProcedureLineV2(
-        combinedText,
-        currentDate,
-        currentPatient,
-      );
-
-      // If combined parsing worked, skip the next row
-      if (procedure) {
-        if (procedures.length < 3) {
-          console.log(
-            "✓ Combined rows:",
-            text.substring(0, 60),
-            "+",
-            nextRow.text.substring(0, 30),
-          );
-        }
-        i++; // Skip next row since we consumed it
-      }
-    }
-
-    if (procedure) {
-      // Validate charge is reasonable (not a random number we picked up)
-      if (procedure.charges > 5000) {
-        console.log(
-          "⚠️ Suspicious high charge:",
-          procedure.charges,
-          "in:",
-          text.substring(0, 80),
-        );
-        continue; // Skip obviously wrong values
-      }
-
-      // Log first few to see what's being captured
-      if (procedures.length < 10) {
-        console.log(
-          `✓ #${procedures.length + 1} Parsed:`,
-          procedure.date,
-          procedure.patientName.substring(0, 20),
-          procedure.code,
-          "Ch:",
-          procedure.charges,
-          "Py:",
-          procedure.payments,
-        );
-      }
-      procedures.push(procedure);
-
-      // Update current context
-      if (procedure.date) currentDate = procedure.date;
-      if (procedure.patientName) currentPatient = procedure.patientName;
-    } else {
-      // Log failures for first 20 attempts to see patterns
-      if (
-        procedures.length < 10 &&
-        text.length > 10 &&
-        !text.includes("04/01/2026 - 04/30/2026")
-      ) {
-        console.log("✗ Failed to parse:", text.substring(0, 100));
-      }
+      return i;
     }
   }
-
-  console.log(
-    `Successfully parsed ${procedures.length} procedures from ${rows.length} rows`,
-  );
-  return {
-    procedures,
-    lastDate: currentDate,
-    lastPatient: currentPatient,
-  };
+  return -1;
 };
 
+const isColumnHeaderRow = (row) => {
+  const t = row.text;
+  return (
+    t.includes("Date") &&
+    (t.includes("Patient") || t.includes("Name")) &&
+    t.includes("Charges")
+  );
+};
+
+// ─── Row Classification ───────────────────────────────────────────────────────
+
+const isGrandTotalsRow = (row) => /Grand\s+TOTALS?/i.test(row.text);
+
+const isSkippableRow = (row) => {
+  const t = row.text;
+  if (!t.trim() || t.length < 3) return true;
+  if (/DAY SHEET/i.test(t)) return true;
+  // Clinic/practice name header — skip lines that are ALL-CAPS words (no digits)
+  if (/DENTAL/i.test(t) && !/\d/.test(t) && t === t.toUpperCase()) return true;
+  if (/Provider\s+[A-Z0-9]+/i.test(t)) return true;
+  if (/Audit\s*#/i.test(t)) return true;
+  if (/Date:\s*Page:/i.test(t)) return true;
+  if (/^\s*Page\s+\d+/i.test(t)) return true;
+  // Date-range header line e.g. "05/01/2026 - 05/31/2026"
+  if (/^\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}\/\d{2}\/\d{4}/.test(t)) return true;
+  if (/New Patients of Record/i.test(t)) return true;
+  if (/Patients Seen/i.test(t)) return true;
+  if (/Avg (Prod|Chg) per/i.test(t)) return true;
+  if (/Page\s+Totals?:/i.test(t)) return true;
+  // Column sub-header repeated on each page
+  if (/Charges:\s+Payments:/i.test(t)) return true;
+  return false;
+};
+
+// ─── Row Text Parser ──────────────────────────────────────────────────────────
+
 /**
- * Enhanced line parser with multiple pattern attempts
- * @param {string} line - Line of text
- * @param {string} lastDate - Last known date
- * @param {string} lastPatient - Last known patient
- * @returns {Object|null} Procedure object or null
+ * Parse a single assembled row text string into a procedure object.
+ * Strategy: anchor on the "amount BT provider" tail to extract the charge,
+ * then parse date / patient / tooth / code / description from the prefix.
+ *
+ * Every data row ends with:  AMOUNT  BT_num  PROVIDER  [(phone)]  [*]
+ * e.g. "685.00 1 SH01 (805)389-6586 *" or "0.00 41 SH01 ( )"
  */
-const parseProcedureLineV2 = (line, lastDate, lastPatient) => {
-  // Clean the line but preserve structure
-  const cleaned = line.replace(/\s+/g, " ").trim();
+const parseRowText = (rawText, lastDate, lastPatient) => {
+  const text = rawText.replace(/\s+/g, " ").trim();
+  if (!text || text.length < 8) return null;
 
-  // Pattern 1: Full line with date (more flexible with spacing)
-  // Match: date + patient + optional(tooth) + code + description + charge
-  const fullPattern =
-    /^(\d{2}\/\d{2}\/\d{4})\s+([A-Za-z][A-Za-z\s,]+?)\s+(?:(\d+)\s+)?([A-Z]\d{4}(?:\.\d+)?)\s+(?:([A-Z]{1,4})\s+)?(.+?)\s+(\d+\.\d{2})/;
+  // ── 1. Extract charge amount via tail pattern ─────────────────────
+  // Tail: AMOUNT  BT(1-3 digits)  PROVIDER(2-6 alnum)  [rest (phone, *)]  EOL
+  // Amount requires exactly 2 decimal places to avoid matching codes like D2999.1
+  const tailMatch = text.match(
+    /^(.+?)\s+(-?\d{1,6}\.\d{2})\s+\d{1,3}\s+[A-Z][A-Z0-9]{1,5}.*$/,
+  );
+  if (!tailMatch) return null;
 
-  let match = cleaned.match(fullPattern);
+  const prefix = tailMatch[1].trim();
+  const chargeAmt = parseFloat(tailMatch[2]);
 
-  if (match) {
-    const [, dateStr, patientName, tooth, code, surface, description, charges] =
-      match;
+  // ── 2. Extract date from start of prefix ─────────────────────────
+  const dateMatch = prefix.match(/^(\d{2}\/\d{2}\/\d{4})\s+(.+)$/);
+  let date = null;
+  let rest = prefix;
+  if (dateMatch) {
+    date = formatDate(dateMatch[1]);
+    rest = dateMatch[2].trim();
+  } else if (lastDate) {
+    date = lastDate;
+  } else {
+    return null;
+  }
 
+  // ── 3. Payment row ────────────────────────────────────────────────
+  if (/Dental Ins\.|Check Payment/i.test(rest)) {
+    const payPatient =
+      rest.replace(/\s*(?:Dental Ins\.|Check Payment).*/i, "").trim() ||
+      lastPatient;
+    if (!payPatient) return null;
     return {
-      date: formatDate(dateStr),
-      patientName: patientName.trim(),
-      tooth: tooth || "",
-      code: code.trim(),
-      description: description.trim(),
-      surface: surface || "",
-      charges: parseFloat(charges) || 0,
+      date,
+      patientName: payPatient,
+      tooth: "",
+      code: "PAYMENT",
+      description: "Dental Insurance Payment",
+      surface: "",
+      charges: 0,
+      payments: Math.abs(chargeAmt),
+    };
+  }
+
+  // ── 4. Procedure row ──────────────────────────────────────────────
+  // rest = "PatientName [Tooth] Code Description"
+  // Code: standard D-code (D0055, D2999.1) or custom UPPERCASE word (RCTLZR)
+  const procMatch = rest.match(
+    /^(.+?)\s+(?:(\d{1,2})\s+)?([A-Z]\d{4}(?:\.\d+)?|[A-Z]{4,10})\s+(.+)$/,
+  );
+  if (procMatch) {
+    const patient = procMatch[1].trim() || lastPatient;
+    if (!patient) return null;
+    return {
+      date,
+      patientName: patient,
+      tooth: procMatch[2] || "",
+      code: procMatch[3].trim(),
+      description: procMatch[4].trim(),
+      surface: "",
+      charges: chargeAmt > 0 ? chargeAmt : 0,
       payments: 0,
     };
   }
 
-  // Pattern 2: Continuation line (no date, but has patient + code + charge)
-  const contPattern =
-    /^([A-Za-z][A-Za-z\s,]+?)\s+(?:(\d+)\s+)?([A-Z]\d{4}(?:\.\d+)?)\s+(?:([A-Z]{1,4})\s+)?(.+?)\s+(\d+\.\d{2})/;
-
-  match = cleaned.match(contPattern);
-
-  if (match && lastDate) {
-    const [, patientName, tooth, code, surface, description, charges] = match;
-
+  // ── 5. Code-only fallback (no description text) ───────────────────
+  const codeOnly = rest.match(
+    /^(.+?)\s+(?:(\d{1,2})\s+)?([A-Z]\d{4}(?:\.\d+)?|[A-Z]{4,10})\s*$/,
+  );
+  if (codeOnly) {
+    const patient = codeOnly[1].trim() || lastPatient;
+    if (!patient) return null;
     return {
-      date: lastDate,
-      patientName: patientName.trim(),
-      tooth: tooth || "",
-      code: code.trim(),
-      description: description.trim(),
-      surface: surface || "",
-      charges: parseFloat(charges) || 0,
+      date,
+      patientName: patient,
+      tooth: codeOnly[2] || "",
+      code: codeOnly[3].trim(),
+      description: "",
+      surface: "",
+      charges: chargeAmt > 0 ? chargeAmt : 0,
       payments: 0,
     };
-  }
-
-  // Pattern 3: Simple line (same patient, code + charge)
-  const simplePattern =
-    /^(?:(\d+)\s+)?([A-Z]\d{4}(?:\.\d+)?)\s+(?:([A-Z]{1,4})\s+)?(.+?)\s+(\d+\.\d{2})/;
-
-  match = cleaned.match(simplePattern);
-
-  if (match && lastDate && lastPatient) {
-    const [, tooth, code, surface, description, charges] = match;
-
-    return {
-      date: lastDate,
-      patientName: lastPatient,
-      tooth: tooth || "",
-      code: code.trim(),
-      description: description.trim(),
-      surface: surface || "",
-      charges: parseFloat(charges) || 0,
-      payments: 0,
-    };
-  }
-
-  // Pattern 4: Payment-only lines (no procedure code)
-  // 04/24/2026 Lowery, Jenna Dental Ins. Check Payment -186.00 1 SH01
-  const paymentPattern =
-    /^(?:(\d{2}\/\d{2}\/\d{4})\s+)?([A-Za-z][A-Za-z\s,]+?)\s+(?:Dental Ins\.|Check Payment|Insurance Payment|Payment).+?(-\d+\.\d{2})/i;
-
-  match = cleaned.match(paymentPattern);
-
-  if (match) {
-    const [, dateStr, patientName, amount] = match;
-    const paymentAmount = Math.abs(parseFloat(amount));
-    const useDate = dateStr ? formatDate(dateStr) : lastDate;
-
-    if (useDate && paymentAmount > 0) {
-      return {
-        date: useDate,
-        patientName: patientName.trim(),
-        tooth: "",
-        code: "PAYMENT",
-        description: "Payment received",
-        surface: "",
-        charges: 0,
-        payments: paymentAmount,
-      };
-    }
   }
 
   return null;
 };
 
+// ─── Grand Totals Parser ──────────────────────────────────────────────────────
+
+/**
+ * Scan all rows for the "Grand TOTALS:" section and extract Charges/Payments.
+ */
+const parseGrandTotals = (rows) => {
+  let inTotals = false;
+  const totals = { charges: 0, payments: 0 };
+  let foundCharges = false;
+  let foundPayments = false;
+
+  for (const row of rows) {
+    if (isGrandTotalsRow(row)) {
+      inTotals = true;
+      continue;
+    }
+    if (!inTotals) continue;
+
+    const text = row.text;
+
+    if (!foundCharges) {
+      // Matches "Charges: 25140.51" (label + value on same row, possibly separate items)
+      const m = text.match(/^Charges:\s*([\d,]+\.?\d*)/i);
+      if (m) {
+        totals.charges = parseAmount(m[1]);
+        foundCharges = true;
+        continue;
+      }
+    }
+
+    if (!foundPayments) {
+      const m = text.match(/^Payments:\s*(-?[\d,]+\.?\d*)/i);
+      if (m) {
+        totals.payments = Math.abs(parseAmount(m[1]));
+        foundPayments = true;
+        continue;
+      }
+    }
+
+    if (foundCharges && foundPayments) break;
+
+    // Safety exit
+    if (/New Patients|Patients Seen|Avg/i.test(text)) break;
+  }
+
+  return foundCharges ? totals : null;
+};
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+/** Strip non-numeric characters (except . and -) and parse as float */
+const parseAmount = (str) => {
+  if (!str) return 0;
+  const cleaned = str.replace(/,/g, "").replace(/[^0-9.-]/g, "");
+  return parseFloat(cleaned) || 0;
+};
+
 /**
  * Format date from MM/DD/YYYY to YYYY-MM-DD
- * @param {string} dateStr - Date string in MM/DD/YYYY format
- * @returns {string} Date in YYYY-MM-DD format
  */
 const formatDate = (dateStr) => {
   const [month, day, year] = dateStr.split("/");
@@ -409,8 +373,6 @@ const formatDate = (dateStr) => {
 export const parseCSV = (csvText) => {
   const lines = csvText.split("\n").filter((line) => line.trim());
   const procedures = [];
-
-  console.log("CSV parsing started, total lines:", lines.length);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -501,14 +463,6 @@ export const parseCSV = (csvText) => {
       payments: 0,
     });
   }
-
-  console.log("CSV parsing complete, procedures found:", procedures.length);
-
-  // Verify totals
-  const totalCharges = procedures.reduce((sum, p) => sum + p.charges, 0);
-  const totalPayments = procedures.reduce((sum, p) => sum + p.payments, 0);
-  console.log("CSV Total Charges:", totalCharges.toFixed(2));
-  console.log("CSV Total Payments:", totalPayments.toFixed(2));
 
   return procedures;
 };

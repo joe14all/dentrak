@@ -28,6 +28,7 @@ const getInitialState = () => ({
   payCycle: 'monthly',
   paymentDetail: '',
   notes: '',
+  archivedDate: null,
 });
 
 
@@ -67,7 +68,34 @@ const PracticeForm = ({ practiceToEdit, onSave, onCancel }) => {
         }
       }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+      setFormData(prev => {
+        let newValue = value;
+        
+        // Handle date inputs - store as YYYY-MM-DD string to avoid timezone issues
+        if (type === 'date' && value) {
+          newValue = value; // Keep as YYYY-MM-DD format
+        } else if (type === 'number') {
+          newValue = parseFloat(value) || 0;
+        }
+        
+        const newData = { ...prev, [name]: newValue };
+        
+        // If status is changing to 'archived', set the archivedDate to today if not already set
+        if (name === 'status' && value === 'archived' && prev.status !== 'archived' && !prev.archivedDate) {
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const day = String(today.getDate()).padStart(2, '0');
+          newData.archivedDate = `${year}-${month}-${day}`;
+        }
+        
+        // If status is changing from 'archived' to 'active', clear the archivedDate
+        if (name === 'status' && value === 'active' && prev.status === 'archived') {
+          newData.archivedDate = null;
+        }
+        
+        return newData;
+      });
     }
   };
   

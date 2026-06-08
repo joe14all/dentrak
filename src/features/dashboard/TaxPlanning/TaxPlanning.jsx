@@ -4,6 +4,7 @@ import { useExpenses } from '../../../contexts/ExpenseContext/ExpenseContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { calculatePay } from '../../../utils/calculations';
+import { filterPracticesForMonth } from '../../../utils/practiceFilters';
 import { 
   calculateQuarterlyEstimates,
   projectYearEndTaxes 
@@ -60,8 +61,11 @@ const TaxPlanning = () => {
         return date.getUTCFullYear() === currentYear && date.getUTCMonth() === monthIndex;
       });
 
+      // Filter practices based on archived date for this month
+      const activePracticesForMonth = filterPracticesForMonth(practices, currentYear, monthIndex);
+      
       // Calculate pay for each practice for this month
-      const monthCalculatedPay = practices.reduce((sum, practice) => {
+      const monthCalculatedPay = activePracticesForMonth.reduce((sum, practice) => {
         const practiceEntries = monthEntries.filter(e => e.practiceId === practice.id);
         if (practiceEntries.length === 0) return sum;
 

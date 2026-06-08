@@ -8,7 +8,7 @@
 export const calculateSinglePeriod = (practice, entriesInPeriod) => {
   // Check for period summary entries which take precedence for financial calculations
   const periodSummaries = entriesInPeriod.filter(
-    (e) => e.entryType === "periodSummary"
+    (e) => e.entryType === "periodSummary",
   );
 
   let performanceEntries;
@@ -20,7 +20,7 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
     // Otherwise, use daily and individual procedure entries for financials.
     performanceEntries = entriesInPeriod.filter(
       (e) =>
-        e.entryType === "dailySummary" || e.entryType === "individualProcedure"
+        e.entryType === "dailySummary" || e.entryType === "individualProcedure",
     );
   }
 
@@ -31,7 +31,7 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
 
   entriesInPeriod
     .filter(
-      (e) => e.entryType === "attendanceRecord" && e.date // Ensure date exists
+      (e) => e.entryType === "attendanceRecord" && e.date, // Ensure date exists
     )
     .forEach((entry) => {
       const date = entry.date;
@@ -49,7 +49,7 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
   const attendedDates = Object.keys(attendanceByDate).sort();
   const attendanceDays = Object.values(attendanceByDate).reduce(
     (sum, val) => sum + val,
-    0
+    0,
   );
 
   const basePayOwed =
@@ -57,11 +57,11 @@ export const calculateSinglePeriod = (practice, entriesInPeriod) => {
 
   const grossProduction = performanceEntries.reduce(
     (sum, e) => sum + (e.production || 0),
-    0
+    0,
   );
   const grossCollection = performanceEntries.reduce(
     (sum, e) => sum + (e.collection || 0),
-    0
+    0,
   );
   const totalAdjustments = performanceEntries
     .flatMap((e) => e.adjustments || [])
@@ -164,7 +164,7 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
 
   // --- CORRECTED PRODUCTION TOTAL LOGIC ---
   const periodSummaries = entriesInMonth.filter(
-    (e) => e.entryType === "periodSummary"
+    (e) => e.entryType === "periodSummary",
   );
 
   // Determine which entries to use for the overall month's production total
@@ -174,18 +174,18 @@ export const calculatePay = (practice, allEntriesForPractice, year, month) => {
   } else {
     financialEntriesForMonth = entriesInMonth.filter(
       (e) =>
-        e.entryType === "dailySummary" || e.entryType === "individualProcedure"
+        e.entryType === "dailySummary" || e.entryType === "individualProcedure",
     );
   }
 
   const productionTotal = financialEntriesForMonth.reduce(
     (sum, e) => sum + (e.production || 0),
-    0
+    0,
   );
   // --- END CORRECTION ---
 
   const dailyAndAttendanceEntries = entriesInMonth.filter(
-    (e) => e.entryType !== "periodSummary"
+    (e) => e.entryType !== "periodSummary",
   );
 
   let totalCalculatedPay = 0;

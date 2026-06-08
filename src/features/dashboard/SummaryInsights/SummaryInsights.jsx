@@ -4,6 +4,7 @@ import { usePractices } from '../../../contexts/PracticeContext/PracticeContext'
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { useGoals } from '../../../contexts/GoalContext/GoalContext';
 import { calculatePay } from '../../../utils/calculations';
+import { filterPracticesForMonth } from '../../../utils/practiceFilters';
 import MetricCard from './MetricCard';
 import { ChevronLeft, ChevronRight, Target, ArrowUp, ArrowDown } from 'lucide-react'; // Added Target, ArrowUp, ArrowDown
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -97,7 +98,10 @@ const SummaryInsights = () => {
             });
         const daysWorked = Object.values(attendanceByDate).reduce((sum, val) => sum + val, 0);
         
-        const practiceBreakdown = practices.map(practice => {
+        // Filter practices based on archived date for current month
+        const activePracticesForCurrentMonth = filterPracticesForMonth(practices, year, month);
+        
+        const practiceBreakdown = activePracticesForCurrentMonth.map(practice => {
             const practiceEntries = entriesInCurrentMonth.filter(e => e.practiceId === practice.id);
             const calcResult = calculatePay(practice, practiceEntries, year, month);
             totalProduction += calcResult.productionTotal;
@@ -130,7 +134,10 @@ const SummaryInsights = () => {
 
         const entriesInPrevMonth = getEntriesInPeriod(prevMonthDate.getFullYear(), prevMonthDate.getMonth());
         const prevMonthProduction = entriesInPrevMonth.filter(e=>e.entryType !== 'attendanceRecord').reduce((s,e)=>s + (e.production || 0), 0);
-        const prevMonthPay = practices.reduce((sum, p) => sum + calculatePay(p, entriesInPrevMonth.filter(e => e.practiceId === p.id), prevMonthDate.getFullYear(), prevMonthDate.getMonth()).calculatedPay, 0);
+        
+        // Filter practices based on archived date for previous month
+        const activePracticesForPrevMonth = filterPracticesForMonth(practices, prevMonthDate.getFullYear(), prevMonthDate.getMonth());
+        const prevMonthPay = activePracticesForPrevMonth.reduce((sum, p) => sum + calculatePay(p, entriesInPrevMonth.filter(e => e.practiceId === p.id), prevMonthDate.getFullYear(), prevMonthDate.getMonth()).calculatedPay, 0);
 
         const overallMonthlyProductionGoal = goals.find(g =>
             g.timePeriod === 'monthly' &&

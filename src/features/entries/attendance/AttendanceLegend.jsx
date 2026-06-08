@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './AttendanceLegend.module.css';
-import { CalendarDays, DollarSign, Info } from 'lucide-react';
+import { ChevronDown, ChevronRight, Info } from 'lucide-react';
 
 const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate, pendingChanges }) => {
+  const [isGuideExpanded, setIsGuideExpanded] = useState(false);
   
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -66,60 +67,98 @@ const AttendanceLegend = ({ practices, colorMap, attendanceEntries, currentDate,
     });
   }, [practices, attendanceEntries, currentDate, pendingChanges]);
 
+  // Calculate totals
+  const totals = useMemo(() => {
+    return legendData.reduce(
+      (acc, practice) => ({
+        totalDays: acc.totalDays + practice.dayCount,
+        totalPay: acc.totalPay + practice.estimatedPay
+      }),
+      { totalDays: 0, totalPay: 0 }
+    );
+  }, [legendData]);
+
   return (
     <div className={styles.legendContainer}>
       <h4 className={styles.title}>Monthly Summary</h4>
       
-      {/* Usage Guide */}
+      {/* Collapsible Usage Guide */}
       <div className={styles.usageGuide}>
-        <div className={styles.guideHeader}>
+        <button 
+          className={styles.guideHeader}
+          onClick={() => setIsGuideExpanded(!isGuideExpanded)}
+        >
+          {isGuideExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           <Info size={14} />
           <span>How to track attendance:</span>
-        </div>
-        <div className={styles.guideContent}>
-          <div className={styles.guideItem}>
-            <div className={styles.guideIndicator}>
-              <div className={styles.emptyDot}></div>
+        </button>
+        {isGuideExpanded && (
+          <div className={styles.guideContent}>
+            <div className={styles.guideItem}>
+              <div className={styles.guideIndicator}>
+                <div className={styles.emptyDot}></div>
+              </div>
+              <span>Click once: Add full day</span>
             </div>
-            <span>Click once: Add full day</span>
-          </div>
-          <div className={styles.guideItem}>
-            <div className={styles.guideIndicator}>
-              <div className={styles.halfDayDot}>½</div>
+            <div className={styles.guideItem}>
+              <div className={styles.guideIndicator}>
+                <div className={styles.halfDayDot}>½</div>
+              </div>
+              <span>Click twice: Change to half day</span>
             </div>
-            <span>Click twice: Change to half day</span>
-          </div>
-          <div className={styles.guideItem}>
-            <div className={styles.guideIndicator}>
-              <div className={styles.emptyDot}></div>
+            <div className={styles.guideItem}>
+              <div className={styles.guideIndicator}>
+                <div className={styles.emptyDot}></div>
+              </div>
+              <span>Click third time: Remove</span>
             </div>
-            <span>Click third time: Remove</span>
           </div>
-        </div>
+        )}
       </div>
       
-      <div className={styles.legendItems}>
-        {(legendData || []).map(practice => (
-          <div key={practice.id} className={styles.legendItem}>
-            <div className={styles.itemHeader}>
-              <span 
-                className={styles.colorSwatch} 
-                style={{ backgroundColor: colorMap[practice.id] }}
-              ></span>
-              <span className={styles.practiceName}>{practice.name}</span>
-            </div>
-            <div className={styles.itemStats}>
-              <div className={styles.stat}>
-                <CalendarDays size={14} />
-                <span>{practice.dayCount % 1 === 0 ? practice.dayCount : practice.dayCount.toFixed(1)} day{practice.dayCount !== 1 ? 's' : ''} attended</span>
-              </div>
-              <div className={styles.stat}>
-                <DollarSign size={14} />
-                <span>Est. Base Pay: {formatCurrency(practice.estimatedPay)}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* Summary Table */}
+      <div className={styles.summaryTable}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Practice</th>
+              <th>Days</th>
+              <th>Base Pay</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(legendData || []).map(practice => (
+              <tr key={practice.id}>
+                <td>
+                  <div className={styles.practiceCell}>
+                    <span 
+                      className={styles.colorSwatch} 
+                      style={{ backgroundColor: colorMap[practice.id] }}
+                    ></span>
+                    <span className={styles.practiceName}>{practice.name}</span>
+                  </div>
+                </td>
+                <td className={styles.centeredCell}>
+                  {practice.dayCount % 1 === 0 ? practice.dayCount : practice.dayCount.toFixed(1)}
+                </td>
+                <td className={styles.rightAlignedCell}>
+                  {formatCurrency(practice.estimatedPay)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className={styles.totalRow}>
+              <td className={styles.totalLabel}>Total</td>
+              <td className={styles.centeredCell}>
+                {totals.totalDays % 1 === 0 ? totals.totalDays : totals.totalDays.toFixed(1)}
+              </td>
+              <td className={styles.rightAlignedCell}>
+                {formatCurrency(totals.totalPay)}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   );

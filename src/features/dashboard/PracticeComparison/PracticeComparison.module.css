@@ -199,10 +199,13 @@
 
 .comparisonTable th {
   padding: 0.75rem 1rem;
-  text-align: left;
   font-weight: 600;
   color: var(--text-secondary, #6b7280);
   border-bottom: 1px solid var(--ui-border-primary, #e5e7eb);
+}
+
+.comparisonTable th:first-child {
+  text-align: left;
 }
 
 .comparisonTable td {
@@ -220,13 +223,19 @@
   color: var(--text-primary, #1f2937);
 }
 
-.currency {
-  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
   text-align: right;
 }
 
+.currency {
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
 .percentage {
-  text-align: right;
   color: var(--primary-color, #3b82f6);
   font-weight: 600;
 }

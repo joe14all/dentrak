@@ -354,10 +354,18 @@ const PdfSummaryGenerator = ({ onCancel }) => {
 
     return (
         <div className={styles.modalContainer}>
-            {/* DESIGNER'S NOTE: The UI is split into a configuration panel and a selection panel. */}
+            {/* Configuration Panel (Left) */}
             <div className={styles.configPanel}>
-                <h3 className={styles.title}>Generate PDF Summary</h3>
-                <p className={styles.subtitle}>Select up to two pay periods to include in the report.</p>
+                <div>
+                    <h3 className={styles.title}>
+                        Generate PDF Summary
+                        {selectedPeriods.length > 0 && (
+                            <span className={styles.selectionCounter}>{selectedPeriods.length}</span>
+                        )}
+                    </h3>
+                    <p className={styles.subtitle}>Select up to two pay periods to include in the report.</p>
+                </div>
+                
                 <div className={styles.formGroup}>
                     <label htmlFor="practiceSelect">Practice</label>
                     <div className={styles.selectWrapper}>
@@ -367,6 +375,7 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                         <ChevronDown size={20} className={styles.selectIcon} />
                     </div>
                 </div>
+                
                 <div className={styles.formGroup}>
                     <label>Year</label>
                     <div className={styles.selectWrapper}>
@@ -379,8 +388,35 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                         <ChevronDown size={20} className={styles.selectIcon} />
                     </div>
                 </div>
+
+                {/* Options Section */}
+                <div className={styles.optionsSection}>
+                    <div className={styles.optionsTitle}>Options</div>
+                    
+                    <label className={styles.syncCheckbox}>
+                        <input 
+                            type="checkbox" 
+                            checked={hipaaCompliant} 
+                            onChange={(e) => setHipaaCompliant(e.target.checked)}
+                        />
+                        <span>HIPAA Compliant (show initials only)</span>
+                    </label>
+
+                    <label className={`${styles.syncCheckbox} ${!jbookConnected ? styles.disabled : ''}`}>
+                        <input 
+                            type="checkbox" 
+                            checked={syncToJBook && jbookConnected} 
+                            onChange={(e) => setSyncToJBook(e.target.checked)}
+                            disabled={!jbookConnected}
+                        />
+                        <Send size={16} />
+                        <span>Create draft invoice in JBook</span>
+                        {!jbookConnected && <span className={styles.notConnected}>(JBook not running)</span>}
+                    </label>
+                </div>
             </div>
 
+            {/* Periods Selection Panel (Right) */}
             <div className={styles.periodsPanel}>
                 <div className={styles.scrollContainer}>
                     {availablePeriodsByMonth.length > 0 ? availablePeriodsByMonth.map(({ month, periods }) => (
@@ -390,7 +426,6 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                                 {periods.map(period => {
                                     const periodKey = period.start.toISOString();
                                     const isSelected = selectedPeriods.some(p => p.start.toISOString() === periodKey);
-                                    // Disable non-selected items when the max is reached
                                     const isDisabled = !isSelected && selectedPeriods.length >= 2;
                                     
                                     return (
@@ -409,46 +444,24 @@ const PdfSummaryGenerator = ({ onCancel }) => {
                 </div>
             </div>
 
-            {/* HIPAA Compliance Option */}
-            <div className={styles.syncOptions}>
-                <label className={styles.syncCheckbox}>
-                    <input 
-                        type="checkbox" 
-                        checked={hipaaCompliant} 
-                        onChange={(e) => setHipaaCompliant(e.target.checked)}
-                    />
-                    <span>HIPAA Compliant (show initials only)</span>
-                </label>
-            </div>
-
-            {/* JBook Sync Option */}
-            <div className={styles.syncOptions}>
-                <label className={`${styles.syncCheckbox} ${!jbookConnected ? styles.disabled : ''}`}>
-                    <input 
-                        type="checkbox" 
-                        checked={syncToJBook && jbookConnected} 
-                        onChange={(e) => setSyncToJBook(e.target.checked)}
-                        disabled={!jbookConnected}
-                    />
-                    <Send size={16} />
-                    <span>Create draft invoice in JBook</span>
-                    {!jbookConnected && <span className={styles.notConnected}>(JBook not running)</span>}
-                </label>
-                {syncStatus && (
-                    <div className={`${styles.syncStatus} ${styles[syncStatus]}`}>
-                        {syncStatus === 'syncing' && <LoaderCircle size={14} className={styles.spinner} />}
-                        {syncStatus === 'success' && <CheckCircle2 size={14} />}
-                        <span>{syncMessage}</span>
-                    </div>
-                )}
-            </div>
-
+            {/* Actions Footer */}
             <div className={styles.actions}>
-                <button onClick={onCancel} className={styles.cancelButton}>Cancel</button>
-                <button onClick={generateReportData} className={styles.generateButton} disabled={isGenerating || selectedPeriods.length === 0}>
-                    {isGenerating ? <LoaderCircle size={18} className={styles.spinner}/> : <Download size={18}/>}
-                    {isGenerating ? 'Generating...' : `Generate PDF (${selectedPeriods.length})`}
-                </button>
+                <div className={styles.actionsSyncStatus}>
+                    {syncStatus && (
+                        <div className={`${styles.syncStatus} ${styles[syncStatus]}`}>
+                            {syncStatus === 'syncing' && <LoaderCircle size={14} className={styles.spinner} />}
+                            {syncStatus === 'success' && <CheckCircle2 size={14} />}
+                            <span>{syncMessage}</span>
+                        </div>
+                    )}
+                </div>
+                <div className={styles.actionsButtons}>
+                    <button onClick={onCancel} className={styles.cancelButton}>Cancel</button>
+                    <button onClick={generateReportData} className={styles.generateButton} disabled={isGenerating || selectedPeriods.length === 0}>
+                        {isGenerating ? <LoaderCircle size={18} className={styles.spinner}/> : <Download size={18}/>}
+                        {isGenerating ? 'Generating...' : `Generate PDF (${selectedPeriods.length})`}
+                    </button>
+                </div>
             </div>
 
             {reportData && <div style={{ position: 'fixed', left: '-2000px', top: 0, zIndex: -1 }}><PdfDocument {...reportData} hipaaCompliant={hipaaCompliant} /></div>}
