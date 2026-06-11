@@ -2,7 +2,67 @@ import React, { useState, useMemo } from 'react';
 import styles from './VacationCalculator.module.css';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
-import { Calendar, TrendingDown, DollarSign, Calculator } from 'lucide-react';
+import { Calendar, TrendingDown, DollarSign, Calculator, History, ChevronRight, BookOpen } from 'lucide-react';
+import { useScheduleBlocks } from '../../../contexts/ScheduleBlockContext/ScheduleBlockContext';
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+// Pure helper: counts which practice gets each weekday in a date range based on attendance patterns
+const calcDaysByPractice = (startDateStr, endDateStr, activePractices, attendancePatterns) => {
+  if (!startDateStr || !endDateStr || !activePractices.length || !Object.keys(attendancePatterns).length) return {};
+  const start = new Date(startDateStr);
+  const end = new Date(endDateStr);
+  if (end < start) return {};
+  const daysByPractice = {};
+  activePractices.forEach(p => { daysByPractice[p.id] = 0; });
+  const MIN_OCCURRENCES = 3;
+  const current = new Date(start);
+  while (current <= end) {
+    const dayOfWeek = current.getDay();
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      let maxAttendance = 0;
+      let primaryPracticeId = null;
+      Object.entries(attendancePatterns).forEach(([practiceId, pattern]) => {
+        if (pattern[dayOfWeek] >= MIN_OCCURRENCES && pattern[dayOfWeek] > maxAttendance) {
+          maxAttendance = pattern[dayOfWeek];
+          primaryPracticeId = parseInt(practiceId);
+        }
+      });
+      if (primaryPracticeId) {
+        daysByPractice[primaryPracticeId] = (daysByPractice[primaryPracticeId] || 0) + 1;
+      }
+    }
+    current.setDate(current.getDate() + 1);
+  }
+  return daysByPractice;
+};
+
+// Merge schedule blocks that are within GAP_DAYS of each other into a single vacation period
+const GAP_DAYS = 3; // bridges Fri→Mon weekends
+const consolidateIntoPeriods = (blocks) => {
+  if (!blocks.length) return [];
+  const sorted = [...blocks].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const periods = [];
+  let current = { startDate: sorted[0].startDate, endDate: sorted[0].endDate, blocks: [sorted[0]] };
+  for (let i = 1; i < sorted.length; i++) {
+    const block = sorted[i];
+    const gapMs = new Date(`${block.startDate}T00:00:00Z`) - new Date(`${current.endDate}T00:00:00Z`);
+    const gap = gapMs / 86400000;
+    if (gap <= GAP_DAYS) {
+      current.blocks.push(block);
+      if (block.endDate > current.endDate) current.endDate = block.endDate;
+    } else {
+      periods.push(current);
+      current = { startDate: block.startDate, endDate: block.endDate, blocks: [block] };
+    }
+  }
+  periods.push(current);
+  return periods;
+};
 
 const formatCurrency = (val) => {
   return new Intl.NumberFormat('en-US', {
@@ -16,12 +76,21 @@ const formatCurrency = (val) => {
 const VacationCalculator = () => {
   const { practices } = usePractices();
   const { entries } = useEntries();
+  const { scheduleBlocks } = useScheduleBlocks();
 
   // State for date range and calculation mode
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [calculationMode, setCalculationMode] = useState('simple'); // 'simple' or 'advanced'
   const [selectedPractices, setSelectedPractices] = useState([]);
+  const [isBlockTableExpanded, setIsBlockTableExpanded] = useState(false);
+  const [expandedPeriods, setExpandedPeriods] = useState(new Set());
+
+  const togglePeriod = (id) => setExpandedPeriods(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
 
   // Analyze attendance patterns by day of week for each practice
   const attendancePatterns = useMemo(() => {
@@ -72,56 +141,8 @@ const VacationCalculator = () => {
 
   // Calculate vacation days and map them to practices
   const vacationDaysByPractice = useMemo(() => {
-    if (!startDate || !endDate || !practices || Object.keys(attendancePatterns).length === 0) {
-      return {};
-    }
-    
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    if (end < start) return {};
-    
-    const daysByPractice = {};
-    const current = new Date(start);
-    
-    // Initialize counters
-    practices
-      .filter(p => p.status === 'active')
-      .forEach(practice => {
-        daysByPractice[practice.id] = 0;
-      });
-    
-    // Minimum occurrences to be considered a regular working day
-    const MIN_OCCURRENCES = 3;
-    
-    // Iterate through vacation period
-    while (current <= end) {
-      const dayOfWeek = current.getDay();
-      
-      // Skip weekends (unless user has worked them regularly)
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        // Find which practice(s) the user typically works at on this day of week
-        let maxAttendance = 0;
-        let primaryPracticeId = null;
-
-        Object.entries(attendancePatterns).forEach(([practiceId, pattern]) => {
-          // Only consider days with regular attendance (minimum threshold)
-          if (pattern[dayOfWeek] >= MIN_OCCURRENCES && pattern[dayOfWeek] > maxAttendance) {
-            maxAttendance = pattern[dayOfWeek];
-            primaryPracticeId = parseInt(practiceId);
-          }
-        });
-
-        // If we found regular historical attendance for this day of week, count it
-        if (primaryPracticeId && maxAttendance >= MIN_OCCURRENCES) {
-          daysByPractice[primaryPracticeId] = (daysByPractice[primaryPracticeId] || 0) + 1;
-        }
-      }
-      
-      current.setDate(current.getDate() + 1);
-    }
-    
-    return daysByPractice;
+    const activePractices = (practices || []).filter(p => p.status === 'active');
+    return calcDaysByPractice(startDate, endDate, activePractices, attendancePatterns);
   }, [startDate, endDate, practices, attendancePatterns]);
 
   // Total vacation days across all practices
@@ -267,6 +288,66 @@ const VacationCalculator = () => {
   };
 
   const activePractices = practices?.filter(p => p.status === 'active') || [];
+
+  // ── Schedule Block Analysis ──────────────────────────────────────────────
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  // Consolidate all blocks into vacation periods (nearby blocks merged), then compute income impact
+  const consolidatedPeriods = useMemo(() => {
+    if (!scheduleBlocks.length || !practices) return [];
+    const active = practices.filter(p => p.status === 'active');
+    const periods = consolidateIntoPeriods(scheduleBlocks);
+
+    return periods.map((period, idx) => {
+      // Category based on the period's span vs today
+      let category = 'upcoming';
+      if (period.endDate < todayStr) category = 'past';
+      else if (period.startDate <= todayStr) category = 'current';
+
+      // Income impact for the whole period span
+      const periodDays = calcDaysByPractice(period.startDate, period.endDate, active, attendancePatterns);
+      let totalDays = 0;
+      let totalLoss = 0;
+      const byPractice = [];
+      Object.entries(periodDays).forEach(([practiceId, days]) => {
+        if (days > 0) {
+          const practice = active.find(p => p.id === parseInt(practiceId));
+          if (practice) {
+            const basePay = practice.basePay || practice.dailyGuarantee || 0;
+            const loss = basePay * days;
+            totalDays += days;
+            totalLoss += loss;
+            byPractice.push({ practice, days, loss });
+          }
+        }
+      });
+
+      // Per-block summaries (for expanded view)
+      const blockDetails = period.blocks.map(block => {
+        const bDays = calcDaysByPractice(block.startDate, block.endDate, active, attendancePatterns);
+        let bTotalDays = 0; let bTotalLoss = 0;
+        const bByPractice = [];
+        Object.entries(bDays).forEach(([pid, d]) => {
+          if (d > 0) {
+            const p = active.find(x => x.id === parseInt(pid));
+            if (p) { const bp = p.basePay || p.dailyGuarantee || 0; bTotalDays += d; bTotalLoss += bp * d; bByPractice.push({ practice: p, days: d, loss: bp * d }); }
+          }
+        });
+        return { block, totalDays: bTotalDays, totalLoss: bTotalLoss, byPractice: bByPractice };
+      });
+
+      return { id: `period-${idx}`, startDate: period.startDate, endDate: period.endDate, blocks: period.blocks, blockDetails, category, totalDays, totalLoss, byPractice };
+    });
+  }, [scheduleBlocks, practices, attendancePatterns, todayStr]);
+
+  // Aggregate chips for the header
+  const blockAggregates = useMemo(() => {
+    const calc = (cat) => consolidatedPeriods.filter(p => p.category === cat).reduce(
+      (acc, p) => ({ count: acc.count + 1, days: acc.days + p.totalDays, loss: acc.loss + p.totalLoss }),
+      { count: 0, days: 0, loss: 0 }
+    );
+    return { current: calc('current'), upcoming: calc('upcoming'), past: calc('past') };
+  }, [consolidatedPeriods]);
 
   // Helper to get day of week name
   const getDayName = (dayNum) => {
@@ -491,6 +572,156 @@ const VacationCalculator = () => {
           )}
         </div>
       )}
+
+      {/* ── Schedule Block Analysis ── */}
+      <div className={styles.blockAnalysis}>
+
+        {/* Summary header row — always visible */}
+        <div className={styles.blockAnalysisHeader}>
+          <History size={16} className={styles.blockAnalysisIcon} />
+          <h4 className={styles.blockAnalysisTitle}>Schedule Blocks</h4>
+
+          {scheduleBlocks.length > 0 && (
+            <div className={styles.blockSummaryStats}>
+              {blockAggregates.current.count > 0 && (
+                <span className={styles.blockStatChip} data-type="current">
+                  Now · {blockAggregates.current.days}d · {formatCurrency(blockAggregates.current.loss)}
+                </span>
+              )}
+              {blockAggregates.upcoming.count > 0 && (
+                <span className={styles.blockStatChip} data-type="upcoming">
+                  {blockAggregates.upcoming.count} upcoming · {blockAggregates.upcoming.days}d · {formatCurrency(blockAggregates.upcoming.loss)}
+                </span>
+              )}
+              {blockAggregates.past.count > 0 && (
+                <span className={styles.blockStatChip} data-type="past">
+                  {blockAggregates.past.count} past · {formatCurrency(blockAggregates.past.loss)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {scheduleBlocks.length > 0 && (
+            <button
+              className={styles.blockToggleBtn}
+              onClick={() => setIsBlockTableExpanded(v => !v)}
+            >
+              {isBlockTableExpanded ? 'Hide periods' : 'Show all periods'}
+            </button>
+          )}
+        </div>
+
+        {/* Consolidated vacation periods — toggled */}
+        {scheduleBlocks.length === 0 ? (
+          <div className={styles.noBlocks}>
+            <BookOpen size={16} />
+            <span>No blocks yet — add them in the Attendance Tracker to see their impact here.</span>
+          </div>
+        ) : isBlockTableExpanded && (
+          <div className={styles.blockTable}>
+            {[
+              { label: 'Current',  cat: 'current',  rowClass: styles.rowCurrent },
+              { label: 'Upcoming', cat: 'upcoming', rowClass: styles.rowFuture  },
+              { label: 'Past',     cat: 'past',     rowClass: styles.rowPast    },
+            ].map(({ label, cat, rowClass }) => {
+              const periods = consolidatedPeriods.filter(p => p.category === cat);
+              if (!periods.length) return null;
+              return (
+                <React.Fragment key={cat}>
+                  <div className={styles.blockGroupHeader}>{label}</div>
+                  {periods.map(period => {
+                    const isExpanded = expandedPeriods.has(period.id);
+                    const hasMultiple = period.blocks.length > 1;
+                    return (
+                      <React.Fragment key={period.id}>
+                        {/* Period row */}
+                        <div
+                          className={`${styles.blockRow} ${styles.periodRow} ${rowClass} ${hasMultiple ? styles.periodRowClickable : ''}`}
+                          onClick={() => hasMultiple && togglePeriod(period.id)}
+                        >
+                          <div className={styles.blockRowLeft}>
+                            {hasMultiple && (
+                              <span className={styles.periodChevron}>{isExpanded ? '▾' : '▸'}</span>
+                            )}
+                            <div className={styles.periodRowDates}>
+                              <span className={styles.blockRowDates}>
+                                {formatDate(period.startDate)}
+                                {period.startDate !== period.endDate && <> — {formatDate(period.endDate)}</>}
+                              </span>
+                              {hasMultiple && (
+                                <span className={styles.periodBlockCount}>{period.blocks.length} blocks</span>
+                              )}
+                              {!hasMultiple && period.blocks[0]?.reason && (
+                                <span className={styles.blockRowReason}>{period.blocks[0].reason}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className={styles.blockRowMeta}>
+                            <span className={styles.blockRowDays}>{period.totalDays}d</span>
+                            {period.byPractice.map(({ practice, days, loss }) => (
+                              <span key={practice.id} className={styles.blockPracticePill} title={practice.name}>
+                                {practice.name.split(' ')[0]} {days}d&nbsp;·&nbsp;{formatCurrency(loss)}
+                              </span>
+                            ))}
+                            {period.totalDays === 0 && <span className={styles.blockNoPill}>no working days</span>}
+                          </div>
+
+                          <div className={styles.blockRowRight}>
+                            <span className={styles.blockRowLoss}>{formatCurrency(period.totalLoss)}</span>
+                            <button
+                              className={styles.loadBlockBtn}
+                              title="Load full period into Calculator"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setStartDate(period.startDate);
+                                setEndDate(period.endDate);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                            >↗</button>
+                          </div>
+                        </div>
+
+                        {/* Expanded: individual blocks within the period */}
+                        {isExpanded && period.blockDetails.map(({ block, totalDays: bDays, totalLoss: bLoss, byPractice: bByPractice }) => (
+                          <div key={block.id} className={`${styles.blockRow} ${styles.blockSubRow} ${rowClass}`}>
+                            <div className={styles.blockRowLeft}>
+                              <span className={styles.blockSubIndent} />
+                              <div className={styles.periodRowDates}>
+                                <span className={styles.blockRowDates}>
+                                  {formatDate(block.startDate)}
+                                  {block.startDate !== block.endDate && <> — {formatDate(block.endDate)}</>}
+                                </span>
+                                {block.reason && <span className={styles.blockRowReason}>{block.reason}</span>}
+                              </div>
+                            </div>
+                            <div className={styles.blockRowMeta}>
+                              <span className={styles.blockRowDays}>{bDays}d</span>
+                              {bByPractice.map(({ practice, days, loss }) => (
+                                <span key={practice.id} className={styles.blockPracticePill} title={practice.name}>
+                                  {practice.name.split(' ')[0]} {days}d&nbsp;·&nbsp;{formatCurrency(loss)}
+                                </span>
+                              ))}
+                            </div>
+                            <div className={styles.blockRowRight}>
+                              <span className={styles.blockRowLoss}>{formatCurrency(bLoss)}</span>
+                              <button
+                                className={styles.loadBlockBtn}
+                                title="Load this block into Calculator"
+                                onClick={() => { setStartDate(block.startDate); setEndDate(block.endDate); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                              >↗</button>
+                            </div>
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

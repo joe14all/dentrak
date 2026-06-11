@@ -430,4 +430,249 @@
   .practiceList {
     grid-template-columns: 1fr;
   }
+
+  .blockList {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Schedule Block Analysis ──────────────────────────────────────────────── */
+.blockAnalysis {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ui-border-secondary);
+}
+
+.blockAnalysisHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.blockAnalysisIcon {
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+.blockAnalysisTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ui-text-primary);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.blockSummaryStats {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.blockStatChip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.625rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.blockStatChip[data-type="current"]  { background: rgba(245, 158, 11, 0.15); color: #B45309; }
+.blockStatChip[data-type="upcoming"] { background: var(--brand-secondary); color: var(--brand-primary); }
+.blockStatChip[data-type="past"]     { background: var(--ui-background-tertiary); color: var(--ui-text-tertiary); border: 1px solid var(--ui-border-secondary); }
+
+.blockToggleBtn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--brand-primary);
+  border: 1px solid var(--brand-primary);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.blockToggleBtn:hover {
+  background: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+
+/* Table */
+.blockTable {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.blockGroupHeader {
+  padding: 0.3rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ui-text-tertiary);
+  background: var(--ui-background-tertiary);
+  border-bottom: 1px solid var(--ui-border-secondary);
+}
+
+.blockRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid var(--ui-border-secondary);
+  transition: background 0.1s ease;
+}
+.blockRow:last-child { border-bottom: none; }
+.blockRow:hover { background: var(--ui-background-tertiary); }
+
+/* Period row — the consolidated header row */
+.periodRow { padding: 0.6rem 0.875rem; }
+.periodRowClickable { cursor: pointer; }
+
+/* Sub-row — individual blocks inside an expanded period */
+.blockSubRow {
+  background: var(--ui-background-secondary);
+  padding-left: 1rem;
+  opacity: 0.9;
+}
+.blockSubRow:hover { background: var(--ui-background-tertiary); }
+
+.periodChevron {
+  font-size: 0.7rem;
+  color: var(--ui-text-tertiary);
+  flex-shrink: 0;
+  width: 1rem;
+  text-align: center;
+}
+
+.blockSubIndent {
+  display: inline-block;
+  width: 1rem;
+  flex-shrink: 0;
+}
+
+.periodRowDates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.periodBlockCount {
+  font-size: 0.7rem;
+  color: var(--ui-text-tertiary);
+}
+
+/* Left accent strip by type */
+.rowCurrent { border-left: 3px solid #F59E0B; }
+.rowFuture  { border-left: 3px solid var(--brand-primary); }
+.rowPast    { border-left: 3px solid var(--ui-border-secondary); opacity: 0.75; }
+
+.blockRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.blockRowDates {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ui-text-primary);
+  white-space: nowrap;
+}
+
+.blockRowReason {
+  font-size: 0.75rem;
+  color: var(--ui-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.blockRowMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  flex: 2;
+}
+
+.blockRowDays {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ui-text-secondary);
+  white-space: nowrap;
+  min-width: 2rem;
+}
+
+.blockPracticePill {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--ui-background-secondary);
+  border: 1px solid var(--ui-border-secondary);
+  border-radius: 999px;
+  color: var(--ui-text-secondary);
+  white-space: nowrap;
+}
+
+.blockNoPill {
+  font-size: 0.7rem;
+  color: var(--ui-text-tertiary);
+  font-style: italic;
+}
+
+.blockRowRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.blockRowLoss {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--state-danger);
+  white-space: nowrap;
+  min-width: 4rem;
+  text-align: right;
+}
+
+.loadBlockBtn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--brand-secondary);
+  color: var(--brand-primary);
+  border: 1px solid var(--brand-primary);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  line-height: 1;
+}
+
+.loadBlockBtn:hover {
+  background: var(--brand-primary);
+  color: var(--brand-text-on-primary);
+}
+
+.noBlocks {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  background: var(--ui-background-tertiary);
+  border-radius: 6px;
+  border: 1px dashed var(--ui-border-secondary);
+  color: var(--ui-text-secondary);
+  font-size: 0.8125rem;
 }

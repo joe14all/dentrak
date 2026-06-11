@@ -11,12 +11,14 @@ import { useScheduleBlocks } from '../../../contexts/ScheduleBlockContext/Schedu
 import { useScheduleBlockEditor } from '../../../hooks/useScheduleBlockEditor';
 import styles from './AttendanceTracker.module.css';
 
+const PRACTICE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+
 const generateColorMap = (practices) => {
   if (!practices) return {};
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
   const map = {};
-  practices.forEach((p, index) => {
-    map[p.id] = colors[index % colors.length];
+  practices.forEach((p) => {
+    // Use practice id to pick a stable color regardless of which practices are visible
+    map[p.id] = PRACTICE_COLORS[p.id % PRACTICE_COLORS.length];
   });
   return map;
 };
@@ -38,7 +40,24 @@ const AttendanceTracker = ({ entries, practices }) => {
      return entries.filter(e => e.entryType === 'attendanceRecord');
    }, [entries]);
 
-  const colorMap = useMemo(() => generateColorMap(practices), [practices]);
+  // Only show practices that were active during the viewed month.
+  // Archived practices are hidden starting from the month AFTER they were archived.
+  const visiblePractices = useMemo(() => {
+    if (!practices) return [];
+    const viewYear = currentDate.getFullYear();
+    const viewMonth = currentDate.getMonth(); // 0-indexed
+    return practices.filter(p => {
+      if (p.status !== 'archived') return true;
+      if (!p.archivedDate) return false;
+      const [y, m] = p.archivedDate.split('-').map(Number); // m is 1-indexed
+      // Show if the archive month/year >= the viewed month/year
+      if (y > viewYear) return true;
+      if (y === viewYear) return (m - 1) >= viewMonth;
+      return false;
+    });
+  }, [practices, currentDate]);
+
+  const colorMap = useMemo(() => generateColorMap(visiblePractices), [visiblePractices]);
 
   // --- Editor Hooks ---
   const {
@@ -92,7 +111,7 @@ const AttendanceTracker = ({ entries, practices }) => {
               conflicts.push({
                   date: dateStr,
                   practiceId: entry.practiceId,
-                  practiceName: practices.find(p => p.id === entry.practiceId)?.name || 'Unknown',
+                  practiceName: visiblePractices.find(p => p.id === entry.practiceId)?.name || 'Unknown',
                   entryId: entry.id,
                   isPendingAddition: false,
               });
@@ -101,7 +120,7 @@ const AttendanceTracker = ({ entries, practices }) => {
                conflicts.push({
                    date: dateStr,
                    practiceId: addition.practiceId,
-                   practiceName: practices.find(p => p.id === addition.practiceId)?.name || 'Unknown',
+                   practiceName: visiblePractices.find(p => p.id === addition.practiceId)?.name || 'Unknown',
                    entryId: null,
                    isPendingAddition: true,
                    additionKey: `${dateStr}-${addition.practiceId}`
@@ -109,7 +128,7 @@ const AttendanceTracker = ({ entries, practices }) => {
            });
       });
       return conflicts;
-  }, [attendanceEntries, pendingAttendanceChanges, practices]);
+  }, [attendanceEntries, pendingAttendanceChanges, visiblePractices]);
 
 
   // --- Action Handlers ---
@@ -161,12 +180,15 @@ const AttendanceTracker = ({ entries, practices }) => {
             setBulkEditOpen(false);
         } else {
             applyBulkAttendanceUpdate(criteria);
+            setCurrentDate(new Date(`${startDate}T00:00:00`));
             setBulkEditOpen(false);
         }
 
     } else { // editMode === 'blocks'
         const { startDate, endDate, daysOfWeek, action } = criteria;
-        const blockAction = action === 'select' ? 'block' : 'unblock'; // Correct mapping based on panel button intent
+
+        // Panel sends 'block'/'unblock' directly for blocks mode — use it as-is
+        const blockAction = action;
         const blockCriteria = { action: blockAction, startDate, endDate, daysOfWeek };
 
         if (blockCriteria.action === 'block') {
@@ -192,10 +214,12 @@ const AttendanceTracker = ({ entries, practices }) => {
                 setIsConflictModalOpen(true);
             } else {
                 applyBulkBlockUpdateInternal(blockCriteria);
+                setCurrentDate(new Date(`${startDate}T00:00:00`));
                 setBulkEditOpen(false);
             }
         } else { // Unblocking
             applyBulkBlockUpdateInternal(blockCriteria);
+            setCurrentDate(new Date(`${startDate}T00:00:00`));
             setBulkEditOpen(false);
         }
     }
@@ -205,7 +229,7 @@ const AttendanceTracker = ({ entries, practices }) => {
       applyBulkBlockUpdateInternal,
       isDateEffectivelyBlocked,
       findConflicts,
-      practices,
+      visiblePractices,
       attendanceEntries
     ]);
 
@@ -240,8 +264,10 @@ const AttendanceTracker = ({ entries, practices }) => {
     if (pendingBlockAction) {
       if (pendingBlockAction.type === 'single') {
         stageBlockChangeInternal(pendingBlockAction.data);
+        setCurrentDate(new Date(`${pendingBlockAction.data}T00:00:00`));
       } else if (pendingBlockAction.type === 'bulk') {
         applyBulkBlockUpdateInternal(pendingBlockAction.data);
+        setCurrentDate(new Date(`${pendingBlockAction.data.startDate}T00:00:00`));
       }
     }
 
@@ -292,7 +318,7 @@ const AttendanceTracker = ({ entries, practices }) => {
         <AttendanceCalendar
           currentDate={currentDate}
           attendanceEntries={attendanceEntries}
-          practices={practices || []}
+          practices={visiblePractices || []}
           colorMap={colorMap}
           pendingAttendanceChanges={pendingAttendanceChanges}
           scheduleBlocks={scheduleBlocks}
@@ -303,9 +329,9 @@ const AttendanceTracker = ({ entries, practices }) => {
         />
       </div>
 
-       {practices && practices.length > 0 && (
+       {visiblePractices && visiblePractices.length > 0 && (
          <AttendanceLegend
-           practices={practices}
+           practices={visiblePractices}
            colorMap={colorMap}
            attendanceEntries={attendanceEntries}
            currentDate={currentDate}
@@ -315,7 +341,7 @@ const AttendanceTracker = ({ entries, practices }) => {
 
       <Modal isOpen={isBulkEditOpen} onClose={() => setBulkEditOpen(false)} title={`Quick ${editMode === 'attendance' ? 'Attendance' : 'Blocking'}`}>
          <BulkEditPanel
-           practices={practices || []}
+           practices={visiblePractices || []}
            currentDate={currentDate}
            onApply={handleBulkUpdate}
            onCancel={() => setBulkEditOpen(false)}
