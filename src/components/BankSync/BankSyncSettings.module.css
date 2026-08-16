@@ -219,7 +219,7 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.5rem 1rem;
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 6px;
@@ -230,7 +230,7 @@
 }
 
 .addBtn:hover:not(:disabled) {
-  background-color: var(--primary-hover, #2563eb);
+  background-color: var(--brand-primary-hover, #2563eb);
 }
 
 .addBtn:disabled {
@@ -340,7 +340,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 8px;
@@ -350,7 +350,7 @@
 }
 
 .saveBtn:hover {
-  background-color: var(--primary-hover, #2563eb);
+  background-color: var(--brand-primary-hover, #2563eb);
 }
 
 /* Sender Links List */
@@ -446,14 +446,14 @@
 .toggleManualBtn {
   background: none;
   border: none;
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
   font-size: 0.8rem;
   cursor: pointer;
   text-decoration: underline;
 }
 
 .toggleManualBtn:hover {
-  color: var(--primary-hover, #2563eb);
+  color: var(--brand-primary-hover, #2563eb);
 }
 
 .addLinkForm {
@@ -567,7 +567,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 8px;
@@ -578,7 +578,7 @@
 
 .connectBankBtn:hover:not(:disabled),
 .fetchBtn:hover:not(:disabled) {
-  background-color: var(--primary-hover, #2563eb);
+  background-color: var(--brand-primary-hover, #2563eb);
 }
 
 .connectBankBtn:disabled,

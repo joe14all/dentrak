@@ -3,6 +3,7 @@ import styles from './PracticeComparison.module.css';
 import { usePractices } from '../../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../../contexts/EntryContext/EntryContext';
 import { usePayments } from '../../../contexts/PaymentContext/PaymentContext';
+import { useTransactions } from '../../../contexts/TransactionContext/TransactionContext';
 import { useNavigation } from '../../../contexts/NavigationContext/NavigationContext';
 import { comparePractices, calculateContributions } from '../../../utils/practiceComparison';
 import { 
@@ -33,6 +34,7 @@ const PracticeComparison = () => {
   const { practices, practicesVersion } = usePractices();
   const { entries } = useEntries();
   const { payments } = usePayments();
+  const { cheques, eTransfers } = useTransactions();
   const { setActivePage } = useNavigation();
   const [showDetails, setShowDetails] = useState(false);
   const [timeRange, setTimeRange] = useState('ytd'); // ytd, last3months, last6months, all
@@ -78,8 +80,8 @@ const PracticeComparison = () => {
     return comparePractices(practices, entries, payments, {
       ...dateRange,
       activeOnly: true,
-    });
-  }, [practices, entries, payments, dateRange, practicesVersion]);
+    }, cheques, eTransfers);
+  }, [practices, entries, payments, dateRange, practicesVersion, cheques, eTransfers]);
 
   // Add contribution percentages
   const metricsWithContributions = useMemo(() => {
@@ -176,6 +178,12 @@ const PracticeComparison = () => {
           </div>
         ))}
       </div>
+
+      {comparison.totals.pendingPaymentsReceived > 0 && (
+        <p className={styles.pendingNote}>
+          {formatCurrency(comparison.totals.pendingPaymentsReceived)} is still pending bank clearance (uncleared cheques or unaccepted e-transfers) and isn't counted as received in the figures above yet.
+        </p>
+      )}
 
       {/* Comparison Chart */}
       <div className={styles.section}>

@@ -60,19 +60,48 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
   const [transactionToApprove, setTransactionToApprove] = useState(null);
   const [approvalData, setApprovalData] = useState({
     practiceId: null,
-    paymentType: 'directDeposits',
+    paymentType: 'eTransfers',
     notes: '',
   });
   const [rejectReason, setRejectReason] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [filterPractice, setFilterPractice] = useState('all');
+  const [filterBankAccount, setFilterBankAccount] = useState('all');
   const [showUnlinkedSenders, setShowUnlinkedSenders] = useState(true);
   const [transactionTypeFilter, setTransactionTypeFilter] = useState('all'); // all, income, expense
 
-  // Active contractor practices for selection
+  // Active practices for selection (all tax statuses, not just contractors)
   const activePractices = useMemo(() => {
-    return practices.filter(p => p.status === 'active' && p.taxStatus === 'contractor');
+    return practices.filter(p => p.status === 'active');
   }, [practices]);
+
+  // Available bank accounts for filtering
+  const bankAccountOptions = useMemo(() => {
+    const options = [];
+    const seenAccountIds = new Set();
+
+    // Prefer connected accounts for clean labels
+    connections.forEach((connection) => {
+      if (!connection.accountId || seenAccountIds.has(connection.accountId)) return;
+      seenAccountIds.add(connection.accountId);
+      options.push({
+        value: connection.accountId,
+        label: `${connection.institutionName} - ${connection.accountName} (****${connection.lastFour})`,
+      });
+    });
+
+    // Include historical/disconnected accounts that still appear in pending transactions
+    pendingTransactions.forEach((transaction) => {
+      if (!transaction.accountId || seenAccountIds.has(transaction.accountId)) return;
+      seenAccountIds.add(transaction.accountId);
+      options.push({
+        value: transaction.accountId,
+        label: `${transaction.institutionName} - ${transaction.accountName}`,
+      });
+    });
+
+    return options;
+  }, [connections, pendingTransactions]);
 
   // Filtered pending transactions
   const filteredTransactions = useMemo(() => {
@@ -91,6 +120,11 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     } else if (transactionTypeFilter === 'expense') {
       filtered = filtered.filter(t => t.type === 'expense');
     }
+
+    // Apply bank account filter if selected
+    if (filterBankAccount !== 'all') {
+      filtered = filtered.filter(t => t.accountId === filterBankAccount);
+    }
     
     // Apply practice-specific filter if selected
     if (filterPractice !== 'all') {
@@ -101,7 +135,7 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     }
     
     return filtered;
-  }, [pendingTransactions, filterPractice, showUnlinkedSenders, transactionTypeFilter]);
+  }, [pendingTransactions, filterPractice, showUnlinkedSenders, transactionTypeFilter, filterBankAccount]);
 
   // Count by match status
   const counts = useMemo(() => {
@@ -141,7 +175,7 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
     setTransactionToApprove(transaction);
     setApprovalData({
       practiceId: transaction.suggestedPracticeId || (activePractices.length > 0 ? activePractices[0].id : null),
-      paymentType: transaction.suggestedPaymentType || 'directDeposits',
+      paymentType: transaction.suggestedPaymentType || 'eTransfers',
       notes: '',
     });
     setShowApproveModal(true);
@@ -185,7 +219,7 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
           pendingId: id,
           data: {
             practiceId: transaction.suggestedPracticeId,
-            paymentType: transaction.suggestedPaymentType || 'directDeposits',
+            paymentType: transaction.suggestedPaymentType || 'eTransfers',
             notes: `Auto-approved from bank import`,
           },
         });
@@ -353,46 +387,81 @@ const PendingTransactionsPanel = ({ onTransactionApproved }) => {
         </div>
 
         {/* Simplified Filters - always visible */}
-        <div className={styles.filters}>
-          {/* Transaction Type Filter */}
-          <select
-            value={transactionTypeFilter}
-            onChange={(e) => setTransactionTypeFilter(e.target.value)}
-            className={styles.typeFilter}
-            style={{ fontWeight: transactionTypeFilter !== 'all' ? 'bold' : 'normal' }}
-          >
-            <option value="all">All Types ({counts.total})</option>
-            <option value="income">✓ Income Only ({counts.income})</option>
-            <option value="expense">✗ Expenses Only ({counts.expense})</option>
-          </select>
-          
-          {/* Toggle for showing unlinked transactions */}
-          <label className={styles.toggleLabel}>
-            <input
-              type="checkbox"
-              checked={showUnlinkedSenders}
-              onChange={(e) => {
-                setShowUnlinkedSenders(e.target.checked);
-                if (!e.target.checked) setFilterPractice('all');
-              }}
-            />
-            <span>Show unlinked senders</span>
-          </label>
-          
-          {/* Practice filter - only show when relevant */}
-          {(showUnlinkedSenders || activePractices.length > 1) && (
-            <select
-              value={filterPractice}
-              onChange={(e) => setFilterPractice(e.target.value)}
-              className={styles.practiceFilter}
-            >
-              <option value="all">All Practices</option>
-              {showUnlinkedSenders && <option value="unmatched">Unlinked Only</option>}
-              {activePractices.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          )}
+        <div className={styles.filtersPanel}>
+          <div className={styles.filtersTitle}>
+            <Filter size={14} />
+            <span>Filter Transactions</span>
+          </div>
+
+          <div className={styles.filters}>
+            {/* Transaction Type Filter */}
+            <div className={styles.filterControl}>
+              <label htmlFor="pending-type-filter" className={styles.filterLabel}>Type</label>
+              <select
+                id="pending-type-filter"
+                value={transactionTypeFilter}
+                onChange={(e) => setTransactionTypeFilter(e.target.value)}
+                className={`${styles.filterSelect} ${styles.typeFilter}`}
+              >
+                <option value="all">All Types ({counts.total})</option>
+                <option value="income">Income Only ({counts.income})</option>
+                <option value="expense">Expenses Only ({counts.expense})</option>
+              </select>
+            </div>
+
+            {/* Practice filter - only show when relevant */}
+            {(showUnlinkedSenders || activePractices.length > 1) && (
+              <div className={styles.filterControl}>
+                <label htmlFor="pending-practice-filter" className={styles.filterLabel}>Practice</label>
+                <select
+                  id="pending-practice-filter"
+                  value={filterPractice}
+                  onChange={(e) => setFilterPractice(e.target.value)}
+                  className={`${styles.filterSelect} ${styles.practiceFilter}`}
+                >
+                  <option value="all">All Practices</option>
+                  {showUnlinkedSenders && <option value="unmatched">Unlinked Only</option>}
+                  {activePractices.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Bank account filter */}
+            <div className={styles.filterControl}>
+              <label htmlFor="pending-account-filter" className={styles.filterLabel}>Bank Account</label>
+              <select
+                id="pending-account-filter"
+                value={filterBankAccount}
+                onChange={(e) => setFilterBankAccount(e.target.value)}
+                className={`${styles.filterSelect} ${styles.practiceFilter}`}
+              >
+                <option value="all">All Bank Accounts</option>
+                {bankAccountOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Toggle for showing unlinked transactions */}
+            <div className={`${styles.filterControl} ${styles.filterToggleControl}`}>
+              <label className={styles.filterLabel}>Matching</label>
+              <label className={styles.toggleLabel}>
+                <input
+                  type="checkbox"
+                  checked={showUnlinkedSenders}
+                  onChange={(e) => {
+                    setShowUnlinkedSenders(e.target.checked);
+                    if (!e.target.checked) setFilterPractice('all');
+                  }}
+                />
+                <span>Show unlinked senders</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 

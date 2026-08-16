@@ -216,7 +216,7 @@ const EntryForm = ({ entryToEdit, practices, initialEntryType, onSave, onCancel 
                 <div className={styles.formGroup}>
                     <label htmlFor="practiceId">Practice</label>
                     <div className={styles.selectWrapper}>
-                        <select id="practiceId" name="practiceId" value={formData.practiceId} onChange={handleChange} required disabled={!!entryToEdit}>
+                        <select id="practiceId" name="practiceId" value={formData.practiceId} onChange={handleChange} required>
                             <option value="" disabled>Select a practice...</option>
                             {(practices || []).map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}
                         </select>

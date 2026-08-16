@@ -68,6 +68,11 @@ const YtdIncomeReport = ({ data }) => {
           <p className={styles.outstandingNote}>
             This represents income earned but not yet received
           </p>
+          {data.totals.totalPending > 0 && (
+            <p className={styles.outstandingNote}>
+              Includes {formatCurrency(data.totals.totalPending)} still pending bank clearance (uncleared cheques or unaccepted e-transfers) that isn't yet counted as received. Once those clear, the outstanding balance will drop accordingly.
+            </p>
+          )}
         </div>
       )}
 

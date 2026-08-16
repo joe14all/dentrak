@@ -4,6 +4,7 @@ import { useTransactions } from '../../contexts/TransactionContext/TransactionCo
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import { usePayments } from '../../contexts/PaymentContext/PaymentContext'; // Keep for potential cash payments
 import FinancialsToolbar from '../../features/financials/FinancialsToolbar';
+import FinancialsFilterBar from '../../features/financials/FinancialsFilterBar';
 import FinancialsList from '../../features/financials/FinancialsList';
 import FinancialsSummary from '../../features/financials/FinancialsSummary';
 import Modal from '../../components/common/Modal/Modal';
@@ -25,6 +26,13 @@ const FinancialsPage = () => {
   const { payments, isLoading: isPaymentsLoading, addNewPayment, editPayment, removePayment } = usePayments();
 
   const [activeView, setActiveView] = useState('all'); // Filter state (all, cheque, deposit, etc.)
+  const [filters, setFilters] = useState({
+    practiceId: 'all',
+    source: 'all',
+    status: 'all',
+    startDate: '',
+    endDate: '',
+  });
 
   // State for modals (similar to TransactionsPage)
   const [isFormModalOpen, setFormModalOpen] = useState(false);
@@ -70,14 +78,38 @@ const FinancialsPage = () => {
      });
   }, [cheques, directDeposits, eTransfers, payments]);
 
+  // Apply practice/source/status/date filters on top of the combined items
+  const filteredFinancialItems = useMemo(() => {
+    return allFinancialItems.filter((item) => {
+      if (filters.practiceId !== 'all' && item.practiceId !== parseInt(filters.practiceId)) {
+        return false;
+      }
+
+      const isBankImported = !!item.externalId?.startsWith('teller_');
+      if (filters.source === 'bank' && !isBankImported) return false;
+      if (filters.source === 'manual' && isBankImported) return false;
+
+      // Only cheques can be 'pending'; everything else is considered completed
+      const isCompleted = item.type !== 'cheques' || item.status === 'Deposited' || item.status === 'Cleared';
+      if (filters.status === 'completed' && !isCompleted) return false;
+      if (filters.status === 'pending' && isCompleted) return false;
+
+      const itemDate = item.dateReceived || item.paymentDate;
+      if (filters.startDate && (!itemDate || new Date(itemDate) < new Date(filters.startDate))) return false;
+      if (filters.endDate && (!itemDate || new Date(itemDate) > new Date(filters.endDate))) return false;
+
+      return true;
+    });
+  }, [allFinancialItems, filters]);
+
   // Define views/filters for the toolbar and data filtering
   const views = useMemo(() => ({
-    all: { label: 'All', icon: List, data: allFinancialItems },
-    cheques: { label: 'Cheques', icon: CreditCard, data: allFinancialItems.filter(t => t.type === 'cheques') },
-    directDeposits: { label: 'Deposits', icon: Landmark, data: allFinancialItems.filter(t => t.type === 'directDeposits') },
-    eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: allFinancialItems.filter(t => t.type === 'eTransfers') },
-    cash: { label: 'Cash', icon: Wallet, data: allFinancialItems.filter(t => t.type === 'cash') },
-  }), [allFinancialItems]);
+    all: { label: 'All', icon: List, data: filteredFinancialItems },
+    cheques: { label: 'Cheques', icon: CreditCard, data: filteredFinancialItems.filter(t => t.type === 'cheques') },
+    directDeposits: { label: 'Deposits', icon: Landmark, data: filteredFinancialItems.filter(t => t.type === 'directDeposits') },
+    eTransfers: { label: 'E-Transfers', icon: MousePointerClick, data: filteredFinancialItems.filter(t => t.type === 'eTransfers') },
+    cash: { label: 'Cash', icon: Wallet, data: filteredFinancialItems.filter(t => t.type === 'cash') },
+  }), [filteredFinancialItems]);
 
   // Calculate summary data based on the current filtered view
   const summaryData = useMemo(() => {
@@ -245,6 +277,7 @@ const FinancialsPage = () => {
         onAddTransaction={handleOpenAddModal}
         onOpenImporter={() => setImportModalOpen(true)}
       />
+      <FinancialsFilterBar practices={practices} filters={filters} onFilterChange={setFilters} />
       <FinancialsSummary summaryData={summaryData} />
       <div className={styles.content}>
         <FinancialsList

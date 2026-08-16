@@ -23,14 +23,14 @@
 }
 
 .headerLeft svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .headerLeft h3 {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .filingSelect {
@@ -39,13 +39,13 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   background: var(--ui-background-secondary, #f9fafb);
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   cursor: pointer;
 }
 
 .filingSelect:focus {
   outline: none;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
 }
 
 /* Summary Cards */
@@ -88,18 +88,18 @@
 .cardLabel {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .cardValue {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .cardSubtext {
   font-size: 0.75rem;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
 }
 
 /* Sections */
@@ -116,14 +116,14 @@
 }
 
 .sectionHeader svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .sectionHeader h4 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 /* Quarterly Grid */
@@ -144,7 +144,7 @@
 }
 
 .quarterCard.current {
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
   background: rgba(59, 130, 246, 0.05);
 }
 
@@ -162,12 +162,12 @@
 .quarterLabel {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .currentBadge {
   padding: 0.125rem 0.5rem;
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
   border-radius: 0.25rem;
   font-size: 0.6875rem;
@@ -178,13 +178,13 @@
 .quarterAmount {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   margin-bottom: 0.25rem;
 }
 
 .quarterDue {
   font-size: 0.75rem;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
 }
 
 /* Chart */
@@ -205,7 +205,7 @@
   border-radius: 0.5rem;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -215,7 +215,7 @@
 }
 
 .toggleButton svg {
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
 }
 
 .detailsGrid {
@@ -233,7 +233,7 @@
   align-items: center;
   padding: 0.5rem 0;
   font-size: 0.875rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .detailRow.highlight {
@@ -241,7 +241,7 @@
   padding-top: 0.75rem;
   margin-top: 0.25rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .detailRow.total {
@@ -249,13 +249,13 @@
   padding-top: 0.75rem;
   margin-top: 0.5rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   font-size: 1rem;
 }
 
 .detailValue {
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
@@ -269,7 +269,7 @@
   border-left: 3px solid #f59e0b;
   border-radius: 0.5rem;
   font-size: 0.8125rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .disclaimer svg {

@@ -26,11 +26,11 @@
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .formGroup label svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .formGroup input,
@@ -42,7 +42,7 @@
   font-size: 0.9375rem;
   font-family: inherit;
   background: var(--ui-background-primary, #ffffff);
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   transition: all 0.2s ease;
 }
 
@@ -50,7 +50,7 @@
 .formGroup select:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -61,12 +61,12 @@
 
 .formGroup select optgroup {
   font-weight: 600;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .formGroup select option {
   font-weight: 400;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .checkboxGroup {
@@ -83,14 +83,14 @@
   cursor: pointer;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .checkboxLabel input[type="checkbox"] {
   width: 1.125rem;
   height: 1.125rem;
   cursor: pointer;
-  accent-color: var(--primary-color, #3b82f6);
+  accent-color: var(--brand-primary, #3b82f6);
 }
 
 .actions {
@@ -114,7 +114,7 @@
 
 .cancelButton {
   background: var(--ui-background-secondary, #f9fafb);
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .cancelButton:hover {
@@ -122,12 +122,12 @@
 }
 
 .saveButton {
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
 }
 
 .saveButton:hover {
-  background: var(--primary-hover, #2563eb);
+  background: var(--brand-primary-hover, #2563eb);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }

@@ -12,6 +12,7 @@
     The primary color that defines the application's identity.
   */
   --brand-primary: #3B82F6; /* A modern, professional blue */
+  --brand-primary-hover: #2563eb; /* Hover state for brand-primary buttons/links */
   --brand-secondary: #Dbeafe;
   --brand-text-on-primary: #ffffff; /* Text color for on-brand backgrounds */
 

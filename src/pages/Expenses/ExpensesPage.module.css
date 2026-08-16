@@ -20,20 +20,20 @@
 }
 
 .headerLeft svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .title {
   margin: 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .subtitle {
   margin: 0.25rem 0 0 0;
   font-size: 0.9375rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .addButton {
@@ -41,7 +41,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -52,7 +52,7 @@
 }
 
 .addButton:hover {
-  background: var(--primary-hover, #2563eb);
+  background: var(--brand-primary-hover, #2563eb);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
 }
@@ -100,7 +100,7 @@
 .statLabel {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -108,12 +108,12 @@
 .statValue {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .statSubtext {
   font-size: 0.8125rem;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
 }
 
 .yearSelect {
@@ -123,14 +123,14 @@
   font-size: 1.5rem;
   font-weight: 700;
   background: transparent;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   cursor: pointer;
   max-width: 150px;
 }
 
 .yearSelect:focus {
   outline: none;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
 }
 
 /* List Container */

@@ -10,7 +10,7 @@ body, h1, h2, h3, p {
 .app-container {
   width: 100vw;
   height: 100vh;
-  background-color: var(--background-primary);
-  color: var(--text-primary);
+  background-color: var(--ui-background-primary);
+  color: var(--ui-text-primary);
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }

@@ -2,18 +2,20 @@ import React from 'react';
 import styles from './MetricCard.module.css'; // Assuming this is MetricCard.module.css
 
 // Accept trendIndicator and goalIndicator as direct JSX props
-const MetricCard = ({ title, value, trendIndicator, goalIndicator, children }) => (
+const MetricCard = ({ title, value, trendNote, trendIndicator, goalIndicator, children }) => (
     <div className={styles.metricCard}>
         {/* UPDATED: Header is now a grid container */}
         <div className={styles.metricHeader}>
           {/* Column 1: Title */}
-          <h4 className={styles.metricTitle}>{title}</h4>
+          <div className={styles.metricTitleGroup}>
+            <h4 className={styles.metricTitle}>{title}</h4>
+          </div>
 
           {/* Column 2: Stacked Indicators */}
-          {(trendIndicator || goalIndicator) && (
+          {(trendIndicator || goalIndicator || trendNote) && (
             <div className={styles.indicatorContainer}>
-                {/* Render the passed JSX directly */}
                 {trendIndicator}
+                {trendNote && <span className={styles.metricHeaderNote}>{trendNote}</span>}
                 {goalIndicator}
             </div>
           )}

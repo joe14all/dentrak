@@ -120,11 +120,13 @@ const SummaryInsights = () => {
                     practiceAttendanceByDate[date] = Math.max(practiceAttendanceByDate[date] || 0, dayValue);
                 });
             const practiceWorkDays = Object.values(practiceAttendanceByDate).reduce((sum, val) => sum + val, 0);
+            const avgProductionPerDay = practiceWorkDays > 0 ? calcResult.productionTotal / practiceWorkDays : 0;
             return { 
                 practiceName: practice.name, 
                 production: calcResult.productionTotal, 
                 salary: calcResult.calculatedPay, 
                 daysWorked: practiceWorkDays, 
+                avgProductionPerDay,
                 payStructure: calcResult.payStructure, 
                 payPeriods: calcResult.payPeriods, 
                 basePayOwed: calcResult.basePayOwed, 
@@ -162,6 +164,22 @@ const SummaryInsights = () => {
             ? (totalEstimatedPay / overallMonthlyIncomeGoal.targetAmount) * 100
             : null;
 
+        const overallAvgProductionPerDay = daysWorked > 0 ? totalProduction / daysWorked : 0;
+        const prevMonthAttendanceByDate = {};
+        entriesInPrevMonth
+            .filter(e => (e.entryType === 'attendanceRecord' || e.entryType === 'dailySummary') && e.date)
+            .forEach(entry => {
+                const date = entry.date;
+                let dayValue = 1;
+                if (entry.entryType === 'attendanceRecord' && entry.attendanceType === 'half-day') {
+                    dayValue = 0.5;
+                }
+                prevMonthAttendanceByDate[date] = Math.max(prevMonthAttendanceByDate[date] || 0, dayValue);
+            });
+        const prevMonthDaysWorked = Object.values(prevMonthAttendanceByDate).reduce((sum, val) => sum + val, 0);
+        const prevAvgProductionPerDay = prevMonthDaysWorked > 0 ? prevMonthProduction / prevMonthDaysWorked : 0;
+        const avgProductionTrend = prevAvgProductionPerDay > 0 ? ((overallAvgProductionPerDay - prevAvgProductionPerDay) / prevAvgProductionPerDay) * 100 : (overallAvgProductionPerDay > 0 ? 100 : 0);
+
         const chartData = practiceBreakdown.map(p => ({
             name: p.practiceName,
             base: p.basePayOwed,
@@ -173,6 +191,8 @@ const SummaryInsights = () => {
                 totalProduction,
                 totalEstimatedPay,
                 daysWorked,
+                avgProductionPerDay: overallAvgProductionPerDay,
+                avgProductionTrend,
                 breakdown: practiceBreakdown,
                 productionTrend: prevMonthProduction > 0 ? ((totalProduction - prevMonthProduction) / prevMonthProduction) * 100 : (totalProduction > 0 ? 100 : 0),
                 payTrend: prevMonthPay > 0 ? ((totalEstimatedPay - prevMonthPay) / prevMonthPay) * 100 : (totalEstimatedPay > 0 ? 100 : 0),
@@ -258,20 +278,39 @@ const SummaryInsights = () => {
                     trendIndicator={renderTrendInfo(summary.productionTrend, summary.productionTrend >= 0 ? 'positive' : 'negative')}
                     goalIndicator={renderGoalInfo(summary.productionGoalTarget, summary.productionGoalProgress)}
                 >
-                   {(summary.breakdown || []).map(p => (
+                   {(summary.breakdown || []).filter(p => p.production > 0).map(p => (
                        <div key={p.practiceName} className={styles.simpleBreakdownItem}>
-                           <span>{p.practiceName}</span>
-                           <span className={styles.breakdownValue}>{formatCurrency(p.production)}</span>
+                           <span className={styles.practiceNameLabel}>{p.practiceName}</span>
+                           <div className={styles.breakdownValueGroup}>
+                               <div className={styles.breakdownStat}>
+                                   <span className={styles.statLabel}>Production</span>
+                                   <span className={styles.statValue}>{formatCurrency(p.production)}</span>
+                               </div>
+                           </div>
                        </div>
                     ))}
                 </MetricCard>
 
                 {/* --- Days Worked Card --- */}
-                <MetricCard title="Days Worked" value={summary.daysWorked || 0}>
-                   {(summary.breakdown || []).map(p => (
+                <MetricCard
+                    title="Days Worked"
+                    value={summary.daysWorked || 0}
+                    trendNote={`Avg ${formatCurrency(summary.avgProductionPerDay)}/day`}
+                    trendIndicator={renderTrendInfo(summary.avgProductionTrend, summary.avgProductionTrend >= 0 ? 'positive' : 'negative')}
+                >
+                   {(summary.breakdown || []).filter(p => p.daysWorked > 0 || p.avgProductionPerDay > 0).map(p => (
                        <div key={p.practiceName} className={styles.simpleBreakdownItem}>
-                           <span>{p.practiceName}</span>
-                           <span className={styles.breakdownValue}>{p.daysWorked} days</span>
+                           <span className={styles.practiceNameLabel}>{p.practiceName}</span>
+                           <div className={styles.breakdownValueGroup}>
+                               <div className={styles.breakdownStat}>
+                                   <span className={styles.statLabel}>Days</span>
+                                   <span className={styles.statValue}>{p.daysWorked}</span>
+                               </div>
+                               <div className={styles.breakdownStat}>
+                                   <span className={styles.statLabel}>Avg/Day</span>
+                                   <span className={styles.statValue}>{formatCurrency(p.avgProductionPerDay)}</span>
+                               </div>
+                           </div>
                        </div>
                     ))}
                 </MetricCard>

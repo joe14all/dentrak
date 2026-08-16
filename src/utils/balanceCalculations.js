@@ -370,8 +370,17 @@ export const calculatePracticeBalances = (
         .forEach(
           (t) => (totalConfirmedPaymentsToDate += Number(t.amount) || 0)
         );
-      // Consider adding generic 'cash' payments if needed:
-      // genericPayments.filter(p => p.practiceId === practice.id && p.paymentMethod === 'cash').forEach(p => totalConfirmedPaymentsToDate += (Number(p.amount) || 0));
+      // Cash payments are logged only in genericPayments (not mirrored into
+      // cheques/directDeposits/eTransfers), so they must be added separately.
+      // Only count 'cash' here - other methods are already covered above via
+      // their dedicated tables and would otherwise be double-counted.
+      (genericPayments || [])
+        .filter(
+          (p) => p.practiceId === practice.id && p.paymentMethod === "cash"
+        )
+        .forEach(
+          (p) => (totalConfirmedPaymentsToDate += Number(p.amount) || 0)
+        );
 
       // --- 3. Calculate Overall Balance ---
       // Balance = Total Earned (Completed Periods) - Total Confirmed Payments

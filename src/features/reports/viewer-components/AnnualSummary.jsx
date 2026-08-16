@@ -145,6 +145,12 @@ const AnnualSummary = ({ data }) => {
         </div>
       ))}
 
+      {data.overallTotals.pendingPaymentsReceived > 0 && (
+        <p className={styles.pendingNote}>
+          Outstanding balance excludes {formatCurrency(data.overallTotals.pendingPaymentsReceived)} that is still pending bank clearance (uncleared cheques or unaccepted e-transfers). That amount is not yet counted as received.
+        </p>
+      )}
+
       <footer className={styles.reportFooter}>
         <p>Generated on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </footer>

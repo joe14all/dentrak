@@ -42,7 +42,6 @@ const TransactionRow = ({ transaction, practice, onEdit, onDelete, onView }) => 
                      ((type === 'eTransfers' || type === 'directDeposits') && reference !== '—');
 
   // --- Click Handlers ---
-  const handlePracticeClick = (e) => { e.stopPropagation(); setActivePage('Practices'); };
   const handleTransactionLinkClick = (e) => { e.stopPropagation(); setActivePage('Transactions'); };
 
   return (
@@ -50,7 +49,7 @@ const TransactionRow = ({ transaction, practice, onEdit, onDelete, onView }) => 
       {/* Column 1: Main Info */}
       <td className={styles.cellMain}>
         <div className={styles.mainInfo}>
-            <a href="#" onClick={handlePracticeClick} className={styles.practiceLink}>{practice?.name || 'N/A'}</a>
+            <span className={styles.practiceLink}>{practice?.name || 'N/A'}</span>
             <div className={styles.subInfo}>
                 <span>{formatDate(date)}</span>
                 <span className={styles.separator}>•</span>

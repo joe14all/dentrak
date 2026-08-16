@@ -153,11 +153,11 @@ export function filterTransactionsByOptions(
     if (existingExternalIds.has(`teller_${tx.id}`)) return false;
 
     // In Teller API:
-    // - Positive amounts = money OUT (expenses/debits)
-    // - Negative amounts = money IN (income/credits)
+    // - Negative amounts = money OUT (expenses/debits)
+    // - Positive amounts = money IN (income/credits)
     const amount = parseFloat(tx.amount);
-    const isExpense = amount > 0; // Positive = money going out
-    const isIncome = amount < 0; // Negative = money coming in
+    const isExpense = amount < 0; // Negative = money going out
+    const isIncome = amount > 0; // Positive = money coming in
 
     // Type filter
     if (isExpense && !safeOptions.transactionTypes.expense) return false;
@@ -203,8 +203,8 @@ export function mapTellerToPendingTransaction(
   practicePatterns = []
 ) {
   const amount = parseFloat(tellerTx.amount);
-  // In Teller API: Positive = expense (money out), Negative = income (money in)
-  const isIncome = amount < 0;
+  // In Teller API: Negative = expense (money out), Positive = income (money in)
+  const isIncome = amount > 0;
 
   // Get merchant name
   const merchantName =
@@ -375,7 +375,7 @@ export function determineSuggestedPaymentType(description, amount) {
     return "directDeposits";
   }
 
-  return "directDeposits"; // Default
+  return "eTransfers"; // Default
 }
 
 /**

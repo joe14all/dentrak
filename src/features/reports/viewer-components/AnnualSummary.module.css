@@ -157,6 +157,16 @@
   background-color: #f8f9fa;
 }
 
+.pendingNote {
+  margin-top: 1.5rem;
+  padding: 0.85rem 1rem;
+  background-color: #fff8e6;
+  border: 1px solid #f5d78e;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #7a5c00;
+}
+
 .reportFooter {
   margin-top: 3rem;
   padding-top: 1.5rem;

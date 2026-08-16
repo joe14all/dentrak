@@ -12,7 +12,7 @@
   align-items: flex-start;
   gap: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  border-bottom: 2px solid var(--ui-border-primary, #e5e7eb);
 }
 
 .warningIcon {
@@ -25,13 +25,13 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary, #111827);
+  color: var(--ui-text-primary, #111827);
 }
 
 .subtitle {
   margin: 0.25rem 0 0 0;
   font-size: 0.9rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .summary {
@@ -40,7 +40,7 @@
   padding: 1rem;
   background: var(--background-secondary, #f9fafb);
   border-radius: 8px;
-  border: 1px solid var(--border-color, #e5e7eb);
+  border: 1px solid var(--ui-border-primary, #e5e7eb);
 }
 
 .summaryItem {
@@ -51,20 +51,20 @@
 
 .summaryLabel {
   font-size: 0.85rem;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
   font-weight: 500;
 }
 
 .summaryValue {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary, #111827);
+  color: var(--ui-text-primary, #111827);
 }
 
 .tableContainer {
   flex: 1;
   overflow-y: auto;
-  border: 1px solid var(--border-color, #e5e7eb);
+  border: 1px solid var(--ui-border-primary, #e5e7eb);
   border-radius: 8px;
 }
 
@@ -85,15 +85,15 @@
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: var(--text-secondary, #6b7280);
-  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  color: var(--ui-text-secondary, #6b7280);
+  border-bottom: 2px solid var(--ui-border-primary, #e5e7eb);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .entriesTable tbody tr {
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  border-bottom: 1px solid var(--ui-border-primary, #e5e7eb);
   transition: background-color 0.2s;
 }
 
@@ -120,7 +120,7 @@
 .numberInput {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid var(--border-color, #e5e7eb);
+  border: 1px solid var(--ui-border-primary, #e5e7eb);
   border-radius: 4px;
   font-size: 0.9rem;
   background: white;
@@ -130,7 +130,7 @@
 .textInput:focus,
 .numberInput:focus {
   outline: none;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
@@ -156,7 +156,7 @@
 
 .procedureCodes {
   font-size: 0.85rem;
-  color: var(--text-primary, #111827);
+  color: var(--ui-text-primary, #111827);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -165,7 +165,7 @@
 
 .procedureCount {
   font-size: 0.75rem;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
   font-style: italic;
 }
 
@@ -204,7 +204,7 @@
   gap: 1rem;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color, #e5e7eb);
+  border-top: 1px solid var(--ui-border-primary, #e5e7eb);
 }
 
 .cancelButton,
@@ -224,7 +224,7 @@
 
 .cancelButton {
   background: var(--background-secondary, #f3f4f6);
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .cancelButton:hover {
@@ -232,12 +232,12 @@
 }
 
 .confirmButton {
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
 }
 
 .confirmButton:hover:not(:disabled) {
-  background: var(--primary-hover, #2563eb);
+  background: var(--brand-primary-hover, #2563eb);
 }
 
 .confirmButton:disabled {
@@ -272,7 +272,7 @@
 
 .spinner {
   animation: spin 1s linear infinite;
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 @keyframes spin {
@@ -291,14 +291,14 @@
 .progressText strong {
   display: block;
   font-size: 1.25rem;
-  color: var(--text-primary, #111827);
+  color: var(--ui-text-primary, #111827);
   margin-bottom: 0.5rem;
 }
 
 .progressText p {
   margin: 0;
   font-size: 0.95rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .progressBar {
@@ -311,7 +311,7 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-color, #3b82f6), var(--primary-hover, #2563eb));
+  background: linear-gradient(90deg, var(--brand-primary, #3b82f6), var(--brand-primary-hover, #2563eb));
   border-radius: 999px;
   transition: width 0.3s ease;
 }
@@ -319,7 +319,7 @@
 .progressPercentage {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .buttonSpinner {

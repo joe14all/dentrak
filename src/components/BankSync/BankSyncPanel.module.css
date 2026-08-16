@@ -92,7 +92,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 8px;
@@ -102,7 +102,7 @@
 }
 
 .connectBtn:hover {
-  background-color: var(--primary-hover, #2563eb);
+  background-color: var(--brand-primary-hover, #2563eb);
   transform: translateY(-1px);
 }
 
@@ -211,7 +211,7 @@
 }
 
 .toggleSwitch input:checked + .slider {
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
 }
 
 .toggleSwitch input:checked + .slider:before {
@@ -304,8 +304,8 @@
   gap: 0.5rem;
   padding: 0.625rem 1rem;
   background-color: transparent;
-  color: var(--primary-color, #3b82f6);
-  border: 1px solid var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
+  border: 1px solid var(--brand-primary, #3b82f6);
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
@@ -313,7 +313,7 @@
 }
 
 .addAccountBtn:hover {
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   color: white;
 }
 
@@ -385,9 +385,9 @@
 }
 
 .selectBtn:hover {
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   color: white;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
 }
 
 /* Sync Options */
@@ -590,7 +590,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  background-color: var(--primary-color, #3b82f6);
+  background-color: var(--brand-primary, #3b82f6);
   border: none;
   border-radius: 8px;
   color: white;
@@ -600,7 +600,7 @@
 }
 
 .primaryBtn:hover:not(:disabled) {
-  background-color: var(--primary-hover, #2563eb);
+  background-color: var(--brand-primary-hover, #2563eb);
 }
 
 .primaryBtn:disabled {

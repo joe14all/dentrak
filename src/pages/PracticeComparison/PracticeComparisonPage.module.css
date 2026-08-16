@@ -23,20 +23,20 @@
 }
 
 .headerLeft svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .headerLeft h1 {
   margin: 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .headerLeft p {
   margin: 0.25rem 0 0 0;
   font-size: 0.9375rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .exportButton {
@@ -44,7 +44,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -55,7 +55,7 @@
 }
 
 .exportButton:hover {
-  background: var(--primary-hover, #2563eb);
+  background: var(--brand-primary-hover, #2563eb);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
@@ -78,11 +78,11 @@
   margin: 0 0 1rem 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .filterSection h3 svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .presetButtons {
@@ -99,15 +99,15 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .presetButtons button:hover {
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
 }
 
 .customDateRange {
@@ -125,7 +125,7 @@
 .dateInput label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .dateInput input[type="date"] {
@@ -133,13 +133,13 @@
   border: 1px solid var(--ui-border-primary, #e5e7eb);
   border-radius: 0.5rem;
   font-size: 0.9375rem;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   background: var(--ui-background-secondary, #f9fafb);
 }
 
 .dateInput input[type="date"]:focus {
   outline: none;
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--brand-primary, #3b82f6);
   background: var(--ui-background-primary, #ffffff);
 }
 
@@ -161,7 +161,7 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -191,7 +191,7 @@
 
 .practiceCheckbox span {
   font-size: 0.9375rem;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 /* Summary Grid */
@@ -224,7 +224,7 @@
   width: 50px;
   height: 50px;
   background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
   border-radius: 0.75rem;
   flex-shrink: 0;
 }
@@ -238,13 +238,13 @@
 .summaryLabel {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
 }
 
 .summaryValue {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 /* Insights Card */
@@ -262,11 +262,11 @@
   margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .insightsCard h2 svg {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .insightsList {
@@ -290,7 +290,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: var(--primary-color, #3b82f6);
+  background: var(--brand-primary, #3b82f6);
   color: white;
   border-radius: 50%;
   font-size: 1rem;
@@ -315,7 +315,7 @@
 .insightTitle {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -327,13 +327,13 @@
 }
 
 .infoIcon {
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--ui-text-tertiary, #9ca3af);
   cursor: help;
   transition: color 0.2s ease;
 }
 
 .infoIcon:hover {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 .tooltipText {
@@ -344,7 +344,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 280px;
-  background: var(--text-primary, #1f2937);
+  background: var(--neutral-800, #1f2937);
   color: white;
   text-align: left;
   padding: 0.75rem;
@@ -367,7 +367,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--text-primary, #1f2937);
+  border-top-color: var(--neutral-800, #1f2937);
 }
 
 .insightTooltip:hover .tooltipText {
@@ -378,7 +378,7 @@
 .insightPractice {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -387,7 +387,7 @@
 .insightValue {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
 }
 
 /* Charts Grid */
@@ -408,7 +408,7 @@
   margin: 0 0 1rem 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 /* Table Card */
@@ -423,7 +423,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .tableContainer {
@@ -445,7 +445,7 @@
 .metricsTable th {
   padding: 0.75rem 1rem;
   font-weight: 600;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
   border-bottom: 1px solid var(--ui-border-primary, #e5e7eb);
   white-space: nowrap;
 }
@@ -456,7 +456,7 @@
 
 .metricsTable td {
   padding: 0.75rem 1rem;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   border-bottom: 1px solid var(--ui-border-secondary, #f3f4f6);
 }
 
@@ -466,7 +466,7 @@
 
 .practiceName {
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .alignCenter {
@@ -482,7 +482,7 @@
 }
 
 .percentage {
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
   font-weight: 600;
 }
 
@@ -508,7 +508,7 @@
   margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .rankingsGrid {
@@ -521,9 +521,9 @@
   margin: 0 0 1rem 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--primary-color, #3b82f6);
+  border-bottom: 2px solid var(--brand-primary, #3b82f6);
 }
 
 .rankingColumn ol {
@@ -546,12 +546,12 @@
 
 .rankingColumn li span:first-child {
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
 }
 
 .rankingColumn li span:last-child {
   font-weight: 600;
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
@@ -568,10 +568,10 @@
 .radarTooltipHeader {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-color, #3b82f6);
+  border-bottom: 2px solid var(--brand-primary, #3b82f6);
 }
 
 .radarTooltipBody {
@@ -589,7 +589,7 @@
 .radarTooltipLabel {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary, #1f2937);
+  color: var(--ui-text-primary, #1f2937);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -597,13 +597,13 @@
 
 .radarTooltipValue {
   font-weight: 700;
-  color: var(--primary-color, #3b82f6);
+  color: var(--brand-primary, #3b82f6);
   font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
 }
 
 .radarTooltipDescription {
   font-size: 0.8125rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--ui-text-secondary, #6b7280);
   line-height: 1.4;
   font-style: italic;
 }

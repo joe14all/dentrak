@@ -43,13 +43,36 @@ function calculateDaysWorked(entries) {
 }
 
 /**
+ * Determines whether a payment record should count as "received" yet.
+ * Cheques only count once cleared and e-transfers only once accepted;
+ * direct deposits, cash, and unlinked payments are treated as confirmed.
+ * @param {Object} payment - A payment record (may have linkedChequeId/linkedETransferId)
+ * @param {Array} cheques - All cheque records (for status lookup)
+ * @param {Array} eTransfers - All e-transfer records (for status lookup)
+ * @returns {boolean}
+ */
+export function isPaymentConfirmed(payment, cheques = [], eTransfers = []) {
+  if (payment.linkedChequeId) {
+    const cheque = cheques.find((c) => c.id === payment.linkedChequeId);
+    return cheque?.status === "Cleared";
+  }
+  if (payment.linkedETransferId) {
+    const transfer = eTransfers.find((t) => t.id === payment.linkedETransferId);
+    return transfer?.status === "Accepted";
+  }
+  return true;
+}
+
+/**
  * Calculate comprehensive metrics for a single practice over a time period
  * @param {Object} practice - Practice object
  * @param {Array} entries - All entries for this practice in the period
  * @param {Array} payments - All payments for this practice in the period
+ * @param {Array} cheques - All cheque records, used to check cleared status
+ * @param {Array} eTransfers - All e-transfer records, used to check accepted status
  * @returns {Object} - Comprehensive metrics
  */
-export function calculatePracticeMetrics(practice, entries, payments) {
+export function calculatePracticeMetrics(practice, entries, payments, cheques = [], eTransfers = []) {
   // Financial entries only (exclude attendance records)
   const financialEntries = entries.filter(
     (e) => e.entryType !== "attendanceRecord",
@@ -96,11 +119,15 @@ export function calculatePracticeMetrics(practice, entries, payments) {
     monthlyPays.push(payResult.calculatedPay);
   });
 
-  // Calculate payments received
-  const totalPaymentsReceived = payments.reduce(
-    (sum, p) => sum + (p.amount || 0),
-    0,
-  );
+  // Calculate payments received - only count payments that have actually cleared/been accepted
+  const totalPaymentsReceived = payments.reduce((sum, p) => {
+    return isPaymentConfirmed(p, cheques, eTransfers) ? sum + (p.amount || 0) : sum;
+  }, 0);
+
+  // Track pending amounts separately so the UI can explain the gap
+  const pendingPaymentsReceived = payments.reduce((sum, p) => {
+    return isPaymentConfirmed(p, cheques, eTransfers) ? sum : sum + (p.amount || 0);
+  }, 0);
 
   // Averages
   const avgProductionPerDay = daysWorked > 0 ? totalProduction / daysWorked : 0;
@@ -129,6 +156,7 @@ export function calculatePracticeMetrics(practice, entries, payments) {
     totalCollection,
     totalCalculatedPay,
     totalPaymentsReceived,
+    pendingPaymentsReceived,
     outstandingBalance,
     avgProductionPerDay,
     avgCollectionPerDay,
@@ -152,6 +180,8 @@ export function comparePractices(
   allEntries,
   allPayments,
   options = {},
+  cheques = [],
+  eTransfers = [],
 ) {
   const {
     startDate = null,
@@ -226,6 +256,8 @@ export function comparePractices(
       practice,
       practiceEntries,
       practicePayments,
+      cheques,
+      eTransfers,
     );
   });
 
@@ -249,6 +281,10 @@ export function comparePractices(
     ),
     totalPaymentsReceived: activePracticeMetrics.reduce(
       (sum, m) => sum + m.totalPaymentsReceived,
+      0,
+    ),
+    pendingPaymentsReceived: activePracticeMetrics.reduce(
+      (sum, m) => sum + m.pendingPaymentsReceived,
       0,
     ),
     outstandingBalance: activePracticeMetrics.reduce(

@@ -15,8 +15,14 @@
 .metricHeader {
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Align items vertically */
-    gap: 0.5rem; /* Space between title and trend */
+    align-items: flex-start;
+    gap: 0.5rem; /* Space between title and indicator block */
+}
+
+.metricTitleGroup {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
 }
 
 .metricTitle {
@@ -24,6 +30,23 @@
     font-weight: 600;
     color: var(--ui-text-primary);
     line-height: 1.3; /* Adjusted line height */
+}
+
+.indicatorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+    margin-top: 0.2rem;
+}
+
+.metricHeaderNote {
+    font-size: 0.8rem;
+    color: var(--ui-text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    display: block;
+    margin-top: 0.15rem;
 }
 
 /* --- Main Value Display --- */
@@ -34,13 +57,19 @@
     line-height: 1.1;
     margin: 0.25rem 0 0.1rem 0; /* Adjusted vertical margins */
 }
+.metricSubText {
+    margin: 0.25rem 0 0.75rem 0;
+    font-size: 0.85rem;
+    color: var(--ui-text-secondary);
+    font-weight: 600;
+}
 
 /* --- Trend Indicator Pill --- */
 .trendIndicator {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 999px; /* Fully rounded */
     font-size: 0.75rem;
     font-weight: 600;

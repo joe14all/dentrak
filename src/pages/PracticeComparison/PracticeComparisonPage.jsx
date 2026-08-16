@@ -3,6 +3,7 @@ import styles from './PracticeComparisonPage.module.css';
 import { usePractices } from '../../contexts/PracticeContext/PracticeContext';
 import { useEntries } from '../../contexts/EntryContext/EntryContext';
 import { usePayments } from '../../contexts/PaymentContext/PaymentContext';
+import { useTransactions } from '../../contexts/TransactionContext/TransactionContext';
 import { comparePractices } from '../../utils/practiceComparison';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ScatterChart, Scatter, ZAxis } from 'recharts';
 import { TrendingUp, Calendar, Download, Award, DollarSign, Activity, Target, Clock, Percent, Info } from 'lucide-react';
@@ -66,6 +67,7 @@ const PracticeComparisonPage = () => {
   const { practices } = usePractices();
   const { entries } = useEntries();
   const { payments } = usePayments();
+  const { cheques, eTransfers } = useTransactions();
 
   // Date range state
   const [startDate, setStartDate] = useState('');
@@ -84,8 +86,8 @@ const PracticeComparisonPage = () => {
     console.log('Practice filter - selectedPractices:', selectedPractices);
     console.log('Comparison options:', options);
 
-    return comparePractices(practices, entries, payments, options);
-  }, [practices, entries, payments, selectedPractices, startDate, endDate]);
+    return comparePractices(practices, entries, payments, options, cheques, eTransfers);
+  }, [practices, entries, payments, selectedPractices, startDate, endDate, cheques, eTransfers]);
 
   const { metrics = [], totals = {}, rankings = {}, insights = [] } = comparisonData || {};
 

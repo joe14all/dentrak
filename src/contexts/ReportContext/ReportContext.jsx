@@ -11,6 +11,7 @@ import {
 import { usePractices } from '../PracticeContext/PracticeContext';
 import { useEntries } from '../EntryContext/EntryContext';
 import { usePayments } from '../PaymentContext/PaymentContext';
+import { useTransactions } from '../TransactionContext/TransactionContext';
 import { calculatePay } from '../../utils/calculations';
 import { calculatePracticeMetrics } from '../../utils/practiceComparison';
 
@@ -26,6 +27,7 @@ export const ReportProvider = ({ children }) => {
   const { practices } = usePractices();
   const { entries } = useEntries();
   const { payments } = usePayments();
+  const { cheques, eTransfers } = useTransactions();
 
   const refreshReports = useCallback(async () => {
     setIsLoading(true);
@@ -84,7 +86,7 @@ export const ReportProvider = ({ children }) => {
           const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
           const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
           
-          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments, cheques, eTransfers);
           
           // Get period breakdown
           const periodStartDate = new Date(startDate);
@@ -134,7 +136,7 @@ export const ReportProvider = ({ children }) => {
         const byPractice = relevantPractices.map(practice => {
             const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
             const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
-            const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+            const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments, cheques, eTransfers);
             
             // Monthly breakdown
             const monthlyData = Array.from({ length: 12 }, (_, monthIndex) => {
@@ -146,7 +148,7 @@ export const ReportProvider = ({ children }) => {
                 const date = new Date(p.paymentDate);
                 return date.getMonth() === monthIndex;
               });
-              const monthMetrics = calculatePracticeMetrics(practice, monthEntries, monthPayments);
+              const monthMetrics = calculatePracticeMetrics(practice, monthEntries, monthPayments, cheques, eTransfers);
               
               return {
                 month: new Date(year, monthIndex).toLocaleString('default', { month: 'long' }),
@@ -165,6 +167,7 @@ export const ReportProvider = ({ children }) => {
                 totalCollection: metrics.totalCollection,
                 totalCalculatedPay: metrics.totalCalculatedPay,
                 totalPaymentsReceived: metrics.totalPaymentsReceived,
+                pendingPaymentsReceived: metrics.pendingPaymentsReceived,
                 outstandingBalance: metrics.outstandingBalance,
                 daysWorked: metrics.daysWorked,
                 avgProductionPerDay: metrics.avgProductionPerDay,
@@ -180,10 +183,11 @@ export const ReportProvider = ({ children }) => {
             acc.totalCollection += curr.totalCollection;
             acc.totalCalculatedPay += curr.totalCalculatedPay;
             acc.totalPaymentsReceived += curr.totalPaymentsReceived;
+            acc.pendingPaymentsReceived += curr.pendingPaymentsReceived;
             acc.outstandingBalance += curr.outstandingBalance;
             acc.daysWorked += curr.daysWorked;
             return acc;
-        }, { totalProduction: 0, totalCollection: 0, totalCalculatedPay: 0, totalPaymentsReceived: 0, outstandingBalance: 0, daysWorked: 0 });
+        }, { totalProduction: 0, totalCollection: 0, totalCalculatedPay: 0, totalPaymentsReceived: 0, pendingPaymentsReceived: 0, outstandingBalance: 0, daysWorked: 0 });
 
         return [{
             name: `${year} Annual Financial Summary`,
@@ -198,7 +202,7 @@ export const ReportProvider = ({ children }) => {
         const metrics = relevantPractices.map(practice => {
           const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
           const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
-          return calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+          return calculatePracticeMetrics(practice, practiceEntries, practicePayments, cheques, eTransfers);
         });
 
         const totals = metrics.reduce((acc, m) => ({
@@ -206,8 +210,9 @@ export const ReportProvider = ({ children }) => {
           totalCollection: acc.totalCollection + m.totalCollection,
           totalCalculatedPay: acc.totalCalculatedPay + m.totalCalculatedPay,
           totalPaymentsReceived: acc.totalPaymentsReceived + m.totalPaymentsReceived,
+          pendingPaymentsReceived: acc.pendingPaymentsReceived + m.pendingPaymentsReceived,
           daysWorked: acc.daysWorked + m.daysWorked,
-        }), { totalProduction: 0, totalCollection: 0, totalCalculatedPay: 0, totalPaymentsReceived: 0, daysWorked: 0 });
+        }), { totalProduction: 0, totalCollection: 0, totalCalculatedPay: 0, totalPaymentsReceived: 0, pendingPaymentsReceived: 0, daysWorked: 0 });
 
         return [{
             name: `Practice Comparison ${startDate} to ${endDate}`,
@@ -225,12 +230,13 @@ export const ReportProvider = ({ children }) => {
         const practiceData = relevantPractices.map(practice => {
           const practiceEntries = relevantEntries.filter(e => e.practiceId === practice.id);
           const practicePayments = relevantPayments.filter(p => p.practiceId === practice.id);
-          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments, cheques, eTransfers);
           
           return {
             practiceName: practice.name,
             totalCalculatedPay: metrics.totalCalculatedPay,
             totalPaymentsReceived: metrics.totalPaymentsReceived,
+            pendingPaymentsReceived: metrics.pendingPaymentsReceived,
             outstandingBalance: metrics.outstandingBalance,
             daysWorked: metrics.daysWorked,
             avgPayPerDay: metrics.avgPayPerDay,
@@ -240,9 +246,10 @@ export const ReportProvider = ({ children }) => {
         const totals = practiceData.reduce((acc, p) => ({
           totalIncome: acc.totalIncome + p.totalCalculatedPay,
           totalReceived: acc.totalReceived + p.totalPaymentsReceived,
+          totalPending: acc.totalPending + p.pendingPaymentsReceived,
           totalOutstanding: acc.totalOutstanding + p.outstandingBalance,
           daysWorked: acc.daysWorked + p.daysWorked,
-        }), { totalIncome: 0, totalReceived: 0, totalOutstanding: 0, daysWorked: 0 });
+        }), { totalIncome: 0, totalReceived: 0, totalPending: 0, totalOutstanding: 0, daysWorked: 0 });
 
         return [{
           name: `YTD Income Report - ${year}`,
@@ -277,7 +284,7 @@ export const ReportProvider = ({ children }) => {
               const date = new Date(p.paymentDate);
               return q.months.includes(date.getMonth());
             });
-            const qMetrics = calculatePracticeMetrics(practice, qEntries, qPayments);
+            const qMetrics = calculatePracticeMetrics(practice, qEntries, qPayments, cheques, eTransfers);
             
             return {
               quarter: q.name,
@@ -286,7 +293,7 @@ export const ReportProvider = ({ children }) => {
             };
           });
 
-          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments);
+          const metrics = calculatePracticeMetrics(practice, practiceEntries, practicePayments, cheques, eTransfers);
           
           return {
             practiceName: practice.name,
@@ -314,7 +321,7 @@ export const ReportProvider = ({ children }) => {
         return null;
     }
 
-  }, [practices, entries, payments]);
+  }, [practices, entries, payments, cheques, eTransfers]);
 
   const saveGeneratedReport = async (reportData) => {
     await dbAddReport(reportData);
