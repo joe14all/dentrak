@@ -16,7 +16,7 @@ const W2_DISCREPANCY_THRESHOLD_PERCENT = 0.3;
 const estimateDueDateForCompletedPeriod = (
   periodEndDate,
   payCycle,
-  paymentDetail
+  paymentDetail,
 ) => {
   if (!(periodEndDate instanceof Date) || isNaN(periodEndDate.getTime())) {
     return null;
@@ -37,7 +37,7 @@ const estimateDueDateForCompletedPeriod = (
     const targetMonth = month === 11 ? 0 : month + 1;
     // Ensure day is valid for the target month
     const lastDayOfTargetMonth = new Date(
-      Date.UTC(targetYear, targetMonth + 1, 0)
+      Date.UTC(targetYear, targetMonth + 1, 0),
     ).getUTCDate();
     const validDay = Math.min(day, lastDayOfTargetMonth);
     dueDate = new Date(Date.UTC(targetYear, targetMonth, validDay));
@@ -66,7 +66,7 @@ const estimateDueDateForCompletedPeriod = (
         const targetYear = month === 11 ? year + 1 : year;
         const targetMonth = month === 11 ? 0 : month + 1;
         const lastDayOfTargetMonth = new Date(
-          Date.UTC(targetYear, targetMonth + 1, 0)
+          Date.UTC(targetYear, targetMonth + 1, 0),
         ).getUTCDate();
         const validDay = Math.min(15, lastDayOfTargetMonth); // Default to 15th of following month
         dueDate = new Date(Date.UTC(targetYear, targetMonth, validDay));
@@ -198,7 +198,7 @@ const generateHistoricalPayPeriods = (practice, practiceEntries, today) => {
 
   // Convert map values to array and sort chronologically
   const sortedPeriods = Array.from(allPeriods.values()).sort(
-    (a, b) => a.start - b.start
+    (a, b) => a.start - b.start,
   );
   return sortedPeriods;
 };
@@ -270,7 +270,7 @@ export const calculatePracticeBalances = (
   genericPayments,
   cheques,
   directDeposits,
-  eTransfers
+  eTransfers,
 ) => {
   if (!practices || !entries || !cheques || !directDeposits || !eTransfers) {
     return [];
@@ -283,16 +283,16 @@ export const calculatePracticeBalances = (
     .filter((p) => p.status === "active")
     .map((practice) => {
       const practiceEntries = entries.filter(
-        (e) => e.practiceId === practice.id
+        (e) => e.practiceId === practice.id,
       );
       const practiceCheques = cheques.filter(
-        (t) => t.practiceId === practice.id
+        (t) => t.practiceId === practice.id,
       );
       const practiceDirectDeposits = directDeposits.filter(
-        (t) => t.practiceId === practice.id
+        (t) => t.practiceId === practice.id,
       );
       const practiceETransfers = eTransfers.filter(
-        (t) => t.practiceId === practice.id
+        (t) => t.practiceId === practice.id,
       );
 
       // --- 1. Calculate Total Pay for Completed Historical Periods ---
@@ -301,7 +301,7 @@ export const calculatePracticeBalances = (
       const historicalPeriods = generateHistoricalPayPeriods(
         practice,
         practiceEntries,
-        today
+        today,
       );
 
       // Track periods that actually have entries with financial data
@@ -333,13 +333,13 @@ export const calculatePracticeBalances = (
             e.entryType === "individualProcedure" ||
             (e.entryType === "attendanceRecord" &&
               practice.paymentType === "employment" &&
-              practice.basePay)
+              practice.basePay),
         );
 
         if (entriesInPeriod.length > 0 && hasFinancialData) {
           const { calculatedPay } = calculateSinglePeriod(
             practice,
-            entriesInPeriod
+            entriesInPeriod,
           );
           totalCalculatedPayForCompletedPeriods += calculatedPay;
           periodsWithFinancialData.push({
@@ -359,16 +359,16 @@ export const calculatePracticeBalances = (
       practiceCheques
         .filter((c) => c.status === "Cleared")
         .forEach(
-          (c) => (totalConfirmedPaymentsToDate += Number(c.amount) || 0)
+          (c) => (totalConfirmedPaymentsToDate += Number(c.amount) || 0),
         );
       practiceDirectDeposits // Assumed confirmed
         .forEach(
-          (d) => (totalConfirmedPaymentsToDate += Number(d.amount) || 0)
+          (d) => (totalConfirmedPaymentsToDate += Number(d.amount) || 0),
         );
       practiceETransfers
         .filter((t) => t.status === "Accepted")
         .forEach(
-          (t) => (totalConfirmedPaymentsToDate += Number(t.amount) || 0)
+          (t) => (totalConfirmedPaymentsToDate += Number(t.amount) || 0),
         );
       // Cash payments are logged only in genericPayments (not mirrored into
       // cheques/directDeposits/eTransfers), so they must be added separately.
@@ -376,10 +376,10 @@ export const calculatePracticeBalances = (
       // their dedicated tables and would otherwise be double-counted.
       (genericPayments || [])
         .filter(
-          (p) => p.practiceId === practice.id && p.paymentMethod === "cash"
+          (p) => p.practiceId === practice.id && p.paymentMethod === "cash",
         )
         .forEach(
-          (p) => (totalConfirmedPaymentsToDate += Number(p.amount) || 0)
+          (p) => (totalConfirmedPaymentsToDate += Number(p.amount) || 0),
         );
 
       // --- 3. Calculate Overall Balance ---
@@ -388,7 +388,7 @@ export const calculatePracticeBalances = (
         Math.round(
           (totalCalculatedPayForCompletedPeriods -
             totalConfirmedPaymentsToDate) *
-            100
+            100,
         ) / 100;
 
       // --- 4. Estimate Pay for the *Current* In-Progress Period ---
@@ -419,13 +419,13 @@ export const calculatePracticeBalances = (
             e.entryType === "individualProcedure" ||
             (e.entryType === "attendanceRecord" &&
               practice.paymentType === "employment" &&
-              practice.basePay)
+              practice.basePay),
         );
 
         if (entriesInCurrentPeriod.length > 0 && hasFinancialData) {
           estimatedCurrentPeriodPay = calculateSinglePeriod(
             practice,
-            entriesInCurrentPeriod
+            entriesInCurrentPeriod,
           ).calculatedPay;
         }
       }
@@ -440,7 +440,7 @@ export const calculatePracticeBalances = (
         const dueDateForLastPeriod = estimateDueDateForCompletedPeriod(
           lastCompletedPeriodEnd,
           practice.payCycle,
-          practice.paymentDetail
+          practice.paymentDetail,
         );
         if (dueDateForLastPeriod) {
           displayDueDate = dueDateForLastPeriod; // Store the potential due date
@@ -469,8 +469,8 @@ export const calculatePracticeBalances = (
             status = isOverdue
               ? "Overdue"
               : displayDueDate
-              ? "Due Soon"
-              : "Owed";
+                ? "Due Soon"
+                : "Owed";
           }
         } else {
           // Contractor status - directly use overdue/due/owed status
@@ -502,7 +502,7 @@ export const calculatePracticeBalances = (
       (b) =>
         b.balance > 0.01 ||
         b.estimatedCurrentPeriodPay > 0.01 ||
-        b.status === "W2 Discrepancy"
+        b.status === "W2 Discrepancy",
     )
     // Sort practices: Overdue > W2 > Due Soon > Owed > Paid Up, then by balance/estimate
     .sort((a, b) => {

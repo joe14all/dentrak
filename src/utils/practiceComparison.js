@@ -72,7 +72,13 @@ export function isPaymentConfirmed(payment, cheques = [], eTransfers = []) {
  * @param {Array} eTransfers - All e-transfer records, used to check accepted status
  * @returns {Object} - Comprehensive metrics
  */
-export function calculatePracticeMetrics(practice, entries, payments, cheques = [], eTransfers = []) {
+export function calculatePracticeMetrics(
+  practice,
+  entries,
+  payments,
+  cheques = [],
+  eTransfers = [],
+) {
   // Financial entries only (exclude attendance records)
   const financialEntries = entries.filter(
     (e) => e.entryType !== "attendanceRecord",
@@ -121,12 +127,16 @@ export function calculatePracticeMetrics(practice, entries, payments, cheques = 
 
   // Calculate payments received - only count payments that have actually cleared/been accepted
   const totalPaymentsReceived = payments.reduce((sum, p) => {
-    return isPaymentConfirmed(p, cheques, eTransfers) ? sum + (p.amount || 0) : sum;
+    return isPaymentConfirmed(p, cheques, eTransfers)
+      ? sum + (p.amount || 0)
+      : sum;
   }, 0);
 
   // Track pending amounts separately so the UI can explain the gap
   const pendingPaymentsReceived = payments.reduce((sum, p) => {
-    return isPaymentConfirmed(p, cheques, eTransfers) ? sum : sum + (p.amount || 0);
+    return isPaymentConfirmed(p, cheques, eTransfers)
+      ? sum
+      : sum + (p.amount || 0);
   }, 0);
 
   // Averages

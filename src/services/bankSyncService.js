@@ -126,7 +126,7 @@ export function getDateRangeForOption(option, customStart, customEnd) {
 export function filterTransactionsByOptions(
   transactions,
   options,
-  existingExternalIds
+  existingExternalIds,
 ) {
   // Merge with defaults to ensure all properties exist
   const safeOptions = {
@@ -145,7 +145,7 @@ export function filterTransactionsByOptions(
   const { start, end } = getDateRangeForOption(
     safeOptions.dateRange,
     safeOptions.customStartDate,
-    safeOptions.customEndDate
+    safeOptions.customEndDate,
   );
 
   return transactions.filter((tx) => {
@@ -200,7 +200,7 @@ export function mapTellerToPendingTransaction(
   tellerTx,
   connection,
   practices,
-  practicePatterns = []
+  practicePatterns = [],
 ) {
   const amount = parseFloat(tellerTx.amount);
   // In Teller API: Negative = expense (money out), Positive = income (money in)
@@ -216,13 +216,13 @@ export function mapTellerToPendingTransaction(
     tellerTx.description, // Raw bank description
     merchantName, // Merchant/counterparty name
     practices,
-    practicePatterns
+    practicePatterns,
   );
 
   // Determine suggested payment type based on amount and description
   const suggestedPaymentType = determineSuggestedPaymentType(
     tellerTx.description,
-    amount
+    amount,
   );
 
   // Set status based on auto-match confidence
@@ -256,7 +256,7 @@ export function matchPracticeFromDescription(
   description,
   merchantName,
   practices,
-  customPatterns = []
+  customPatterns = [],
 ) {
   const searchText = `${description || ""} ${merchantName || ""}`
     .toLowerCase()
@@ -293,7 +293,7 @@ export function matchPracticeFromDescription(
       const matchedPractice = practices.find(
         (p) =>
           p.name.toLowerCase() === pattern.practiceName.toLowerCase() ||
-          p.name.toLowerCase().includes(pattern.practiceName.toLowerCase())
+          p.name.toLowerCase().includes(pattern.practiceName.toLowerCase()),
       );
       if (matchedPractice) {
         return { ...matchedPractice, confidence: 95 };
@@ -313,14 +313,14 @@ export function matchPracticeFromDescription(
 
     // Check if significant words from practice name appear
     const matchedWords = practiceWords.filter((word) =>
-      searchText.includes(word)
+      searchText.includes(word),
     );
     if (
       matchedWords.length >= 2 ||
       (matchedWords.length === 1 && practiceWords.length === 1)
     ) {
       const confidence = Math.round(
-        (matchedWords.length / practiceWords.length) * 80
+        (matchedWords.length / practiceWords.length) * 80,
       );
       return { ...practice, confidence };
     }
